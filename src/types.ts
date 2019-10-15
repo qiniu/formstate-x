@@ -90,8 +90,3 @@ export enum ValidateStatus {
   Validating, // 校验中
   Validated // 校验完成
 }
-
-export interface InputBinds<T, E = T> {
-  value: T
-  onChange(event: E): void
-}

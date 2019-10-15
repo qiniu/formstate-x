@@ -1,5 +1,4 @@
-import FieldState from './fieldState'
-import { bindInput, asyncResponsesAnd, isEmpty } from './utils'
+import { asyncResponsesAnd, isEmpty } from './utils'
 
 const defaultDelay = 1
 
@@ -60,36 +59,5 @@ describe('asyncResponsesAnd', () => {
       delay('empty', 2)
     ])
     expect(result3).toBe('too long')
-  })
-})
-
-describe('bindInput', () => {
-  it('should work well', () => {
-    const field = new FieldState('')
-    const binds = bindInput(field)
-
-    expect(binds.value).toBe('')
-    expect(typeof binds.onChange).toBe('function')
-
-    const value = '123'
-    binds.onChange(value)
-    expect(field._value).toBe(value)
-
-    const newBinds = bindInput(field)
-    expect(newBinds.value).toBe(value)
-  })
-
-  it('should work well with getValue', () => {
-    const field = new FieldState('')
-    const binds = bindInput(field, (num: number) => num + '')
-
-    expect(binds.value).toBe('')
-    expect(typeof binds.onChange).toBe('function')
-
-    binds.onChange(123)
-    expect(field._value).toBe('123')
-
-    const newBinds = bindInput(field)
-    expect(newBinds.value).toBe('123')
   })
 })

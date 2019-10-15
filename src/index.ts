@@ -6,4 +6,4 @@ export * from './fieldState'
 export { default as FormState } from './formState'
 export * from './formState'
 
-export { bindInput } from './utils'
+export * from './bind'
