@@ -1,0 +1,6 @@
+{
+  "mode": "file",
+  "out": "docs",
+  "exclude": "**/*.spec.ts",
+  "readme": "./README.md"
+}

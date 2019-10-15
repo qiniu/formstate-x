@@ -1,0 +1,44 @@
+{
+  "name": "formstate-x",
+  "version": "0.0.4",
+  "description": "Extended alternative for formstate",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qbox/rmb-web.git",
+    "directory": "formstate-x"
+  },
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "scripts": {
+    "test": "jest",
+    "coverage": "jest --coverage",
+    "clean": "rm -rf ./esm ./lib",
+    "build:esm": "tsc --module es6 --outDir ./esm",
+    "build:lib": "tsc",
+    "build": "npm run clean && npm run build:esm && npm run build:lib",
+    "prepublish": "npm run test && npm run build",
+    "travis:script": "tsc --noEmit && npm run coverage && npm run build",
+    "travis:before-script": "npm install"
+  },
+  "keywords": [
+    "form",
+    "state",
+    "mobx",
+    "formstate"
+  ],
+  "peerDependencies": {
+    "mobx": ">=4.0.0"
+  },
+  "author": "nighca@live.cn",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/jest": "^24.0.18",
+    "@types/node": "^12.7.12",
+    "jest": "^24.9.0",
+    "mobx": "^5.14.0",
+    "ts-jest": "^24.1.0",
+    "typedoc": "^0.15.0",
+    "typescript": "^3.6.3"
+  },
+  "dependencies": {}
+}
