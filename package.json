@@ -10,12 +10,13 @@
   "main": "lib/index.js",
   "module": "esm/index.js",
   "scripts": {
+    "clean": "rm -rf ./esm ./lib ./docs",
     "test": "jest",
-    "coverage": "jest --coverage",
-    "clean": "rm -rf ./esm ./lib",
-    "build:esm": "tsc --module es6 --outDir ./esm",
-    "build:lib": "tsc",
-    "build": "npm run clean && npm run build:esm && npm run build:lib",
+    "coverage": "rm -rf coverage && jest --coverage",
+    "build:esm": "rm -rf ./esm && tsc --module es6 --outDir ./esm",
+    "build:lib": "rm -rf ./lib && tsc",
+    "build:doc": "rm -rf ./docs && typedoc",
+    "build": "npm run build:esm && npm run build:lib && npm run build:doc",
     "prepublish": "npm run test && npm run build",
     "travis:script": "tsc --noEmit && npm run coverage && npm run build",
     "travis:before-script": "npm install"
@@ -38,6 +39,7 @@
     "mobx": "^5.14.0",
     "ts-jest": "^24.1.0",
     "typedoc": "^0.15.0",
+    "typedoc-plugin-markdown": "^2.2.10",
     "typescript": "^3.6.3"
   },
   "dependencies": {}

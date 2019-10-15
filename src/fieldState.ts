@@ -3,37 +3,43 @@ import { ComposibleValidatable, Validator, Validated, ValidationResponse, Valida
 import { applyValidators } from './utils'
 import Disposable from './disposable'
 
+/**
+ * The state for a field.
+ */
 export default class FieldState<TValue> extends Disposable implements ComposibleValidatable<TValue> {
 
   /**
-   * 是否激活（自动 validate）
+   * If activated (with auto validation).
+   * Field will only be activated when `validate()` or `onChange()` called.
    */
   @observable _activated = false
 
   /**
-   * 值是否脏（不同于 initialValue）
+   * If value has been touched (different with `initialValue`)
    */
   @computed get dirty() {
     return this.value !== this.initialValue
   }
 
   /**
-   * 原始值，即时响应 `onChange` 的值，用于绑定界面输入组件
+   * Value that reacts to `onChange` immediately.
+   * You should only use it to bind with UI input componnet.
    */
   @observable.ref _value: TValue
 
   /**
-   * 值（程序可消费），`_value` debounce（默认 200ms）后同步到 `value`
+   * Value that can be consumed by your code.
+   * It's synced from `_value` with debounce of 200ms.
    */
   @observable.ref value: TValue
 
   /**
-   * 校验通过的安全值
+   * Value that has bean validated with no error, AKA "safe".
    */
   @observable.ref $: TValue
 
   /**
-   * 将原始值（`_value`）同步到值（`value`）
+   * Apply `_value` to `value`.
    */
   @action private applyValue() {
     this._activated = true
@@ -41,57 +47,58 @@ export default class FieldState<TValue> extends Disposable implements Composible
   }
 
   /**
-   * 校验状态
+   * The validate status.
    */
   @observable _validateStatus: ValidateStatus = ValidateStatus.NotValidated
 
   /**
-   * 是否校验中
+   * If the state is doing a validation.
    */
   @computed get validating() {
     return this.shouldDisableValidation() ? false : this._validateStatus === ValidateStatus.Validating
   }
 
   /**
-   * 校验逻辑输出的原始错误信息
+   * The original error info of validation.
    */
   @observable _error?: string
 
   /**
-   * 校验逻辑输出的错误信息
+   * The error info of validation.
    */
   @computed get error() {
     return this.shouldDisableValidation() ? undefined : this._error
   }
 
   /**
-   * 是否包含校验错误
+   * If the state contains error.
    */
   @computed get hasError() {
     return !!this.error
   }
 
   /**
-   * 校验行为是否完成（不意味着校验通过）
+   * If the validation has been done.
+   * It does not means validation passed.
    */
   @computed get validated() {
     return this.shouldDisableValidation() ? false : this._validateStatus === ValidateStatus.Validated
   }
 
   /**
-   * 设置错误信息
+   * Set error info.
    */
   @action setError(error: ValidationResponse) {
     this._error = error ? error : undefined
   }
 
   /**
-   * 校验函数列表
+   * List of validator functions.
    */
   @observable.shallow private _validators: Validator<TValue>[] = []
 
   /**
-   * 添加校验函数
+   * Add validator function.
    */
   @action validators(...validators: Validator<TValue>[]) {
     this._validators.push(...validators)
@@ -99,7 +106,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
   }
 
   /**
-   * 设置 `_value`
+   * Set `_value`.
    */
   @action private setValue(value: TValue) {
     this._value = value
@@ -107,14 +114,14 @@ export default class FieldState<TValue> extends Disposable implements Composible
   }
 
   /**
-   * 响应值的变更并修改（`_value`）
+   * Set `_value` on change event.
    */
   @action onChange(value: TValue) {
     this.setValue(value)
   }
 
   /**
-   * 同步设置值
+   * Set `value` (& `_value`) synchronously.
    */
   @action set(value: TValue) {
     this.setValue(value)
@@ -122,7 +129,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
   }
 
   /**
-   * 重置为初始状态
+   * Reset to initial status.
    */
   @action reset() {
     this.$ = this.value = this._value = this.initialValue
@@ -133,12 +140,12 @@ export default class FieldState<TValue> extends Disposable implements Composible
   }
 
   /**
-   * 当前正在进行的 validate 行为信息
+   * Current validation info.
    */
   @observable.ref private validation?: Validated<TValue>
 
   /**
-   * 事实上的的校验行为
+   * Do validation.
    */
   private _validate() {
     const value = this.value
@@ -159,7 +166,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
   }
 
   /**
-   * 执行校验
+   * Fire a validation behavior.
    */
   async validate() {
     runInAction('activate-when-validate', () => {
@@ -168,7 +175,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
 
     this.applyValue()
 
-    // 兼容 formstate 接口
+    // Compatible with formstate
     await when(
       () => this.shouldDisableValidation() || this.validated,
       { name: 'return-validate-when-not-validating' }
@@ -182,12 +189,12 @@ export default class FieldState<TValue> extends Disposable implements Composible
   }
 
   /**
-   * 是否应该禁用校验的检查函数
+   * Method to check if we should disable validation.
    */
   @observable.ref private shouldDisableValidation = () => false
 
   /**
-   * 配置禁用校验的逻辑
+   * Configure when to disable validation.
    */
   @action disableValidationWhen(predict: () => boolean) {
     this.shouldDisableValidation = predict
@@ -195,7 +202,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
   }
 
   /**
-   * 让校验行为生效
+   * Apply validation.
    */
   private async applyValidation() {
     const validation = this.validation

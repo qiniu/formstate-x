@@ -1,6 +1,10 @@
 {
   "mode": "file",
   "out": "docs",
-  "exclude": "**/*.spec.ts",
-  "readme": "./README.md"
+  "exclude": "src/utils.ts",
+  "excludeNotExported": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "readme": "none",
+  "theme": "markdown"
 }
