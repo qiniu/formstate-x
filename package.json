@@ -1,11 +1,10 @@
 {
   "name": "formstate-x",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "description": "Extended alternative for formstate",
   "repository": {
     "type": "git",
-    "url": "https://github.com/qbox/rmb-web.git",
-    "directory": "formstate-x"
+    "url": "https://github.com/qiniu/formstate-x.git"
   },
   "main": "lib/index.js",
   "module": "esm/index.js",
