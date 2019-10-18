@@ -943,4 +943,27 @@ describe('nested FormState', () => {
     expect(state.$.inputs.$[1].error).toBeUndefined()
     expect(state.$.inputs.$[2].error).toBeUndefined()
   })
+
+  it('should give correct `validated` value with validation-disabled field', async () => {
+    const options = observable({ disabled: true })
+    const notEmpty = (value: string) => value === '' && 'empty'
+    const initialValue = ['123', '456']
+    const disabledState = new FormState(initialValue.map(
+      value => createFieldState(value).validators(notEmpty)
+    )).validators(
+      list => list.join('').length > 5 && 'too long'
+    ).disableValidationWhen(
+      () => options.disabled
+    )
+    const state = new FormState({
+      foo: new FieldState(''),
+      disabled: disabledState
+    })
+
+    state.validate()
+    await delay()
+
+    expect(state.$.disabled.validated).toBe(false)
+    expect(state.validated).toBe(true)
+  })
 })

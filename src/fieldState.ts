@@ -193,6 +193,11 @@ export default class FieldState<TValue> extends Disposable implements Composible
    */
   @observable.ref private shouldDisableValidation = () => false
 
+  /** If validation disabled. */
+  @computed get validationDisabled() {
+    return this.shouldDisableValidation()
+  }
+
   /**
    * Configure when to disable validation.
    */

@@ -133,7 +133,7 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
       return false
     }
     return this._validateStatus === ValidateStatus.Validated && this.fields.every(
-      field => field.validated
+      field => field.validationDisabled || field.validated
     )
   }
 
@@ -227,6 +227,11 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
    * Method to check if we should disable validation.
    */
   @observable.ref private shouldDisableValidation = () => false
+
+  /** If validation disabled. */
+  @computed get validationDisabled() {
+    return this.shouldDisableValidation()
+  }
 
   /**
    * Configure when to disable validation.
