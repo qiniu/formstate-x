@@ -34,6 +34,7 @@ export interface Validatable<T, TValue = T> {
   error?: string | null | undefined
   validating: boolean
   validated: boolean
+  validationDisabled: boolean
   validate(): Promise<{ hasError: true } | { hasError: false, value: TValue }>
 
   // To see if there are requirements: enableAutoValidation, disableAutoValidation

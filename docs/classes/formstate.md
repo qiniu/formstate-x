@@ -39,6 +39,7 @@ The state for a form (composition of fields).
 * [hasError](formstate.md#haserror)
 * [validated](formstate.md#validated)
 * [validating](formstate.md#validating)
+* [validationDisabled](formstate.md#validationdisabled)
 * [value](formstate.md#value)
 
 ### Methods
@@ -58,7 +59,7 @@ The state for a form (composition of fields).
 
 *Overrides [Disposable](disposable.md).[constructor](disposable.md#constructor)*
 
-*Defined in [formState.ts:265](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L265)*
+*Defined in [formState.ts:270](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L270)*
 
 **Parameters:**
 
@@ -76,7 +77,7 @@ Name | Type |
 
 *Implementation of [ComposibleValidatable](../interfaces/composiblevalidatable.md).[$](../interfaces/composiblevalidatable.md#$)*
 
-*Defined in [formState.ts:45](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L45)*
+*Defined in [formState.ts:45](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L45)*
 
 Fields.
 
@@ -88,7 +89,7 @@ ___
 
 *Implementation of [ComposibleValidatable](../interfaces/composiblevalidatable.md).[_validateStatus](../interfaces/composiblevalidatable.md#_validatestatus)*
 
-*Defined in [formState.ts:83](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L83)*
+*Defined in [formState.ts:83](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L83)*
 
 The validate status.
 
@@ -98,7 +99,7 @@ The validate status.
 
 • **get _activated**(): *boolean*
 
-*Defined in [formState.ts:27](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L27)*
+*Defined in [formState.ts:27](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L27)*
 
 If activated (with auto validate).
 Form will only be activated when some field activated.
@@ -111,7 +112,7 @@ ___
 
 • **get dirty**(): *boolean*
 
-*Defined in [formState.ts:36](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L36)*
+*Defined in [formState.ts:36](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L36)*
 
 If value has been touched.
 
@@ -123,7 +124,7 @@ ___
 
 • **get error**(): *undefined | string*
 
-*Defined in [formState.ts:106](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L106)*
+*Defined in [formState.ts:106](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L106)*
 
 The error info of validation (including fields' error info).
 
@@ -135,7 +136,7 @@ ___
 
 • **get hasError**(): *boolean*
 
-*Defined in [formState.ts:123](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L123)*
+*Defined in [formState.ts:123](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L123)*
 
 If the state contains error.
 
@@ -147,7 +148,7 @@ ___
 
 • **get validated**(): *boolean*
 
-*Defined in [formState.ts:131](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L131)*
+*Defined in [formState.ts:131](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L131)*
 
 If the validation has been done.
 It does not means validation passed.
@@ -160,9 +161,21 @@ ___
 
 • **get validating**(): *boolean*
 
-*Defined in [formState.ts:88](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L88)*
+*Defined in [formState.ts:88](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L88)*
 
 If the state is doing a validation.
+
+**Returns:** *boolean*
+
+___
+
+###  validationDisabled
+
+• **get validationDisabled**(): *boolean*
+
+*Defined in [formState.ts:232](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L232)*
+
+If validation disabled.
 
 **Returns:** *boolean*
 
@@ -172,7 +185,7 @@ ___
 
 • **get value**(): *TValue*
 
-*Defined in [formState.ts:64](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L64)*
+*Defined in [formState.ts:64](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L64)*
 
 Value that can be consumed by your code.
 It's a composition of fields' value.
@@ -185,7 +198,7 @@ It's a composition of fields' value.
 
 ▸ **disableValidationWhen**(`predict`: function): *this*
 
-*Defined in [formState.ts:234](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L234)*
+*Defined in [formState.ts:239](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L239)*
 
 Configure when to disable validation.
 
@@ -205,7 +218,7 @@ ___
 
 *Inherited from [Disposable](disposable.md).[dispose](disposable.md#dispose)*
 
-*Defined in [disposable.ts:23](https://github.com/qiniu/formstate-x/blob/f0b789c/src/disposable.ts#L23)*
+*Defined in [disposable.ts:23](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/disposable.ts#L23)*
 
 Do dispose by calling all disposer functions.
 
@@ -217,7 +230,7 @@ ___
 
 ▸ **reset**(): *void*
 
-*Defined in [formState.ts:172](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L172)*
+*Defined in [formState.ts:172](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L172)*
 
 Reset to initial status.
 
@@ -229,7 +242,7 @@ ___
 
 ▸ **setError**(`error`: [ValidationResponse](../README.md#validationresponse)): *void*
 
-*Defined in [formState.ts:143](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L143)*
+*Defined in [formState.ts:143](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L143)*
 
 Set error info of form.
 
@@ -249,7 +262,7 @@ ___
 
 *Implementation of [ComposibleValidatable](../interfaces/composiblevalidatable.md)*
 
-*Defined in [formState.ts:207](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L207)*
+*Defined in [formState.ts:207](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L207)*
 
 Fire a validation behavior.
 
@@ -261,7 +274,7 @@ ___
 
 ▸ **validators**(...`validators`: [Validator](../interfaces/validator.md)‹TValue›[]): *this*
 
-*Defined in [formState.ts:155](https://github.com/qiniu/formstate-x/blob/f0b789c/src/formState.ts#L155)*
+*Defined in [formState.ts:155](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/formState.ts#L155)*
 
 Add validator function.
 

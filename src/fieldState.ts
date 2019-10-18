@@ -55,7 +55,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
    * If the state is doing a validation.
    */
   @computed get validating() {
-    return this.shouldDisableValidation() ? false : this._validateStatus === ValidateStatus.Validating
+    return this.validationDisabled ? false : this._validateStatus === ValidateStatus.Validating
   }
 
   /**
@@ -67,7 +67,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
    * The error info of validation.
    */
   @computed get error() {
-    return this.shouldDisableValidation() ? undefined : this._error
+    return this.validationDisabled ? undefined : this._error
   }
 
   /**
@@ -82,7 +82,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
    * It does not means validation passed.
    */
   @computed get validated() {
-    return this.shouldDisableValidation() ? false : this._validateStatus === ValidateStatus.Validated
+    return this.validationDisabled ? false : this._validateStatus === ValidateStatus.Validated
   }
 
   /**
@@ -177,7 +177,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
 
     // Compatible with formstate
     await when(
-      () => this.shouldDisableValidation() || this.validated,
+      () => this.validationDisabled || this.validated,
       { name: 'return-validate-when-not-validating' }
     )
 
@@ -192,6 +192,11 @@ export default class FieldState<TValue> extends Disposable implements Composible
    * Method to check if we should disable validation.
    */
   @observable.ref private shouldDisableValidation = () => false
+
+  /** If validation disabled. */
+  @computed get validationDisabled() {
+    return this.shouldDisableValidation()
+  }
 
   /**
    * Configure when to disable validation.
@@ -250,7 +255,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
 
     // auto validate: this.value -> this.validation
     this.addDisposer(autorun(
-      () => !this.shouldDisableValidation() && this._activated && this._validate(),
+      () => !this.validationDisabled && this._activated && this._validate(),
       { name: 'autorun-check-&-_validate' }
     ))
 
