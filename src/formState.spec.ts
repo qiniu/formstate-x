@@ -450,6 +450,8 @@ describe('FormState (mode: object) validation', () => {
     expect(state.error).toBeUndefined()
 
     runInAction(() => options.disabled = false)
+
+    await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
 
@@ -510,6 +512,23 @@ describe('FormState (mode: array)', () => {
       expect(field.$).toBe(initialValue[i])
     })
     expect(state.dirty).toBe(false)
+
+    state.dispose()
+  })
+
+  it('should applyValidation correctly', async () => {
+    const state = new FormState([]).validators(
+      value => value.length <= 0 && 'empty'
+    )
+
+    let validation: any
+    runInAction(() => {
+      validation = state.validate()
+      state.$ = []
+    })
+
+    await delay()
+    expect(state.validated).toBe(true)
 
     state.dispose()
   })
@@ -865,10 +884,34 @@ describe('FormState (mode: array) validation', () => {
     expect(state.error).toBeUndefined()
 
     runInAction(() => options.disabled = false)
+    await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
 
     state.dispose()
+  })
+
+  it('should give correct `validated` value with validation-disabled field', async () => {
+    const options = observable({ disabled: true })
+    const notEmpty = (value: string) => value === '' && 'empty'
+    const initialValue = ['123', '456']
+    const disabledState = new FormState(initialValue.map(
+      value => createFieldState(value).validators(notEmpty)
+    )).validators(
+      list => list.join('').length > 5 && 'too long'
+    ).disableValidationWhen(
+      () => options.disabled
+    )
+    const state = new FormState({
+      foo: new FieldState(''),
+      disabled: disabledState
+    })
+
+    state.validate()
+    await delay()
+
+    expect(state.$.disabled.validated).toBe(false)
+    expect(state.validated).toBe(true)
   })
 })
 
@@ -942,28 +985,5 @@ describe('nested FormState', () => {
     expect(state.$.inputs.$[0].error).toBeUndefined()
     expect(state.$.inputs.$[1].error).toBeUndefined()
     expect(state.$.inputs.$[2].error).toBeUndefined()
-  })
-
-  it('should give correct `validated` value with validation-disabled field', async () => {
-    const options = observable({ disabled: true })
-    const notEmpty = (value: string) => value === '' && 'empty'
-    const initialValue = ['123', '456']
-    const disabledState = new FormState(initialValue.map(
-      value => createFieldState(value).validators(notEmpty)
-    )).validators(
-      list => list.join('').length > 5 && 'too long'
-    ).disableValidationWhen(
-      () => options.disabled
-    )
-    const state = new FormState({
-      foo: new FieldState(''),
-      disabled: disabledState
-    })
-
-    state.validate()
-    await delay()
-
-    expect(state.$.disabled.validated).toBe(false)
-    expect(state.validated).toBe(true)
   })
 })

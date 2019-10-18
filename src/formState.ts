@@ -252,10 +252,8 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
 
     const error = await validation.response
 
-    if (
-      validation !== this.validation // 如果 validation 已过期，则不生效
-      || validation.value !== this.value // 如果 value 已过期，则不生效
-    ) {
+    // 如果 validation 已过期，则不生效
+    if (validation !== this.validation) {
       return
     }
 
