@@ -35,6 +35,7 @@ Composible validatable object (which can be used as a field for `FormState`).
 * [reset](composiblevalidatable.md#reset)
 * [validated](composiblevalidatable.md#validated)
 * [validating](composiblevalidatable.md#validating)
+* [validationDisabled](composiblevalidatable.md#validationdisabled)
 * [value](composiblevalidatable.md#value)
 
 ### Methods
@@ -49,7 +50,7 @@ Composible validatable object (which can be used as a field for `FormState`).
 
 *Inherited from [Validatable](validatable.md).[$](validatable.md#$)*
 
-*Defined in [types.ts:31](https://github.com/qiniu/formstate-x/blob/f0b789c/src/types.ts#L31)*
+*Defined in [types.ts:31](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L31)*
 
 ___
 
@@ -57,7 +58,7 @@ ___
 
 • **_activated**: *boolean*
 
-*Defined in [types.ts:49](https://github.com/qiniu/formstate-x/blob/f0b789c/src/types.ts#L49)*
+*Defined in [types.ts:50](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L50)*
 
 ___
 
@@ -65,7 +66,7 @@ ___
 
 • **_validateStatus**: *[ValidateStatus](../enums/validatestatus.md)*
 
-*Defined in [types.ts:50](https://github.com/qiniu/formstate-x/blob/f0b789c/src/types.ts#L50)*
+*Defined in [types.ts:51](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L51)*
 
 ___
 
@@ -73,7 +74,7 @@ ___
 
 • **dirty**: *boolean*
 
-*Defined in [types.ts:48](https://github.com/qiniu/formstate-x/blob/f0b789c/src/types.ts#L48)*
+*Defined in [types.ts:49](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L49)*
 
 ___
 
@@ -81,7 +82,7 @@ ___
 
 • **dispose**: *function*
 
-*Defined in [types.ts:47](https://github.com/qiniu/formstate-x/blob/f0b789c/src/types.ts#L47)*
+*Defined in [types.ts:48](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L48)*
 
 #### Type declaration:
 
@@ -95,7 +96,7 @@ ___
 
 *Inherited from [Validatable](validatable.md).[error](validatable.md#optional-error)*
 
-*Defined in [types.ts:34](https://github.com/qiniu/formstate-x/blob/f0b789c/src/types.ts#L34)*
+*Defined in [types.ts:34](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L34)*
 
 ___
 
@@ -105,7 +106,7 @@ ___
 
 *Inherited from [Validatable](validatable.md).[hasError](validatable.md#haserror)*
 
-*Defined in [types.ts:33](https://github.com/qiniu/formstate-x/blob/f0b789c/src/types.ts#L33)*
+*Defined in [types.ts:33](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L33)*
 
 ___
 
@@ -113,7 +114,7 @@ ___
 
 • **reset**: *function*
 
-*Defined in [types.ts:46](https://github.com/qiniu/formstate-x/blob/f0b789c/src/types.ts#L46)*
+*Defined in [types.ts:47](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L47)*
 
 #### Type declaration:
 
@@ -127,7 +128,7 @@ ___
 
 *Inherited from [Validatable](validatable.md).[validated](validatable.md#validated)*
 
-*Defined in [types.ts:36](https://github.com/qiniu/formstate-x/blob/f0b789c/src/types.ts#L36)*
+*Defined in [types.ts:36](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L36)*
 
 ___
 
@@ -137,7 +138,17 @@ ___
 
 *Inherited from [Validatable](validatable.md).[validating](validatable.md#validating)*
 
-*Defined in [types.ts:35](https://github.com/qiniu/formstate-x/blob/f0b789c/src/types.ts#L35)*
+*Defined in [types.ts:35](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L35)*
+
+___
+
+###  validationDisabled
+
+• **validationDisabled**: *boolean*
+
+*Inherited from [Validatable](validatable.md).[validationDisabled](validatable.md#validationdisabled)*
+
+*Defined in [types.ts:37](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L37)*
 
 ___
 
@@ -147,7 +158,7 @@ ___
 
 *Inherited from [Validatable](validatable.md).[value](validatable.md#value)*
 
-*Defined in [types.ts:32](https://github.com/qiniu/formstate-x/blob/f0b789c/src/types.ts#L32)*
+*Defined in [types.ts:32](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L32)*
 
 ## Methods
 
@@ -157,6 +168,6 @@ ___
 
 *Inherited from [Validatable](validatable.md).[validate](validatable.md#validate)*
 
-*Defined in [types.ts:37](https://github.com/qiniu/formstate-x/blob/f0b789c/src/types.ts#L37)*
+*Defined in [types.ts:38](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/types.ts#L38)*
 
 **Returns:** *Promise‹object | object›*

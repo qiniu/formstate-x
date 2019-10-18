@@ -31,7 +31,7 @@ Typical React input component accepts `value` & `onChange` to bind value.
 
 • **value**: *T*
 
-*Defined in [bind.ts:8](https://github.com/qiniu/formstate-x/blob/f0b789c/src/bind.ts#L8)*
+*Defined in [bind.ts:8](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/bind.ts#L8)*
 
 ## Methods
 
@@ -39,7 +39,7 @@ Typical React input component accepts `value` & `onChange` to bind value.
 
 ▸ **onChange**(`event`: E): *void*
 
-*Defined in [bind.ts:9](https://github.com/qiniu/formstate-x/blob/f0b789c/src/bind.ts#L9)*
+*Defined in [bind.ts:9](https://github.com/qiniu/formstate-x/blob/d29c1fc/src/bind.ts#L9)*
 
 **Parameters:**
 
