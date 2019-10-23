@@ -17,7 +17,7 @@ If a truthy string is returned it represents a validation error
 
 ▸ (`value`: TValue): *[ValidatorResponse](../README.md#validatorresponse)*
 
-*Defined in [types.ts:25](https://github.com/qiniu/formstate-x/blob/ccc96d5/src/types.ts#L25)*
+*Defined in [types.ts:25](https://github.com/qiniu/formstate-x/blob/1867f21/src/types.ts#L25)*
 
 A validator simply takes a value and returns a string or Promise<string>
 If a truthy string is returned it represents a validation error
