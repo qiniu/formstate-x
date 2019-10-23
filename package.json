@@ -15,10 +15,9 @@
     "build:esm": "rm -rf ./esm && tsc --module es6 --outDir ./esm",
     "build:lib": "rm -rf ./lib && tsc",
     "build:doc": "rm -rf ./docs && typedoc",
-    "build": "npm run build:esm && npm run build:lib && npm run build:doc",
-    "prepublish": "npm run test && npm run build",
-    "travis:script": "tsc --noEmit && npm run coverage && npm run build",
-    "travis:before-script": "npm install"
+    "build": "npm run build:esm && npm run build:lib",
+    "prepublishOnly": "npm run test && npm run build",
+    "ci": "tsc --noEmit && npm run coverage && npm run build"
   },
   "keywords": [
     "form",
