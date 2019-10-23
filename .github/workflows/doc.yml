@@ -16,9 +16,10 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 12.x
-    - name: Generate document
-      run: |
-        npm ci
-        npm run build:doc
-    - name: GitHub Pages Deploy
-      uses: maxheld83/ghpages@v0.2.1
+    - name: Generate and deploy document
+      uses: JamesIves/github-pages-deploy-action@master
+      env:
+        BRANCH: gh-pages
+        FOLDER: docs
+        BUILD_SCRIPT: npm ci && npm run build:doc
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
