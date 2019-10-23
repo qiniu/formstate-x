@@ -20,13 +20,5 @@ jobs:
       run: |
         npm ci
         npm run build:doc
-    - name: Commit document updates
-      run: |
-        git config --local user.email "actions@github.com"
-        git config --local user.name "GitHub Actions"
-        git commit -m "Generate documents" -a || echo "No document updates to commit"
-    - name: Push to repo
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: master
+    - name: GitHub Pages Deploy
+      uses: maxheld83/ghpages@v0.2.1
