@@ -61,7 +61,7 @@ The state for a field.
 
 *Overrides [Disposable](disposable.md).[constructor](disposable.md#constructor)*
 
-*Defined in [fieldState.ts:235](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L235)*
+*Defined in [fieldState.ts:235](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L235)*
 
 **Parameters:**
 
@@ -80,7 +80,7 @@ Name | Type | Default |
 
 *Implementation of [ComposibleValidatable](../interfaces/composiblevalidatable.md).[$](../interfaces/composiblevalidatable.md#$)*
 
-*Defined in [fieldState.ts:39](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L39)*
+*Defined in [fieldState.ts:39](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L39)*
 
 Value that has bean validated with no error, AKA "safe".
 
@@ -92,7 +92,7 @@ ___
 
 *Implementation of [ComposibleValidatable](../interfaces/composiblevalidatable.md).[_activated](../interfaces/composiblevalidatable.md#_activated)*
 
-*Defined in [fieldState.ts:15](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L15)*
+*Defined in [fieldState.ts:15](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L15)*
 
 If activated (with auto validation).
 Field will only be activated when `validate()` or `onChange()` called.
@@ -103,7 +103,7 @@ ___
 
 • **_error**? : *undefined | string*
 
-*Defined in [fieldState.ts:64](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L64)*
+*Defined in [fieldState.ts:64](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L64)*
 
 The original error info of validation.
 
@@ -115,7 +115,7 @@ ___
 
 *Implementation of [ComposibleValidatable](../interfaces/composiblevalidatable.md).[_validateStatus](../interfaces/composiblevalidatable.md#_validatestatus)*
 
-*Defined in [fieldState.ts:52](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L52)*
+*Defined in [fieldState.ts:52](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L52)*
 
 The validate status.
 
@@ -125,7 +125,7 @@ ___
 
 • **_value**: *TValue*
 
-*Defined in [fieldState.ts:28](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L28)*
+*Defined in [fieldState.ts:28](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L28)*
 
 Value that reacts to `onChange` immediately.
 You should only use it to bind with UI input componnet.
@@ -138,7 +138,7 @@ ___
 
 *Implementation of [ComposibleValidatable](../interfaces/composiblevalidatable.md).[value](../interfaces/composiblevalidatable.md#value)*
 
-*Defined in [fieldState.ts:34](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L34)*
+*Defined in [fieldState.ts:34](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L34)*
 
 Value that can be consumed by your code.
 It's synced from `_value` with debounce of 200ms.
@@ -149,7 +149,7 @@ It's synced from `_value` with debounce of 200ms.
 
 • **get dirty**(): *boolean*
 
-*Defined in [fieldState.ts:20](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L20)*
+*Defined in [fieldState.ts:20](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L20)*
 
 If value has been touched (different with `initialValue`)
 
@@ -161,7 +161,7 @@ ___
 
 • **get error**(): *undefined | string*
 
-*Defined in [fieldState.ts:69](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L69)*
+*Defined in [fieldState.ts:69](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L69)*
 
 The error info of validation.
 
@@ -173,7 +173,7 @@ ___
 
 • **get hasError**(): *boolean*
 
-*Defined in [fieldState.ts:76](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L76)*
+*Defined in [fieldState.ts:76](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L76)*
 
 If the state contains error.
 
@@ -185,7 +185,7 @@ ___
 
 • **get validated**(): *boolean*
 
-*Defined in [fieldState.ts:84](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L84)*
+*Defined in [fieldState.ts:84](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L84)*
 
 If the validation has been done.
 It does not means validation passed.
@@ -198,7 +198,7 @@ ___
 
 • **get validating**(): *boolean*
 
-*Defined in [fieldState.ts:57](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L57)*
+*Defined in [fieldState.ts:57](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L57)*
 
 If the state is doing a validation.
 
@@ -210,7 +210,7 @@ ___
 
 • **get validationDisabled**(): *boolean*
 
-*Defined in [fieldState.ts:197](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L197)*
+*Defined in [fieldState.ts:197](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L197)*
 
 If validation disabled.
 
@@ -222,7 +222,7 @@ If validation disabled.
 
 ▸ **disableValidationWhen**(`predict`: function): *this*
 
-*Defined in [fieldState.ts:204](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L204)*
+*Defined in [fieldState.ts:204](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L204)*
 
 Configure when to disable validation.
 
@@ -242,7 +242,7 @@ ___
 
 *Inherited from [Disposable](disposable.md).[dispose](disposable.md#dispose)*
 
-*Defined in [disposable.ts:23](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/disposable.ts#L23)*
+*Defined in [disposable.ts:23](https://github.com/nighca/formstate-x/blob/fca3b10/src/disposable.ts#L23)*
 
 Do dispose by calling all disposer functions.
 
@@ -254,7 +254,7 @@ ___
 
 ▸ **onChange**(`value`: TValue): *void*
 
-*Defined in [fieldState.ts:119](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L119)*
+*Defined in [fieldState.ts:119](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L119)*
 
 Set `_value` on change event.
 
@@ -272,7 +272,7 @@ ___
 
 ▸ **reset**(): *void*
 
-*Defined in [fieldState.ts:134](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L134)*
+*Defined in [fieldState.ts:134](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L134)*
 
 Reset to initial status.
 
@@ -284,7 +284,7 @@ ___
 
 ▸ **set**(`value`: TValue): *void*
 
-*Defined in [fieldState.ts:126](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L126)*
+*Defined in [fieldState.ts:126](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L126)*
 
 Set `value` (& `_value`) synchronously.
 
@@ -302,7 +302,7 @@ ___
 
 ▸ **setError**(`error`: [ValidationResponse](../README.md#validationresponse)): *void*
 
-*Defined in [fieldState.ts:91](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L91)*
+*Defined in [fieldState.ts:91](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L91)*
 
 Set error info.
 
@@ -322,7 +322,7 @@ ___
 
 *Implementation of [ComposibleValidatable](../interfaces/composiblevalidatable.md)*
 
-*Defined in [fieldState.ts:171](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L171)*
+*Defined in [fieldState.ts:171](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L171)*
 
 Fire a validation behavior.
 
@@ -334,7 +334,7 @@ ___
 
 ▸ **validators**(...`validators`: [Validator](../interfaces/validator.md)‹TValue›[]): *this*
 
-*Defined in [fieldState.ts:103](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/fieldState.ts#L103)*
+*Defined in [fieldState.ts:103](https://github.com/nighca/formstate-x/blob/fca3b10/src/fieldState.ts#L103)*
 
 Add validator function.
 

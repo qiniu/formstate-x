@@ -47,7 +47,7 @@
 
 Ƭ **FieldsArray**: *[ComposibleValidatable](interfaces/composiblevalidatable.md)‹any›[]*
 
-*Defined in [formState.ts:9](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/formState.ts#L9)*
+*Defined in [formState.ts:9](https://github.com/nighca/formstate-x/blob/fca3b10/src/formState.ts#L9)*
 
 Mode: array
 
@@ -57,7 +57,7 @@ ___
 
 Ƭ **FieldsObject**: *object*
 
-*Defined in [formState.ts:7](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/formState.ts#L7)*
+*Defined in [formState.ts:7](https://github.com/nighca/formstate-x/blob/fca3b10/src/formState.ts#L7)*
 
 Mode: object
 
@@ -71,7 +71,7 @@ ___
 
 Ƭ **ValidatableFields**: *[FieldsObject](README.md#fieldsobject) | [FieldsArray](README.md#fieldsarray)*
 
-*Defined in [formState.ts:11](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/formState.ts#L11)*
+*Defined in [formState.ts:11](https://github.com/nighca/formstate-x/blob/fca3b10/src/formState.ts#L11)*
 
 Each key of the object is a validatable
 
@@ -81,7 +81,7 @@ ___
 
 Ƭ **Validated**: *object*
 
-*Defined in [types.ts:16](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/types.ts#L16)*
+*Defined in [types.ts:16](https://github.com/nighca/formstate-x/blob/fca3b10/src/types.ts#L16)*
 
 #### Type declaration:
 
@@ -91,7 +91,7 @@ ___
 
 Ƭ **ValidationResponse**: *string | null | undefined | false*
 
-*Defined in [types.ts:5](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/types.ts#L5)*
+*Defined in [types.ts:5](https://github.com/nighca/formstate-x/blob/fca3b10/src/types.ts#L5)*
 
 A truthy string or falsy values.
 
@@ -101,7 +101,7 @@ ___
 
 Ƭ **ValidatorResponse**: *[ValidationResponse](README.md#validationresponse) | Promise‹[ValidationResponse](README.md#validationresponse)›*
 
-*Defined in [types.ts:12](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/types.ts#L12)*
+*Defined in [types.ts:12](https://github.com/nighca/formstate-x/blob/fca3b10/src/types.ts#L12)*
 
 The return value of a validator.
 
@@ -111,7 +111,7 @@ ___
 
 Ƭ **ValueOf**: *State extends FormState<infer Fields, infer Fields extends { [key: string]: ComposibleValidatable<any, any>; } ? ValueOfObjectFields<infer Fields> : infer Fields extends (infer Field)[] ? ValueArrayOf<Field> : never> ? Fields extends { ...; } ? ValueOfObjectFields<...> : Fields extends (infer Field)[] ? ValueArrayOf...*
 
-*Defined in [types.ts:91](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/types.ts#L91)*
+*Defined in [types.ts:91](https://github.com/nighca/formstate-x/blob/fca3b10/src/types.ts#L91)*
 
 Value of state (`FormState` or `FieldState`)
 
@@ -121,7 +121,7 @@ ___
 
 Ƭ **ValueOfArrayFields**: *Fields extends (infer Field)[] ? ValueArrayOf<Field> : never*
 
-*Defined in [types.ts:77](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/types.ts#L77)*
+*Defined in [types.ts:77](https://github.com/nighca/formstate-x/blob/fca3b10/src/types.ts#L77)*
 
 Value of array-fields.
 
@@ -131,7 +131,7 @@ ___
 
 Ƭ **ValueOfFieldState**: *State extends FieldState<infer FieldType> ? FieldType : never*
 
-*Defined in [types.ts:60](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/types.ts#L60)*
+*Defined in [types.ts:60](https://github.com/nighca/formstate-x/blob/fca3b10/src/types.ts#L60)*
 
 Value of `FieldState`.
 
@@ -141,7 +141,7 @@ ___
 
 Ƭ **ValueOfFields**: *Fields extends { [key: string]: ComposibleValidatable<any, any>; } ? ValueOfObjectFields<Fields> : Fields extends (infer Field)[] ? ValueArrayOf<Field> : never*
 
-*Defined in [types.ts:84](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/types.ts#L84)*
+*Defined in [types.ts:84](https://github.com/nighca/formstate-x/blob/fca3b10/src/types.ts#L84)*
 
 Value of fields.
 
@@ -151,7 +151,7 @@ ___
 
 Ƭ **ValueOfObjectFields**: *object*
 
-*Defined in [types.ts:72](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/types.ts#L72)*
+*Defined in [types.ts:72](https://github.com/nighca/formstate-x/blob/fca3b10/src/types.ts#L72)*
 
 Value of object-fields.
 
@@ -163,7 +163,7 @@ Value of object-fields.
 
 ▸ **bindInput**<**T**>(`state`: [FieldState](classes/fieldstate.md)‹T›): *[InputBindings](interfaces/inputbindings.md)‹T›*
 
-*Defined in [bind.ts:16](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/bind.ts#L16)*
+*Defined in [bind.ts:16](https://github.com/nighca/formstate-x/blob/fca3b10/src/bind.ts#L16)*
 
 Helper method to bind state to your input component.
 You can define your own bindInput by specifying `getValue`.
@@ -182,7 +182,7 @@ Name | Type |
 
 ▸ **bindInput**<**T**, **E**>(`state`: [FieldState](classes/fieldstate.md)‹T›, `getValue`: function): *[InputBindings](interfaces/inputbindings.md)‹T, E›*
 
-*Defined in [bind.ts:17](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/bind.ts#L17)*
+*Defined in [bind.ts:17](https://github.com/nighca/formstate-x/blob/fca3b10/src/bind.ts#L17)*
 
 **Type parameters:**
 
