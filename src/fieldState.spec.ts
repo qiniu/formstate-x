@@ -7,9 +7,9 @@ import FieldState from './fieldState'
 //   }
 // })
 
-const defaultDelay = 1
+const defaultDelay = 10
 
-function delay<T>(value?: T, delay: number = defaultDelay + 1): Promise<T> {
+function delay<T>(value?: T, delay: number = defaultDelay + 10): Promise<T> {
   return new Promise(
     resolve => setTimeout(() => resolve(value), delay)
   )
