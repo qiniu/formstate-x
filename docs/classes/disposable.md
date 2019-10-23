@@ -28,7 +28,7 @@ Class that collects side-effects and dispose them on demand.
 
 \+ **new Disposable**(): *[Disposable](disposable.md)*
 
-*Defined in [disposable.ts:28](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/disposable.ts#L28)*
+*Defined in [disposable.ts:28](https://github.com/qiniu/formstate-x/blob/15476f3/src/disposable.ts#L28)*
 
 **Returns:** *[Disposable](disposable.md)*
 
@@ -38,7 +38,7 @@ Class that collects side-effects and dispose them on demand.
 
 ▸ **dispose**(): *void*
 
-*Defined in [disposable.ts:23](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/disposable.ts#L23)*
+*Defined in [disposable.ts:23](https://github.com/qiniu/formstate-x/blob/15476f3/src/disposable.ts#L23)*
 
 Do dispose by calling all disposer functions.
 

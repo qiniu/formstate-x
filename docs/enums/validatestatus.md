@@ -18,7 +18,7 @@ Validate status.
 
 • **NotValidated**:
 
-*Defined in [types.ts:100](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/types.ts#L100)*
+*Defined in [types.ts:100](https://github.com/qiniu/formstate-x/blob/15476f3/src/types.ts#L100)*
 
 (need validation but) not validated
 
@@ -28,7 +28,7 @@ ___
 
 • **Validated**:
 
-*Defined in [types.ts:104](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/types.ts#L104)*
+*Defined in [types.ts:104](https://github.com/qiniu/formstate-x/blob/15476f3/src/types.ts#L104)*
 
 current validation finished
 
@@ -38,6 +38,6 @@ ___
 
 • **Validating**:
 
-*Defined in [types.ts:102](https://github.com/qiniu/formstate-x/blob/ee2bb7a/src/types.ts#L102)*
+*Defined in [types.ts:102](https://github.com/qiniu/formstate-x/blob/15476f3/src/types.ts#L102)*
 
 current validation ongoing
