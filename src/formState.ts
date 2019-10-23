@@ -22,13 +22,9 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
 
   /**
    * If activated (with auto validate).
-   * Form will only be activated when some field activated.
+   * Form will only be activated when `validate()` called or some field activated.
    */
-  @computed get _activated() {
-    return this.fields.some(
-      field => field._activated
-    )
-  }
+  @observable _activated = false
 
   /**
    * If value has been touched.
@@ -170,6 +166,7 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
    * Reset to initial status.
    */
   @action reset() {
+    this._activated = false
     this._validateStatus = ValidateStatus.NotValidated
     this._error = undefined
     this.validation = undefined
@@ -205,6 +202,10 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
    * Fire a validation behavior.
    */
   async validate() {
+    runInAction('activate-when-validate', () => {
+      this._activated = true
+    })
+
     this._validate()
     this.fields.forEach(
       field => field.validate()
@@ -276,6 +277,13 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
     if (!isObservable(this.$)) {
       this.$ = observable(this.$, undefined, { deep: false })
     }
+
+    // auto activate: any field activated -> form activated
+    this.addDisposer(reaction(
+      () => this.fields.some(field => field._activated),
+      someFieldActivated => someFieldActivated && !this._activated && (this._activated = true),
+      { fireImmediately: true }
+    ))
 
     // auto validate: this.value -> this.validation
     this.addDisposer(autorun(
