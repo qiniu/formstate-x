@@ -8,9 +8,9 @@ import FormState from './formState'
 //   }
 // })
 
-const defaultDelay = 1
+const defaultDelay = 10
 
-function delay<T>(value?: T, delay: number = defaultDelay + 1): Promise<T> {
+function delay<T>(value?: T, delay: number = defaultDelay + 10): Promise<T> {
   return new Promise(
     resolve => setTimeout(() => resolve(value), delay)
   )
@@ -593,16 +593,12 @@ describe('FormState (mode: array) validation', () => {
     state.validate()
 
     await when(() => state.validated)
-    expect(state.validating).toBe(false)
-    expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
 
-    state.$.splice(0, defaultDelay)
+    state.$.splice(0, 1)
 
     await when(() => state.validated)
-    expect(state.validating).toBe(false)
-    expect(state.validated).toBe(true)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 

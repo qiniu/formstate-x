@@ -1,8 +1,8 @@
 import { asyncResponsesAnd, isEmpty } from './utils'
 
-const defaultDelay = 1
+const defaultDelay = 10
 
-function delay<T>(value?: T, delay: number = defaultDelay + 1): Promise<T> {
+function delay<T>(value?: T, delay: number = defaultDelay + 10): Promise<T> {
   return new Promise(
     resolve => setTimeout(() => resolve(value), delay)
   )
@@ -19,9 +19,9 @@ describe('asyncResponsesAnd', () => {
     expect(isEmpty(result)).toBe(true)
 
     const result2 = await asyncResponsesAnd([
-      delay(null, 3),
-      delay(undefined, 1),
-      delay(false, 2)
+      delay(null, 30),
+      delay(undefined, 10),
+      delay(false, 20)
     ])
     expect(isEmpty(result)).toBe(true)
   })
@@ -31,32 +31,32 @@ describe('asyncResponsesAnd', () => {
     expect(result).toBe('empty')
 
     const result2 = await asyncResponsesAnd([
-      delay(null, 3),
-      delay(undefined, 1),
-      delay('empty', 2)
+      delay(null, 30),
+      delay(undefined, 10),
+      delay('empty', 20)
     ])
     expect(result2).toBe('empty')
 
     const result3 = await asyncResponsesAnd([
-      delay(null, 3),
-      delay('too long', 1),
-      delay(false, 2)
+      delay(null, 30),
+      delay('too long', 10),
+      delay(false, 20)
     ])
     expect(result3).toBe('too long')
   })
 
   it('should work well with multi-unpassed results', async () => {
     const result = await asyncResponsesAnd([
-      delay('too many', 3),
-      delay(undefined, 1),
-      delay('empty', 2)
+      delay('too many', 30),
+      delay(undefined, 10),
+      delay('empty', 20)
     ])
     expect(result).toBe('empty')
 
     const result3 = await asyncResponsesAnd([
-      delay('too many', 3),
-      delay('too long', 1),
-      delay('empty', 2)
+      delay('too many', 30),
+      delay('too long', 10),
+      delay('empty', 20)
     ])
     expect(result3).toBe('too long')
   })
