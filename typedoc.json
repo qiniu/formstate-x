@@ -5,6 +5,5 @@
   "excludeNotExported": true,
   "excludePrivate": true,
   "excludeProtected": true,
-  "readme": "none",
-  "theme": "markdown"
+  "theme": "./node_modules/typedoc-twilio-theme/bin"
 }

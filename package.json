@@ -37,7 +37,7 @@
     "mobx": "^5.14.0",
     "ts-jest": "^24.1.0",
     "typedoc": "^0.15.0",
-    "typedoc-plugin-markdown": "^2.2.10",
+    "typedoc-twilio-theme": "^1.0.0",
     "typescript": "^3.6.3"
   },
   "dependencies": {}

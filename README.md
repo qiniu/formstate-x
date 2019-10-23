@@ -52,7 +52,3 @@ formstate-x provides similar APIs with [formstate](https://github.com/formstate/
 2. formstate mixes validated, safe value with readable value (`$`), in some cases it's not suitable to use either `$` or `value`. formstate-x provides `value` as readable value, `$` as validated and safe value and `_value` for UI binding only.
 3. formstate doesn't provide a good way to extract value from `FormState` ( related issues: [#25](https://github.com/formstate/formstate/issues/25) [#28](https://github.com/formstate/formstate/issues/28)). formstate-x provides `value` as `FormState`'s serialized value, with full type info.
 4. formstate dosen't provide a good way to disable part of a `FormState`. `FormStateLazy` is like a hack and very different concept from `FieldState` & `FormState`. formstate-x provides `disableValidationWhen` to let you realize conditional validation with a single method call.
-
-### API references
-
-[API references](./docs/README.md)
