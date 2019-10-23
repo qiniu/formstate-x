@@ -17,7 +17,9 @@ jobs:
       with:
         node-version: 12.x
     - name: Generate document
-      run: npm run build:doc
+      run: |
+        npm ci
+        npm run build:doc
     - name: Commit document updates
       run: |
         git config --local user.email "actions@github.com"
