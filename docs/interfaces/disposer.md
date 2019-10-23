@@ -12,7 +12,7 @@ Function to do dispose.
 
 ▸ (): *void*
 
-*Defined in [types.ts:55](https://github.com/qiniu/formstate-x/blob/ad577cd/src/types.ts#L55)*
+*Defined in [types.ts:55](https://github.com/qiniu/formstate-x/blob/ccc96d5/src/types.ts#L55)*
 
 Function to do dispose.
 
