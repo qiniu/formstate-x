@@ -8,6 +8,10 @@ What we offer:
 * **Reactive**: based on [MobX](https://mobx.js.org), every dependency's change causes reaction automatically and you can easily react to state's change
 * **UI-independent**: formstate-x only deals with state / data, you can easily use it with any UI library you like
 
+### Documents 
+
+Full documents [here](https://qiniu.github.io/formstate-x).
+
 ### Install
 
 ```shell
