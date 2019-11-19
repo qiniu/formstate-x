@@ -856,7 +856,7 @@ describe('FormState (mode: array) validation', () => {
     state.dispose()
   })
 
-  it('should work well with disableValidationWhen', async () => {
+  fit('should work well with disableValidationWhen', async () => {
     const options = observable({ disabled: false })
     const notEmpty = (value: string) => value === '' && 'empty'
     const initialValue = ['123', '456']
@@ -871,16 +871,19 @@ describe('FormState (mode: array) validation', () => {
     runInAction(() => options.disabled = true)
 
     await state.validate()
+    expect(state.$[0].hasError).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
     state.$[0].onChange('')
     await state.validate()
+    expect(state.$[0].hasError).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
     runInAction(() => options.disabled = false)
     await delay()
+    expect(state.$[0].hasError).toBe(true)
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
 
