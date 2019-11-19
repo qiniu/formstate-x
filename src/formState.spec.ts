@@ -856,7 +856,7 @@ describe('FormState (mode: array) validation', () => {
     state.dispose()
   })
 
-  fit('should work well with disableValidationWhen', async () => {
+  it('should work well with disableValidationWhen', async () => {
     const options = observable({ disabled: false })
     const notEmpty = (value: string) => value === '' && 'empty'
     const initialValue = ['123', '456']
