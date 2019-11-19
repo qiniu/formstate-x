@@ -10,6 +10,9 @@ Manage the state of your form with ease, inspired by awesome [formstate](https:/
 What we offer:
 
 * **Type safety**: written in [Typescript](https://typescriptlang.org), you can compose complex form state without loss of type information
+
+    ![Demo](./assets/demo.gif)
+
 * **Reactive**: based on [MobX](https://mobx.js.org), every dependency's change causes reaction automatically and you can easily react to state's change
 * **UI-independent**: formstate-x only deals with state / data, you can easily use it with any UI library you like
 
