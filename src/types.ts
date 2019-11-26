@@ -49,7 +49,6 @@ export interface ComposibleValidatable<T, TValue = T> extends Validatable<T, TVa
   dirty: boolean
   _activated: boolean
   _validateStatus: ValidateStatus
-  disableValidationWhen: (predict: () => boolean) => this
 }
 
 /** Function to do dispose. */
