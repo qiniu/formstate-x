@@ -239,9 +239,6 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
    */
   @action disableValidationWhen(predict: () => boolean) {
     this.shouldDisableValidation = predict
-    this.fields.forEach(
-      field => field.disableValidationWhen(predict)
-    )
     return this
   }
 
