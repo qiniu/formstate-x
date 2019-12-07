@@ -117,7 +117,9 @@ export default class FieldState<TValue> extends Disposable implements Composible
    * Set `_value` on change event.
    */
   @action onChange(value: TValue) {
-    this.setValue(value)
+    if (value !== this._value) {
+      this.setValue(value)
+    }
   }
 
   /**
