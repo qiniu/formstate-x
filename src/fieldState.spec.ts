@@ -158,6 +158,22 @@ describe('FieldState validation', () => {
     state.dispose()
   })
 
+  it('should work well with onChange of same value', async () => {
+    const state = createFieldState(1).validators(
+      () => null
+    )
+    await state.validate()
+    expect(state.validated).toBe(true)
+    expect(state.validating).toBe(false)
+    expect(state.hasError).toBe(false)
+
+    state.onChange(1)
+    await delay()
+    expect(state.validated).toBe(true)
+    expect(state.validating).toBe(false)
+    expect(state.hasError).toBe(false)
+  })
+
   it('should work well with validate()', async () => {
     const state = createFieldState('').validators(val => !val && 'empty')
     state.validate()
