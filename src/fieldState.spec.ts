@@ -9,10 +9,13 @@ import FieldState from './fieldState'
 
 const defaultDelay = 10
 
-function delay<T>(value?: T, delay: number = defaultDelay + 10): Promise<T> {
-  return new Promise(
-    resolve => setTimeout(() => resolve(value), delay)
-  )
+async function delay(millisecond: number = defaultDelay + 20/* debounce 10ms + async validate 10ms = 20ms */) {
+  await new Promise(resolve => setTimeout(() => resolve(), millisecond))
+}
+
+async function delayValue<T>(value: T, millisecond: number = defaultDelay) {
+  await delay(millisecond)
+  return value
 }
 
 function createFieldState<T>(initialValue: T) {
@@ -44,7 +47,7 @@ describe('FieldState', () => {
     expect(state.value).toBe(initialValue)
     expect(state.$).toBe(initialValue)
 
-    await when(() => state.validated)
+    await delay()
     expect(state._value).toBe(value)
     expect(state.value).toBe(value)
     expect(state.$).toBe(value)
@@ -57,7 +60,7 @@ describe('FieldState', () => {
     expect(state.value).toBe(value)
     expect(state.$).toBe(value)
 
-    await when(() => state.validated)
+    await delay()
     expect(state._value).toBe(newValue)
     expect(state.value).toBe(newValue)
     expect(state.$).toBe(newValue)
@@ -90,8 +93,17 @@ describe('FieldState', () => {
     expect(state.value).toBe(value)
     expect(state.dirty).toBe(true)
 
+    // set 不应该使 field 激活
+    expect(state.validating).toBe(false)
+    expect(state.validated).toBe(false)
+    expect(state.hasError).toBe(false)
+    await delay()
+    expect(state.validating).toBe(false)
+    expect(state.validated).toBe(false)
+    expect(state.hasError).toBe(false)
+
     state.validate()
-    await when(() => state.validated)
+    await delay()
     expect(state._value).toBe(value)
     expect(state.value).toBe(value)
     expect(state.dirty).toBe(true)
@@ -104,7 +116,7 @@ describe('FieldState', () => {
     const state = createFieldState(initialValue)
 
     state.onChange('123')
-    await when(() => state.validated)
+    await delay()
     state.reset()
 
     expect(state._value).toBe(initialValue)
@@ -138,15 +150,9 @@ describe('FieldState validation', () => {
     const state = createFieldState('xxx').validators(val => !val && 'empty')
     state.onChange('')
 
-    await when(() => state.validating)
-    expect(state.validating).toBe(true)
-    expect(state.validated).toBe(false)
-
-    await when(() => state.validated)
-    expect(state.validating).toBe(false)
+    await delay()
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
-    expect(state.error).toBe('empty')
 
     state.onChange('123')
     state.onChange('123456')
@@ -178,7 +184,7 @@ describe('FieldState validation', () => {
     const state = createFieldState('').validators(val => !val && 'empty')
     state.validate()
 
-    await when(() => state.validated)
+    await delay()
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
@@ -191,7 +197,7 @@ describe('FieldState validation', () => {
     const initialValue = ''
     const state = createFieldState(initialValue).validators(val => !val && 'empty')
     state.validate()
-    await when(() => state.validated)
+    await delay()
 
     state.reset()
     expect(state._value).toBe(initialValue)
@@ -211,7 +217,7 @@ describe('FieldState validation', () => {
     )
     state.validate()
 
-    await when(() => state.validated)
+    await delay()
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
@@ -219,7 +225,7 @@ describe('FieldState validation', () => {
 
     state.onChange('123456')
 
-    await when(() => state.validated)
+    await delay()
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
@@ -227,7 +233,7 @@ describe('FieldState validation', () => {
 
     state.onChange('123')
 
-    await when(() => state.validated)
+    await delay()
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(false)
@@ -238,7 +244,7 @@ describe('FieldState validation', () => {
 
   it('should work well with async validator', async () => {
     const state = createFieldState('').validators(
-      val => !val && delay('empty')
+      val => delayValue(!val && 'empty')
     )
     state.validate()
 
@@ -246,7 +252,7 @@ describe('FieldState validation', () => {
     expect(state.validating).toBe(true)
     expect(state.validated).toBe(false)
 
-    await when(() => state.validated)
+    await delay()
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
@@ -257,26 +263,26 @@ describe('FieldState validation', () => {
 
   it('should work well with mixed sync and async validator', async () => {
     const state = createFieldState('').validators(
-      val => !val && delay('empty'),
+      val => delayValue(!val && 'empty'),
       val => val.length > 5 && 'too long'
     )
     state.validate()
 
-    await when(() => state.validated)
+    await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
 
     state.onChange('123456')
 
-    await when(() => state.validated)
+    await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
 
     state.onChange('123')
 
-    await when(() => state.validated)
-    expect(state.hasError).toBe(false)
+    await delay()
     expect(state.error).toBeUndefined()
+    expect(state.hasError).toBe(false)
 
     state.dispose()
   })
@@ -288,22 +294,22 @@ describe('FieldState validation', () => {
     )
 
     state.onChange('123')
-    await when(() => state.validated)
+    await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('same')
 
     runInAction(() => target.value = '123456')
-    await when(() => state.validated)
+    await delay()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
     runInAction(() => target.value = '123')
-    await when(() => state.validated)
+    await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('same')
 
     state.onChange('123456')
-    await when(() => state.validated)
+    await delay()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
@@ -316,12 +322,12 @@ describe('FieldState validation', () => {
     )
     state.onChange('123456')
 
-    await when(() => state.validated)
+    await delay()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
     state.validators(val => val.length > 5 && 'too long')
-    await when(() => state.validated)
+    await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
 
