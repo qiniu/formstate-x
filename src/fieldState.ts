@@ -39,14 +39,6 @@ export default class FieldState<TValue> extends Disposable implements Composible
   @observable.ref $: TValue
 
   /**
-   * Apply `_value` to `value`.
-   */
-  @action private applyValue() {
-    this._activated = true
-    this.value = this._value
-  }
-
-  /**
    * The validate status.
    */
   @observable _validateStatus: ValidateStatus = ValidateStatus.NotValidated
@@ -106,28 +98,17 @@ export default class FieldState<TValue> extends Disposable implements Composible
   }
 
   /**
-   * Set `_value`.
-   */
-  @action private setValue(value: TValue) {
-    this._value = value
-    this._validateStatus = ValidateStatus.NotValidated
-  }
-
-  /**
    * Set `_value` on change event.
    */
   @action onChange(value: TValue) {
-    if (value !== this._value) {
-      this.setValue(value)
-    }
+    this._value = value
   }
 
   /**
    * Set `value` (& `_value`) synchronously.
    */
   @action set(value: TValue) {
-    this.setValue(value)
-    this.value = this._value // 不使用 applyValue，避免 activate
+    this.value = this._value = value
   }
 
   /**
@@ -171,11 +152,19 @@ export default class FieldState<TValue> extends Disposable implements Composible
    * Fire a validation behavior.
    */
   async validate() {
-    runInAction('activate-when-validate', () => {
+    const validation = this.validation
+
+    runInAction('activate-and-sync-_value-when-validate', () => {
       this._activated = true
+      // 若有用户交互产生的变更（因 debounce）尚未同步，同步之，确保本次 validate 结果是相对稳定的
+      this.value = this._value
     })
 
-    this.applyValue()
+    // 若 `validation` 未发生变更，意味着未发生新的校验行为
+    // 若上边操作未触发自动的校验行为，强制调用之
+    if (this.validation === validation) {
+      this._validate()
+    }
 
     // Compatible with formstate
     await when(
@@ -241,14 +230,20 @@ export default class FieldState<TValue> extends Disposable implements Composible
 
     this.reset()
 
-    // debounced auto sync: this._value -> this.value
+    // debounced reaction to `_value` change
     this.addDisposer(reaction(
       () => this._value,
-      () => this.applyValue(),
-      { delay, name: 'applyValue-when-value-change' }
+      () => {
+        if (this.value !== this._value) {
+          this.value = this._value
+          this._validateStatus = ValidateStatus.NotValidated
+          this._activated = true
+        }
+      },
+      { delay, name: 'reaction-when-_value-change' }
     ))
 
-    // auto sync while validated: this.value -> this.$
+    // auto sync when validate ok: this.value -> this.$
     this.addDisposer(reaction(
       () => this.validated && !this.hasError,
       validateOk => validateOk && (this.$ = this.value),
