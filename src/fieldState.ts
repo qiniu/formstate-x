@@ -152,12 +152,18 @@ export default class FieldState<TValue> extends Disposable implements Composible
    * Fire a validation behavior.
    */
   async validate() {
+    const validation = this.validation
+
     runInAction('activate-and-sync-_value-when-validate', () => {
       this._activated = true
       this.value = this._value
     })
 
-    this._validate()
+    // 若 `validation` 未发生变更，意味着未发生新的校验行为
+    // 若上边操作未触发自动的校验行为，强制调用之
+    if (this.validation === validation) {
+      this._validate()
+    }
 
     // Compatible with formstate
     await when(
