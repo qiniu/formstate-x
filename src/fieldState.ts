@@ -156,6 +156,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
 
     runInAction('activate-and-sync-_value-when-validate', () => {
       this._activated = true
+      // 若有用户交互产生的变更（因 debounce）尚未同步，同步之，确保本次 validate 结果是相对稳定的
       this.value = this._value
     })
 
