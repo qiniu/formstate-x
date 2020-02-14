@@ -55,3 +55,13 @@ export function applyValidators<TValue>(value: TValue, validators: Validator<TVa
 
   return asyncResponsesAnd(asyncResponses)
 }
+
+export function debounce(fn: () => void, delay: number) {
+  let timeout: any = null
+  return () => {
+    if (timeout) {
+      clearTimeout(timeout)
+    }
+    timeout = setTimeout(fn, delay)
+  }
+}

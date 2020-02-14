@@ -1,6 +1,6 @@
 import { observable, computed, action, reaction, autorun, runInAction, when } from 'mobx'
 import { ComposibleValidatable, Validator, Validated, ValidationResponse, ValidateStatus } from './types'
-import { applyValidators } from './utils'
+import { applyValidators, debounce } from './utils'
 import Disposable from './disposable'
 
 /**
@@ -233,14 +233,17 @@ export default class FieldState<TValue> extends Disposable implements Composible
     // debounced reaction to `_value` change
     this.addDisposer(reaction(
       () => this._value,
-      () => {
+      // use debounce instead of reactionOptions.delay
+      // cause the later do throttle in fact, not debounce
+      // see https://github.com/mobxjs/mobx/issues/1956
+      debounce(() => {
         if (this.value !== this._value) {
           this.value = this._value
           this._validateStatus = ValidateStatus.NotValidated
           this._activated = true
         }
-      },
-      { delay, name: 'reaction-when-_value-change' }
+      }, delay),
+      { name: 'reaction-when-_value-change' }
     ))
 
     // auto sync when validate ok: this.value -> this.$
