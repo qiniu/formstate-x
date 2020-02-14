@@ -375,4 +375,29 @@ describe('FieldState validation', () => {
 
     state.dispose()
   })
+
+  it('should work well with delay', async () => {
+    const state = new FieldState('0', 1000)
+
+    state.onChange('1')
+    expect(state.value).toBe('0')
+    await delay(250)
+    expect(state.value).toBe('0')
+
+    state.onChange('2')
+    expect(state.value).toBe('0')
+    await delay(500)
+    expect(state.value).toBe('0')
+
+    state.onChange('3')
+    expect(state.value).toBe('0')
+    await delay(750)
+    expect(state.value).toBe('0')
+
+    state.onChange('4')
+    expect(state.value).toBe('0')
+    await delay(1250)
+    expect(state.value).toBe('4')
+
+  })
 })
