@@ -238,9 +238,11 @@ export default class FieldState<TValue> extends Disposable implements Composible
       // see https://github.com/mobxjs/mobx/issues/1956
       debounce(() => {
         if (this.value !== this._value) {
-          this.value = this._value
-          this._validateStatus = ValidateStatus.NotValidated
-          this._activated = true
+          runInAction('sync-value-when-_value-changed', () => {
+            this.value = this._value
+            this._validateStatus = ValidateStatus.NotValidated
+            this._activated = true
+          })
         }
       }, delay),
       { name: 'reaction-when-_value-change' }

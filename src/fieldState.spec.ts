@@ -1,11 +1,5 @@
-import { when, spy, observable, runInAction } from 'mobx'
+import { when, observable, runInAction } from 'mobx'
 import FieldState from './fieldState'
-
-// spy((event) => {
-//   if (event.type === 'action') {
-//     console.log(`${event.name} with args: ${event.arguments}`)
-//   }
-// })
 
 const defaultDelay = 10
 const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]

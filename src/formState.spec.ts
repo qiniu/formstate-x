@@ -1,12 +1,6 @@
-import { when, observable, runInAction, spy, autorun, isObservable } from 'mobx'
+import { observable, runInAction, isObservable } from 'mobx'
 import FieldState from './fieldState'
 import FormState from './formState'
-
-// spy((event) => {
-//   if (event.type === 'action') {
-//     console.log(`${event.name} with args: ${event.arguments}`)
-//   }
-// })
 
 const defaultDelay = 10
 const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
@@ -579,7 +573,9 @@ describe('FormState (mode: array) validation', () => {
       value => createFieldState(value)
     )).validators(list => list.join('').length > 5 && 'too long')
 
-    state.$.push(createFieldState('456'))
+    runInAction(() => {
+      state.$.push(createFieldState('456'))
+    })
     // 如果不手动调用 validate()，新增 field 可能一直处于初始状态，即 !dirty，从而导致 !form.validated
     state.validate()
 
@@ -587,7 +583,9 @@ describe('FormState (mode: array) validation', () => {
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
 
-    state.$.splice(0, 1)
+    runInAction(() => {
+      state.$.splice(0, 1)
+    })
 
     await delay()
     expect(state.hasError).toBe(false)
@@ -634,11 +632,13 @@ describe('FormState (mode: array) validation', () => {
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
 
-    state.$.splice(
-      1, 1,
-      createFieldState(''),
-      createFieldState('')
-    )
+    runInAction(() => {
+      state.$.splice(
+        1, 1,
+        createFieldState(''),
+        createFieldState('')
+      )
+    })
 
     await delay()
     expect(state.hasError).toBe(true)
@@ -686,7 +686,9 @@ describe('FormState (mode: array) validation', () => {
     expect(state.error).toBe('too long')
 
     state.$[0].onChange('')
-    state.$.push(createFieldState(''))
+    runInAction(() => {
+      state.$.push(createFieldState(''))
+    })
     state.validate()
 
     await delay()
@@ -746,7 +748,9 @@ describe('FormState (mode: array) validation', () => {
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too many')
 
-    state.$.pop()
+    runInAction(() => {
+      state.$.pop()
+    })
     state.$[1].onChange('456')
     await delay()
     expect(state.hasError).toBe(true)
@@ -929,10 +933,12 @@ describe('nested FormState', () => {
       return inputState.validators(duplicateValidator)
     }
 
-    state.$.inputs.$.push(
-      createInputState(''),
-      createInputState('')
-    )
+    runInAction(() => {
+      state.$.inputs.$.push(
+        createInputState(''),
+        createInputState('')
+      )
+    })
 
     await state.validate()
     expect(state.error).toBe('empty')
@@ -961,7 +967,9 @@ describe('nested FormState', () => {
     expect(state.$.inputs.$[1].error).toBe('empty')
 
     state.$.inputs.$[1].onChange('4')
-    state.$.inputs.$.push(createFieldState('56'))
+    runInAction(() => {
+      state.$.inputs.$.push(createFieldState('56'))
+    })
 
     await delay()
     expect(state.error).toBe('too long')
