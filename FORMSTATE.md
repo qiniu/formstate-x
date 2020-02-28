@@ -64,6 +64,12 @@ runInAction(() => options.disabled = false)
 // 此时 state 的校验逻辑恢复正常
 ```
 
+注意假设有这样一组父子表单的嵌套关系 `AFormState` -> `BFormState` -> `CFormState` / `DFieldState`
+并且满足 `BFormState.disableValidationWhen(() => false)`
+那么 `CFormState` / `DFieldState` 的校验状态依然是不受 `BFormState` 影响的
+它只能让 `BFormState` 及其祖先 `AFormState` 觉得 `BFormState` 的校验是通过的
+行为类似于在 `BFormState` 这一层做了类似 `validateEvent.stopPropagation()` 的事情
+
 ### 7. dispose
 
 formstate-x 提供的 `FieldState` & `FormState` 实例在不再需要的时候都需要被手动 dispose（通过 `state.dispose()`）。
