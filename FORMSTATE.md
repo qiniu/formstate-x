@@ -68,7 +68,7 @@ runInAction(() => options.disabled = false)
 
     假设有这样一组父子表单的嵌套关系 `AFormState` -> `BFormState` -> `CFormState` / `DFieldState`
 
-    并且满足 `BFormState.disableValidationWhen(() => false)`
+    并且满足 `BFormState.disableValidationWhen(() => true)`
 
     那么 `BFormState` 的子表单 `CFormState` / `DFieldState` 的校验状态依然是不受 `BFormState` 影响的
 
