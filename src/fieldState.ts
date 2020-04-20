@@ -1,6 +1,6 @@
 import { observable, computed, action, reaction, autorun, runInAction, when } from 'mobx'
 import { ComposibleValidatable, Validator, Validated, ValidationResponse, ValidateStatus } from './types'
-import { applyValidators, debounce } from './utils'
+import { applyValidators, debounce, isPromiseLike } from './utils'
 import Disposable from './disposable'
 
 /**
@@ -206,7 +206,11 @@ export default class FieldState<TValue> extends Disposable implements Composible
       return
     }
 
-    const error = await validation.response
+    const error = (
+      isPromiseLike(validation.response)
+      ? await validation.response
+      : validation.response
+    )
 
     if (
       validation !== this.validation // 如果 validation 已过期，则不生效
