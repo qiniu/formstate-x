@@ -1,5 +1,5 @@
 import { observable, computed, isArrayLike, isObservable, action, autorun, runInAction, when, reaction } from 'mobx'
-import { ComposibleValidatable, ValueOfFields, ValidationResponse, Validator, Validated, ValidateStatus } from './types'
+import { ComposibleValidatable, ValueOfFields, ValidationResponse, Validator, Validated, ValidateStatus, Error, ValidateResult } from './types'
 import { applyValidators, isPromiseLike } from './utils'
 import Disposable from './disposable'
 
@@ -94,7 +94,7 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
   /**
    * The error info of form validation.
    */
-  @observable private _error?: string
+  @observable private _error: Error
 
   /**
    * The error info of validation (including fields' error info).
@@ -201,7 +201,7 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
   /**
    * Fire a validation behavior.
    */
-  async validate() {
+  async validate(): Promise<ValidateResult<TValue>> {
     runInAction('activate-when-validate', () => {
       this._activated = true
     })
@@ -219,7 +219,7 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
 
     return (
       this.hasError
-      ? { hasError: true } as const
+      ? { hasError: true, error: this.error } as const
       : { hasError: false, value: this.value } as const
     )
   }

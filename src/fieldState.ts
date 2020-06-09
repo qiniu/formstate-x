@@ -1,5 +1,5 @@
 import { observable, computed, action, reaction, autorun, runInAction, when } from 'mobx'
-import { ComposibleValidatable, Validator, Validated, ValidationResponse, ValidateStatus } from './types'
+import { ComposibleValidatable, Validator, Validated, ValidationResponse, ValidateStatus, Error, ValidateResult } from './types'
 import { applyValidators, debounce, isPromiseLike } from './utils'
 import Disposable from './disposable'
 
@@ -53,7 +53,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
   /**
    * The original error info of validation.
    */
-  @observable _error?: string
+  @observable _error: Error
 
   /**
    * The error info of validation.
@@ -151,7 +151,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
   /**
    * Fire a validation behavior.
    */
-  async validate() {
+  async validate(): Promise<ValidateResult<TValue>> {
     const validation = this.validation
 
     runInAction('activate-and-sync-_value-when-validate', () => {
@@ -174,7 +174,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
 
     return (
       this.hasError
-      ? { hasError: true } as const
+      ? { hasError: true, error: this.error } as const
       : { hasError: false, value: this.value } as const
     )
   }
