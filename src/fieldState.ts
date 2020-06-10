@@ -25,18 +25,18 @@ export default class FieldState<TValue> extends Disposable implements Composible
    * Value that reacts to `onChange` immediately.
    * You should only use it to bind with UI input componnet.
    */
-  @observable.ref _value: TValue
+  @observable.ref _value!: TValue
 
   /**
    * Value that can be consumed by your code.
    * It's synced from `_value` with debounce of 200ms.
    */
-  @observable.ref value: TValue
+  @observable.ref value!: TValue
 
   /**
    * Value that has bean validated with no error, AKA "safe".
    */
-  @observable.ref $: TValue
+  @observable.ref $!: TValue
 
   /**
    * The validate status.
