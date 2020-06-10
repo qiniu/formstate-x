@@ -36,7 +36,7 @@
     "jest": "^25.2.7",
     "mobx": "^5.15.4",
     "ts-jest": "^25.3.1",
-    "typedoc": "^0.15.0",
+    "typedoc": "~0.16.11",
     "typedoc-twilio-theme": "^1.0.0",
     "typescript": "^3.6.3"
   },
