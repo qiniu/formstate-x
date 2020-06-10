@@ -17,7 +17,7 @@
     "build:doc": "rm -rf ./docs && typedoc",
     "build": "npm run build:esm && npm run build:lib",
     "prepublishOnly": "npm run test && npm run build",
-    "ci": "tsc --noEmit && npm run coverage && npm run build"
+    "ci": "tsc --noEmit && npm run coverage && npm run build && npm run build:doc"
   },
   "keywords": [
     "form",
