@@ -1,6 +1,7 @@
 import { observable, runInAction, isObservable } from 'mobx'
 import FieldState from './fieldState'
 import FormState from './formState'
+import { ValidateResultWithError, ValidateResultWithValue } from './types'
 
 const defaultDelay = 10
 const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
@@ -132,13 +133,33 @@ describe('FormState (mode: object) validation', () => {
       bar: createFieldState(initialValue.bar)
     }).validators(({ foo, bar }) => foo === bar && 'same')
 
-    state.validate()
+    const validateRet1 = state.validate()
 
     await delay()
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('same')
+
+    const validateResult1 = await validateRet1
+    expect(validateResult1.hasError).toBe(true)
+    expect((validateResult1 as ValidateResultWithError).error).toBe('same')
+
+    state.$.bar.onChange('456')
+    const validateRet2 = state.validate()
+
+    await delay()
+    expect(state.validating).toBe(false)
+    expect(state.validated).toBe(true)
+    expect(state.hasError).toBe(false)
+    expect(state.error).toBeUndefined()
+
+    const validateResult2 = await validateRet2
+    expect(validateResult2.hasError).toBe(false)
+    expect((validateResult2 as ValidateResultWithValue<typeof initialValue>).value).toEqual({
+      foo: '123',
+      bar: '456'
+    })
 
     state.dispose()
   })

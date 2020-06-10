@@ -1,5 +1,6 @@
 import { when, observable, runInAction } from 'mobx'
 import FieldState from './fieldState'
+import { ValidateResultWithError, ValidateResultWithValue } from './types'
 
 const defaultDelay = 10
 const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
@@ -177,13 +178,29 @@ describe('FieldState validation', () => {
 
   it('should work well with validate()', async () => {
     const state = createFieldState('').validators(val => !val && 'empty')
-    state.validate()
+    const validateRet1 = state.validate()
 
     await delay()
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
+
+    const validateResult1 = await validateRet1
+    expect(validateResult1.hasError).toBe(true)
+    expect((validateResult1 as ValidateResultWithError).error).toBe('empty')
+
+    state.onChange('sth')
+    const validateRet2 = state.validate()
+    await delay()
+    expect(state.validating).toBe(false)
+    expect(state.validated).toBe(true)
+    expect(state.hasError).toBe(false)
+    expect(state.error).toBeUndefined()
+
+    const validateResult2 = await validateRet2
+    expect(validateResult2.hasError).toBe(false)
+    expect((validateResult2 as ValidateResultWithValue<string>).value).toBe('sth')
 
     state.dispose()
   })

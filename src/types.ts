@@ -26,16 +26,22 @@ export interface Validator<TValue> {
   (value: TValue): ValidatorResponse
 }
 
+export type Error = string | undefined
+
+export type ValidateResultWithError = { hasError: true, error: Error }
+export type ValidateResultWithValue<T> = { hasError: false, value: T }
+export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
+
 /** Validatable object. */
 export interface Validatable<T, TValue = T> {
   $: T
   value: TValue
   hasError: boolean
-  error?: string | null | undefined
+  error: Error
   validating: boolean
   validated: boolean
   validationDisabled: boolean
-  validate(): Promise<{ hasError: true } | { hasError: false, value: TValue }>
+  validate(): Promise<ValidateResult<TValue>>
 
   // To see if there are requirements: enableAutoValidation, disableAutoValidation
   // enableAutoValidation: () => void

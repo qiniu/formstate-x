@@ -34,7 +34,7 @@
     "@types/jest": "^25.2.1",
     "@types/node": "^12.7.12",
     "jest": "^25.2.7",
-    "mobx": "^5.14.0",
+    "mobx": "^5.15.4",
     "ts-jest": "^25.3.1",
     "typedoc": "^0.15.0",
     "typedoc-twilio-theme": "^1.0.0",
