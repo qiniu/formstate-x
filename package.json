@@ -33,6 +33,7 @@
   "devDependencies": {
     "@types/jest": "^25.2.1",
     "@types/node": "^12.7.12",
+    "formstate": "^1.0.0",
     "jest": "^25.2.7",
     "mobx": "^5.15.4",
     "ts-jest": "^25.3.1",
