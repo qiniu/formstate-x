@@ -7,7 +7,7 @@ import * as fs from 'formstate'
 import { FormState } from 'formstate-x'
 
 // the adapt method
-import { xify } from 'formstate-x/adapter'
+import { xify } from 'formstate-x/esm/adapter'
 
 // formstate FieldState or FormState
 const stateA = new fs.FieldState(1)
