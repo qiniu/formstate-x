@@ -27,20 +27,24 @@ describe('xify', () => {
   })
 
   it('should work well with field state', () => {
-    const stateX = xify(new fs.FieldState(0))
+    const state = new fs.FieldState(0)
+    const stateX = xify(state)
     expect(stateX.value).toBe(0)
     expect(stateX.$).toBe(0)
+    expect(stateX.origin).toBe(state)
   })
 
   it('should work well with form state', () => {
-    const stateX = xify(new fs.FormState({
+    const state = new fs.FormState({
       a: new fs.FieldState('a'),
       b: new fs.FormState({
         c: new fs.FieldState(1)
       })
-    }))
+    })
+    const stateX = xify(state)
     expect(stateX.value).toEqual({ a: 'a', b: { c: 1 } })
     expect(stateX.$).toEqual({ a: 'a', b: { c: 1 } })
+    expect(stateX.origin).toBe(state)
   })
 
   it('should work well with form state of mode "array"', () => {
