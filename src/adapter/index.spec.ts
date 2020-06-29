@@ -347,7 +347,10 @@ describe('xify', () => {
       return v <= 0 && 'positive requried'
     })
     const state = new fs.FormStateLazy(() => [numState])
-    expect(() => xify(state as any)).toThrow()
+    expect(() => {
+      const stateX = xify(state as any)
+      console.log(stateX.value)
+    }).toThrow()
   })
 
   it('should throw with formstate of mode "map"', () => {

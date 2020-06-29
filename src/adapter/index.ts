@@ -11,39 +11,6 @@ export type Xify<T> = fsx.ComposibleValidatable<ValueOf<T>>
 
 /** Convert formstate field / form state into formstate-x state */
 export function xify<T extends fs.ComposibleValidatable<any>>(state: T): Xify<T> {
-  if (state instanceof fs.FieldState) return xifyField(state)
-  if (state instanceof fs.FormState) return xifyForm(state)
-  throw new Error(`Expecting ComposibleValidatable value, while got ${typeof state}`)
-}
-
-function xifyField<T>(state: fs.FieldState<T>): fsx.ComposibleValidatable<T> {
-  const stateX: fsx.ComposibleValidatable<T> = {
-    get $() { return state.$ },
-    get value() {
-      // 这里理应有 200ms 的延迟（UI input -> value 的 debounce）
-      // 考虑有额外的复杂度，且这里不影响逻辑（只影响性能），故不做处理
-      return state.value
-    },
-    get hasError() { return !!this.error },
-    get error() { return getError(state) },
-    get validating() { return this._validateStatus === fsx.ValidateStatus.Validating },
-    get validated() { return this._validateStatus === fsx.ValidateStatus.Validated },
-    validationDisabled: false,
-    async validate() {
-      await state.validate()
-      if (this.hasError) return { hasError: true, error: this.error }
-      return { hasError: false, value: this.value }
-    },
-    reset() { state.reset() },
-    dispose() {},
-    get dirty() { return getDirty(state) },
-    get _activated() { return getActivated(state) },
-    get _validateStatus() { return getValidateStatus(state) }
-  }
-  return observable(stateX)
-}
-
-function xifyForm<T extends fs.FormState<any>>(state: T): fsx.ComposibleValidatable<ValueOf<T>> {
   const stateX: fsx.ComposibleValidatable<ValueOf<T>> = {
     get $() { return getValue(state, true) },
     get value() {
