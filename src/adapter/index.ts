@@ -157,5 +157,5 @@ export function getActivated(state: fs.ComposibleValidatable<any>): boolean {
 
 function getError(state: fs.ComposibleValidatable<any>) {
   // formstate 可能会用 `""` 表示没有错误
-  return state.error ? state.error : undefined
+  return state.hasError ? (state.error as string) : undefined
 }
