@@ -21,7 +21,7 @@ function createFieldState<T>(initialValue: T) {
 describe('FieldState', () => {
   it('should initialize well', () => {
     const initialValue = '123'
-    const state = createFieldState(initialValue)
+    const state = new FieldState(initialValue)
 
     expect(state._value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
@@ -410,5 +410,31 @@ describe('FieldState validation', () => {
     await delay(1250)
     expect(state.value).toBe('4')
 
+  })
+
+  it('should work well with race condition caused by validate()', async () => {
+    const validator = jest.fn()
+    validator.mockReturnValueOnce(delayValue('foo', 200))
+    validator.mockReturnValueOnce(delayValue('bar', 100))
+    const field = createFieldState(1).validators(validator)
+    field.validate()
+    await delay(50)
+    await field.validate()
+
+    expect(field.error).toBe('bar')
+  })
+
+  it('should work well with race condition caused by value change', async () => {
+    const validator = jest.fn()
+    validator.mockReturnValue(null)
+    validator.mockReturnValueOnce(delayValue('foo', 200))
+    validator.mockReturnValueOnce(delayValue('bar', 100))
+    const field = createFieldState(1).validators(validator)
+    field.onChange(2)
+    await delay(50)
+    field.onChange(3)
+    await when(() => field.validated)
+
+    expect(field.error).toBe('bar')
   })
 })
