@@ -1,4 +1,4 @@
-import { observable, computed, action, reaction, autorun, runInAction, when } from 'mobx'
+import { observable, computed, action, reaction, autorun, when, makeObservable } from 'mobx'
 import { ComposibleValidatable, Validator, Validated, ValidationResponse, ValidateStatus, Error, ValidateResult } from './types'
 import { applyValidators, debounce, isPromiseLike } from './utils'
 import Disposable from './disposable'
@@ -137,15 +137,15 @@ export default class FieldState<TValue> extends Disposable implements Composible
       return
     }
 
-    runInAction('set-validateStatus-when-_validate', () => {
+    action('set-validateStatus-when-_validate', () => {
       this._validateStatus = ValidateStatus.Validating
-    })
+    })()
 
     const response = applyValidators(value, this._validators)
 
-    runInAction('set-validation-when-_validate', () => {
+    action('set-validation-when-_validate', () => {
       this.validation = { value, response }
-    })
+    })()
   }
 
   /**
@@ -154,11 +154,11 @@ export default class FieldState<TValue> extends Disposable implements Composible
   async validate(): Promise<ValidateResult<TValue>> {
     const validation = this.validation
 
-    runInAction('activate-and-sync-_value-when-validate', () => {
+    action('activate-and-sync-_value-when-validate', () => {
       this._activated = true
       // 若有用户交互产生的变更（因 debounce）尚未同步，同步之，确保本次 validate 结果是相对稳定的
       this.value = this._value
-    })
+    })()
 
     // 若 `validation` 未发生变更，意味着未发生新的校验行为
     // 若上边操作未触发自动的校验行为，强制调用之
@@ -219,18 +219,20 @@ export default class FieldState<TValue> extends Disposable implements Composible
       return
     }
 
-    runInAction('endValidation', () => {
+    action('endValidation', () => {
       this.validation = undefined
       this._validateStatus = ValidateStatus.Validated
 
       if (error !== this.error) {
         this.setError(error)
       }
-    })
+    })()
   }
 
   constructor(private initialValue: TValue, delay = 200) {
     super()
+
+    makeObservable(this)
 
     this.reset()
 
@@ -242,11 +244,11 @@ export default class FieldState<TValue> extends Disposable implements Composible
       // see https://github.com/mobxjs/mobx/issues/1956
       debounce(() => {
         if (this.value !== this._value) {
-          runInAction('sync-value-when-_value-changed', () => {
+          action('sync-value-when-_value-changed', () => {
             this.value = this._value
             this._validateStatus = ValidateStatus.NotValidated
             this._activated = true
-          })
+          })()
         }
       }, delay),
       { name: 'reaction-when-_value-change' }

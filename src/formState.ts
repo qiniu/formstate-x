@@ -1,6 +1,6 @@
-import { observable, computed, isArrayLike, isObservable, action, autorun, runInAction, when, reaction } from 'mobx'
+import { observable, computed, isObservable, action, autorun, when, reaction, makeObservable } from 'mobx'
 import { ComposibleValidatable, ValueOfFields, ValidationResponse, Validator, Validated, ValidateStatus, Error, ValidateResult } from './types'
-import { applyValidators, isPromiseLike } from './utils'
+import { applyValidators, isPromiseLike, isArrayLike } from './utils'
 import Disposable from './disposable'
 
 /** Mode: object */
@@ -187,24 +187,24 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
   private _validate() {
     const value = this.value
 
-    runInAction('set-validateStatus-when-_validate', () => {
+    action('set-validateStatus-when-_validate', () => {
       this._validateStatus = ValidateStatus.Validating
-    })
+    })()
 
     const response = applyValidators(value, this._validators)
 
-    runInAction('set-validation-when-_validate', () => {
+    action('set-validation-when-_validate', () => {
       this.validation = { value, response }
-    })
+    })()
   }
 
   /**
    * Fire a validation behavior.
    */
   async validate(): Promise<ValidateResult<TValue>> {
-    runInAction('activate-when-validate', () => {
+    action('activate-when-validate', () => {
       this._activated = true
-    })
+    })()
 
     this._validate()
     this.fields.forEach(
@@ -262,18 +262,20 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
       return
     }
 
-    runInAction('endValidation', () => {
+    action('endValidation', () => {
       this.validation = undefined
       this._validateStatus = ValidateStatus.Validated
 
       if (error !== this.error) {
         this.setError(error)
       }
-    })
+    })()
   }
 
   constructor(initialFields: TFields) {
     super()
+
+    makeObservable(this)
 
     this.mode = isArrayLike(initialFields) ? 'array' : 'object'
     this.$ = initialFields
