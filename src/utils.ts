@@ -1,4 +1,5 @@
-import { Validator, ValidationResponse, ValidatorResponse } from "./types"
+import { isObservableArray, IObservableArray } from 'mobx'
+import { Validator, ValidationResponse, ValidatorResponse } from './types'
 
 export function isPromiseLike(arg: any): arg is Promise<any> {
   return arg != null && typeof arg === 'object' && typeof arg.then === 'function'
@@ -64,4 +65,8 @@ export function debounce(fn: () => void, delay: number) {
     }
     timeout = setTimeout(fn, delay)
   }
+}
+
+export function isArrayLike(value: unknown): value is unknown[] | IObservableArray {
+  return Array.isArray(value) || isObservableArray(value)
 }

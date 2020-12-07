@@ -1,6 +1,6 @@
 {
   "name": "formstate-x",
-  "version": "1.2.0",
+  "version": "2.0.0-beta.1",
   "description": "Extended alternative for formstate",
   "repository": {
     "type": "git",
@@ -26,20 +26,20 @@
     "formstate"
   ],
   "peerDependencies": {
-    "mobx": ">=4.0.0"
+    "mobx": ">=6.0.0"
   },
   "author": "nighca@live.cn",
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/jest": "^25.2.1",
     "@types/node": "^12.7.12",
-    "formstate": "^1.0.0",
-    "jest": "^25.2.7",
-    "mobx": "^5.15.4",
-    "ts-jest": "^25.3.1",
+    "formstate": "^2.0.0",
+    "jest": "~26.6.1",
+    "mobx": "^6.0.4",
+    "ts-jest": "~26.4.2",
     "typedoc": "~0.16.11",
     "typedoc-twilio-theme": "^1.0.0",
-    "typescript": "^3.6.3"
+    "typescript": "~4.0.3"
   },
   "dependencies": {}
 }

@@ -1,4 +1,5 @@
-import { asyncResponsesAnd, isEmpty } from './utils'
+import { observable } from 'mobx'
+import { asyncResponsesAnd, isEmpty, isArrayLike } from './utils'
 
 const defaultDelay = 10
 
@@ -59,5 +60,33 @@ describe('asyncResponsesAnd', () => {
       delay('empty', 20)
     ])
     expect(result3).toBe('too long')
+  })
+})
+
+describe('isArrayLike', () => {
+  it('should work well with array', () => {
+    expect(isArrayLike([])).toBe(true)
+    expect(isArrayLike([1, 2, 3])).toBe(true)
+  })
+  it('should work well with observable array', () => {
+    expect(isArrayLike(observable([]))).toBe(true)
+    expect(isArrayLike(observable([1, 2, 3]))).toBe(true)
+  })
+  it('should recognize non-object values', () => {
+    expect(isArrayLike(null)).toBe(false)
+    expect(isArrayLike(undefined)).toBe(false)
+    expect(isArrayLike(0)).toBe(false)
+    expect(isArrayLike('123')).toBe(false)
+    expect(isArrayLike(/abc/)).toBe(false)
+  })
+  it('should recognize normal objects', () => {
+    expect(isArrayLike({})).toBe(false)
+    expect(isArrayLike({ 0: 'a' })).toBe(false)
+    expect(isArrayLike({ a: 1, b: 2 })).toBe(false)
+    expect(isArrayLike(observable({ a: 1, b: 2 }))).toBe(false)
+  })
+  it('should recognize object with invalid length', () => {
+    expect(isArrayLike({ length: -1 })).toBe(false)
+    expect(isArrayLike({ length: 2.3 })).toBe(false)
   })
 })
