@@ -69,11 +69,6 @@ export type ValueOfFieldState<State> = (
   : never
 )
 
-/** Value Array of given Field. */
-// workaround for recursive type reference: https://github.com/Microsoft/TypeScript/issues/3496#issuecomment-128553540
-// not needed for typescript@3.7+: https://github.com/microsoft/TypeScript/pull/33050
-export interface ValueArrayOf<Field> extends Array<ValueOf<Field>> {}
-
 /** Value of object-fields. */
 export type ValueOfObjectFields<Fields> = {
   [FieldKey in keyof Fields]: ValueOf<Fields[FieldKey]>
@@ -82,7 +77,7 @@ export type ValueOfObjectFields<Fields> = {
 /** Value of array-fields. */
 export type ValueOfArrayFields<Fields> = (
   Fields extends Array<infer Field>
-  ? ValueArrayOf<Field>
+  ? Array<ValueOf<Field>>
   : never
 )
 
