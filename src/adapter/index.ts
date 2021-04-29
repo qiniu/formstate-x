@@ -7,7 +7,7 @@ import * as fs from 'formstate'
 import * as fsx from '..'
 import { observable } from 'mobx'
 
-export type Xify<T> = fsx.ComposibleValidatable<ValueOf<T>> & {
+export type Xify<T> = fsx.Validatable<ValueOf<T>> & {
   origin: T
 }
 
@@ -32,7 +32,10 @@ export function xify<T extends fs.ComposibleValidatable<any>>(state: T): Xify<T>
       return { hasError: false, value: this.value }
     },
     reset() { state.reset() },
+    resetWith(v: ValueOf<T>) { state.reset() },
+    set() { throw new Error('`set()` is supported.') },
     dispose() {},
+    _dirtyWith() { return getDirty(state) },
     get dirty() { return getDirty(state) },
     get _activated() { return getActivated(state) },
     get _validateStatus() { return getValidateStatus(state) }
@@ -127,7 +130,7 @@ export function getValidateStatus(state: fs.ComposibleValidatable<any>): fsx.Val
   throw new Error(`Expecting ComposibleValidatable value, while got ${typeof state}`)
 }
 
-function getDirtyOfField(state: fs.FieldState<any>): boolean {
+function getDirtyOfField(state: fs.FieldState<any>, ): boolean {
   return !!state.dirty
 }
 

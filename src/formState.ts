@@ -1,24 +1,9 @@
 import { observable, computed, isObservable, action, autorun, when, reaction, makeObservable } from 'mobx'
-import { ComposibleValidatable, ValueOfFields, ValidationResponse, Validator, Validated, ValidateStatus, Error, ValidateResult } from './types'
-import { applyValidators, isPromiseLike, isArrayLike } from './utils'
+import { Validatable, ValidationResponse, Validator, Validated, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
+import { applyValidators, isPromiseLike, objectShallowEqual, arrayShallowEqual } from './utils'
 import Disposable from './disposable'
 
-/** Mode: object */
-export type FieldsObject = { [key: string]: ComposibleValidatable<any> }
-/** Mode: array */
-export type FieldsArray = ComposibleValidatable<any>[]
-/** Each key of the object is a validatable */
-export type ValidatableFields = FieldsObject | FieldsArray
-
-/**
- * The state for a form (composition of fields).
- */
-export default class FormState<TFields extends ValidatableFields, TValue = ValueOfFields<TFields>> extends Disposable implements ComposibleValidatable<TFields, TValue> {
-
-  /**
-   * Behavior mode: `object` or `array`
-   */
-  private mode: 'object' | 'array' = 'object'
+export abstract class AbstractFormState<TValue> extends Disposable {
 
   /**
    * If activated (with auto validate).
@@ -27,51 +12,15 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
   @observable _activated = false
 
   /**
-   * If value has been touched.
-   */
-  @computed get dirty() {
-    return this.fields.some(
-      field => field.dirty
-    )
-  }
-
-  /**
-   * Fields.
-   */
-  @observable.ref $: TFields
-
-  /**
    * List of fields.
    */
-  @computed private get fields(): ComposibleValidatable<any>[] {
-    if (this.mode === 'array') {
-      return this.$ as FieldsArray
-    }
-    const fields = this.$ as FieldsObject
-    return Object.keys(fields).map(
-      key => fields[key]
-    )
-  }
+  declare protected abstract fieldList: Validatable<any>[]
 
   /**
    * Value that can be consumed by your code.
    * It's a composition of fields' value.
    */
-  @computed get value(): TValue {
-    if (this.mode === 'array') {
-      return this.fields.map(
-        field => field.value
-      ) as any
-    }
-    const fields = this.$ as FieldsObject
-    return Object.keys(fields).reduce(
-      (value, key) => ({
-        ...value,
-        [key]: fields[key].value
-      }),
-      {}
-    ) as any
-  }
+  declare abstract value: TValue
 
   /**
    * The validate status.
@@ -87,7 +36,7 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
     }
     return (
       this._validateStatus === ValidateStatus.Validating
-      || this.fields.some(field => field.validating)
+      || this.fieldList.some(field => field.validating)
     )
   }
 
@@ -106,7 +55,7 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
     if (this._error) {
       return this._error
     }
-    for (const field of this.fields) {
+    for (const field of this.fieldList) {
       if (field.error) {
         return field.error
       }
@@ -128,7 +77,7 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
     if (this.validationDisabled) {
       return false
     }
-    return this._validateStatus === ValidateStatus.Validated && this.fields.every(
+    return this._validateStatus === ValidateStatus.Validated && this.fieldList.every(
       field => field.validationDisabled || field.validated
     )
   }
@@ -153,27 +102,31 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
     return this
   }
 
+  protected abstract declare initialValue: TValue
+
   /**
-   * 同步设置值
-   * 这里 `FormState` 不提供 `set`，因为
-   * 1. 如果 `set` 传入 fields（`$`），不够好用，意义不大
-   * 2. 如果 `set` 传入 `value`，则 `FormState` 很难利用 `value` 还原 fields
-   *    如 fields 是 `[field1, field2]`，传入 `value` 为 `[1, 2, 3]` 的情况，这里做不到依据 `3` 还原出其对应的 field
+   * Reset fields
    */
-  // @action private set(value: TValue) {}
+  protected abstract resetFields(initialValue: TValue): void
+
+  /**
+   * Reset to intial status with specific value.
+   */
+  @action resetWith(initialValue: TValue) {
+    this._activated = false
+    this._validateStatus = ValidateStatus.NotValidated
+    this._error = undefined
+    this.validation = undefined
+    this.initialValue = initialValue
+
+    this.resetFields(initialValue)
+  }
 
   /**
    * Reset to initial status.
    */
   @action reset() {
-    this._activated = false
-    this._validateStatus = ValidateStatus.NotValidated
-    this._error = undefined
-    this.validation = undefined
-
-    this.fields.forEach(
-      field => field.reset()
-    )
+    this.resetWith(this.initialValue)
   }
 
   /**
@@ -207,7 +160,7 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
     })()
 
     this._validate()
-    this.fields.forEach(
+    this.fieldList.forEach(
       field => field.validate()
     )
 
@@ -272,21 +225,12 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
     })()
   }
 
-  constructor(initialFields: TFields) {
-    super()
-
+  protected init() {
     makeObservable(this)
-
-    this.mode = isArrayLike(initialFields) ? 'array' : 'object'
-    this.$ = initialFields
-
-    if (!isObservable(this.$)) {
-      this.$ = observable(this.$, undefined, { deep: false })
-    }
 
     // auto activate: any field activated -> form activated
     this.addDisposer(reaction(
-      () => this.fields.some(field => field._activated),
+      () => this.fieldList.some(field => field._activated),
       someFieldActivated => someFieldActivated && !this._activated && (this._activated = true),
       { fireImmediately: true }
     ))
@@ -306,10 +250,184 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
 
     // dispose fields when dispose
     this.addDisposer(() => {
-      this.fields.forEach(
+      this.fieldList.forEach(
         field => field.dispose()
       )
     })
   }
+}
 
+export type FieldsObject = { [key: string]: Validatable<any> }
+
+/**
+ * The state for a form (composition of fields).
+ */
+export class FormState<
+  TFields extends FieldsObject
+> extends AbstractFormState<
+  ValueOfObjectFields<TFields>
+> implements Validatable<
+  TFields, ValueOfObjectFields<TFields>
+> {
+  /**
+   * Fields.
+   */
+  @observable.ref $: TFields
+
+  protected initialValue: ValueOfObjectFields<TFields>
+
+  _dirtyWith(initialValue: ValueOfObjectFields<TFields>) {
+    return Object.keys(this.$).some(
+      key => this.$[key]._dirtyWith(initialValue[key])
+    )
+  }
+
+  /**
+   * If value has been touched.
+   */
+  @computed get dirty() {
+    return this._dirtyWith(this.initialValue)
+  }
+
+  /**
+   * List of fields.
+   */
+  @computed protected get fieldList(): Validatable<any>[] {
+    const fields = this.$
+    return Object.keys(fields).map(
+      key => fields[key]
+    )
+  }
+
+  protected resetFields() {
+    const fields = this.$
+    const initialValue = this.initialValue
+    Object.keys(fields).forEach(key => {
+      fields[key].resetWith(initialValue[key])
+    })
+  }
+
+  /**
+   * Value that can be consumed by your code.
+   * It's a composition of fields' value.
+   */
+  @computed get value(): ValueOfObjectFields<TFields> {
+    const fields = this.$
+    return Object.keys(fields).reduce(
+      (value, key) => ({
+        ...value,
+        [key]: fields[key].value
+      }),
+      {}
+    ) as any
+  }
+
+  /**
+   * Set form value synchronously.
+   */
+  @action set(value: ValueOfObjectFields<TFields>) {
+    const fields = this.$
+    Object.keys(fields).forEach(key => {
+      fields[key].set(value[key])
+    })
+  }
+
+  constructor(initialFields: TFields) {
+    super()
+
+    this.$ = Object.assign({}, initialFields)
+    this.initialValue = this.value
+
+    if (!isObservable(this.$)) {
+      this.$ = observable(this.$, undefined, { deep: false })
+    }
+
+    this.init()
+  }
+}
+
+/**
+ * The state for a array form (list of fields).
+ */
+export class ArrayFormState<
+  V, T extends Validatable<any, V> = Validatable<any, V>
+> extends AbstractFormState<
+  V[]
+> implements Validatable<
+  T[], V[]
+> {
+  /**
+   * Fields.
+   */
+  @observable.ref $: T[]
+
+  _dirtyWith(initialValue: V[]) {
+    return (
+      this.$.length !== initialValue.length
+      || this.$.some((field, i) => field._dirtyWith(initialValue[i]))
+    )
+  }
+
+  /**
+   * If value has been touched.
+   */
+  @computed get dirty() {
+    return this._dirtyWith(this.initialValue)
+  }
+
+  /**
+   * List of fields.
+   */
+  @computed protected get fieldList(): T[] {
+    return this.$
+  }
+
+  private createFields(value: V[]): T[] {
+    return observable(
+      value.map(this.createFieldState),
+      undefined,
+      { deep: false }
+    )
+  }
+
+  @action protected resetFields() {
+    this.$.splice(0)
+    this.$.push(...this.createFields(this.initialValue))
+  }
+
+  /**
+   * Value that can be consumed by your code.
+   * It's a composition of fields' value.
+   */
+  @computed get value(): V[] {
+    return this.fieldList.map(
+      field => field.value
+    ) as any
+  }
+
+  /**
+   * Set form value synchronously.
+   */
+  @action set(value: V[]) {
+    let i = 0
+    // index exists in both value & fields => set
+    for (; i < value.length && i < this.$.length; i++) {
+      this.$[i].set(value[i])
+    }
+    // index only exists in value => append
+    for (; i < value.length; i++) {
+      this.$.push(this.createFieldState(value[i]))
+    }
+    // index only exists in fields => truncate
+    if (i < this.$.length) {
+      this.$.splice(i)
+    }
+  }
+
+  constructor(protected initialValue: V[], private createFieldState: (v: V) => T) {
+    super()
+
+    this.$ = this.createFields(this.initialValue)
+    this.init()
+  }
 }

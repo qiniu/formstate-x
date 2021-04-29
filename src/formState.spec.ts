@@ -1,13 +1,13 @@
 import { observable, runInAction, isObservable } from 'mobx'
 import FieldState from './fieldState'
-import FormState from './formState'
+import { FormState, ArrayFormState } from './formState'
 import { ValidateResultWithError, ValidateResultWithValue } from './types'
 
 const defaultDelay = 10
 const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
 
 async function delay(millisecond: number = stableDelay) {
-  await new Promise(resolve => setTimeout(() => resolve(), millisecond))
+  await new Promise<void>(resolve => setTimeout(() => resolve(), millisecond))
 }
 
 async function delayValue<T>(value: T, millisecond: number = defaultDelay) {
@@ -72,6 +72,57 @@ describe('FormState (mode: object)', () => {
     state.dispose()
   })
 
+  it('should set well', async () => {
+    const initialValue = { foo: 123, bar: '456' }
+    const state = new FormState({
+      foo: createFieldState(initialValue.foo),
+      bar: createFieldState(initialValue.bar)
+    })
+
+    const value1 = { foo: 0, bar: '' }
+    state.set(value1)
+    expect(state.value).toEqual(value1)
+    expect(state.$.foo.value).toBe(value1.foo)
+    expect(state.$.foo._value).toBe(value1.foo)
+    expect(state.$.bar.value).toBe(value1.bar)
+    expect(state.$.bar._value).toBe(value1.bar)
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    const value2 = { foo: 123, bar: '' }
+    state.set(value2)
+    expect(state.value).toEqual(value2)
+    expect(state.$.foo.value).toBe(value2.foo)
+    expect(state.$.foo._value).toBe(value2.foo)
+    expect(state.$.bar.value).toBe(value2.bar)
+    expect(state.$.bar._value).toBe(value2.bar)
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    const value3 = { foo: 0, bar: '456' }
+    state.set(value3)
+    expect(state.value).toEqual(value3)
+    expect(state.$.foo.value).toBe(value3.foo)
+    expect(state.$.foo._value).toBe(value3.foo)
+    expect(state.$.bar.value).toBe(value3.bar)
+    expect(state.$.bar._value).toBe(value3.bar)
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    state.set(initialValue)
+    expect(state.value).toEqual(initialValue)
+    expect(state.$.foo.value).toBe(initialValue.foo)
+    expect(state.$.foo._value).toBe(initialValue.foo)
+    expect(state.$.bar.value).toBe(initialValue.bar)
+    expect(state.$.bar._value).toBe(initialValue.bar)
+    expect(state.dirty).toBe(false)
+
+    state.dispose()
+  })
+
   it('should reset well', async () => {
     const initialValue = { foo: 123, bar: '456' }
     const state = new FormState({
@@ -87,6 +138,58 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(initialValue)
     expect(state.$.foo.$).toBe(initialValue.foo)
     expect(state.$.bar.$).toBe(initialValue.bar)
+    expect(state.dirty).toBe(false)
+
+    state.dispose()
+  })
+
+  it('should reset well with fields changed', async () => {
+    const initialValue = { foo: 123, bar: '456' }
+    const state = new FormState({
+      foo: createFieldState(initialValue.foo),
+      bar: createFieldState(initialValue.bar)
+    })
+
+    runInAction(() => {
+      state.$.foo = createFieldState(0)
+    })
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    expect(state.value).toEqual(initialValue)
+    expect(state.dirty).toBe(false)
+
+    runInAction(() => {
+      state.$.bar = createFieldState('')
+    })
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    expect(state.value).toEqual(initialValue)
+    expect(state.dirty).toBe(false)
+
+    runInAction(() => {
+      state.$.foo = createFieldState(0)
+      state.$.bar = createFieldState('')
+    })
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    expect(state.value).toEqual(initialValue)
+    expect(state.dirty).toBe(false)
+
+    runInAction(() => {
+      state.$.foo = createFieldState(initialValue.foo)
+      state.$.bar = createFieldState(initialValue.bar)
+    })
+    expect(state.dirty).toBe(false)
+
+    state.reset()
+
+    expect(state.value).toEqual(initialValue)
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -468,9 +571,7 @@ describe('FormState (mode: object) validation', () => {
 describe('FormState (mode: array)', () => {
   it('should initialize well', () => {
     const initialValue = ['123', '456']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    ))
+    const state = new ArrayFormState(initialValue, createFieldState)
 
     expect(state.value).toEqual(initialValue)
     expect(state.$).toHaveLength(initialValue.length)
@@ -485,9 +586,7 @@ describe('FormState (mode: array)', () => {
 
   it('should compose fields well', async () => {
     const initialValue = ['123', '456']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    ))
+    const state = new ArrayFormState(initialValue, createFieldState)
 
     const value = ['456', '789']
     state.$.forEach((field, i) => field.onChange(value[i]))
@@ -502,11 +601,58 @@ describe('FormState (mode: array)', () => {
     state.dispose()
   })
 
+  it('should set well', async () => {
+    const initialValue = ['123', '456']
+    const state = new ArrayFormState(initialValue, createFieldState)
+
+    const value1 = ['123', '456', '789']
+    state.set(value1)
+    expect(state.value).toEqual(value1)
+    expect(state.$).toHaveLength(value1.length)
+    state.$.forEach((field, i) => {
+      expect(field.value).toBe(value1[i])
+      expect(field._value).toBe(value1[i])
+    })
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    const value2 = ['456', '789', '012']
+    state.set(value2)
+    expect(state.value).toEqual(value2)
+    expect(state.$).toHaveLength(value2.length)
+    state.$.forEach((field, i) => {
+      expect(field.value).toBe(value2[i])
+      expect(field._value).toBe(value2[i])
+    })
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    const value3 = ['abc']
+    state.set(value3)
+    expect(state.value).toEqual(value3)
+    expect(state.$).toHaveLength(value3.length)
+    state.$.forEach((field, i) => {
+      expect(field.value).toBe(value3[i])
+      expect(field._value).toBe(value3[i])
+    })
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    const value4: string[] = []
+    state.set(value4)
+    expect(state.value).toEqual(value4)
+    expect(state.$).toHaveLength(value4.length)
+    expect(state.dirty).toBe(true)
+
+    state.dispose()
+  })
+
   it('should reset well', async () => {
     const initialValue = ['123', '456']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    ))
+    const state = new ArrayFormState(initialValue, createFieldState)
 
     const value = ['456', '789']
     state.$.forEach((field, i) => field.onChange(value[i]))
@@ -522,8 +668,51 @@ describe('FormState (mode: array)', () => {
     state.dispose()
   })
 
+  it('should reset well with fields changed', async () => {
+    const initialValue = ['123', '456']
+    const state = new ArrayFormState(initialValue, createFieldState)
+
+    runInAction(() => {
+      state.$.pop()
+    })
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    expect(state.value).toEqual(initialValue)
+    expect(state.dirty).toBe(false)
+
+    runInAction(() => {
+      state.$.push(createFieldState('789'))
+    })
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    expect(state.value).toEqual(initialValue)
+    expect(state.dirty).toBe(false)
+
+    state.set([])
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    expect(state.value).toEqual(initialValue)
+    expect(state.dirty).toBe(false)
+
+    state.set(['456', '789', '012'])
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    expect(state.value).toEqual(initialValue)
+    expect(state.dirty).toBe(false)
+
+    state.dispose()
+  })
+
   it('should applyValidation correctly', async () => {
-    const state = new FormState([]).validators(
+    const state = new ArrayFormState<string>([], createFieldState).validators(
       value => value.length <= 0 && 'empty'
     )
 
@@ -543,9 +732,9 @@ describe('FormState (mode: array)', () => {
 describe('FormState (mode: array) validation', () => {
   it('should work well when initialized', async () => {
     const initialValue = ['123', '456']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    )).validators(list => list.join('').length > 5 && 'too long')
+    const state = new ArrayFormState(initialValue, createFieldState).validators(
+      list => list.join('').length > 5 && 'too long'
+    )
 
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(false)
@@ -557,9 +746,9 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with fields onChange()', async () => {
     const initialValue = ['123', '']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    )).validators(list => list.join('').length > 5 && 'too long')
+    const state = new ArrayFormState(initialValue, createFieldState).validators(
+      list => list.join('').length > 5 && 'too long'
+    )
 
     state.$[1].onChange('456')
 
@@ -573,9 +762,9 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with validate()', async () => {
     const initialValue = ['123', '456']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    )).validators(list => list.join('').length > 5 && 'too long')
+    const state = new ArrayFormState(initialValue, createFieldState).validators(
+      list => list.join('').length > 5 && 'too long'
+    )
 
     state.validate()
 
@@ -590,9 +779,9 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with fields change', async () => {
     const initialValue = ['123', '']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    )).validators(list => list.join('').length > 5 && 'too long')
+    const state = new ArrayFormState(initialValue, createFieldState).validators(
+      list => list.join('').length > 5 && 'too long'
+    )
 
     runInAction(() => {
       state.$.push(createFieldState('456'))
@@ -617,9 +806,9 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with reset()', async () => {
     const initialValue = ['123', '456']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    )).validators(list => list.join('').length > 5 && 'too long')
+    const state = new ArrayFormState(initialValue, createFieldState).validators(
+      list => list.join('').length > 5 && 'too long'
+    )
     state.validate()
     await delay()
 
@@ -635,9 +824,7 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with multiple validators', async () => {
     const initialValue = ['123', '']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    )).validators(
+    const state = new ArrayFormState(initialValue, createFieldState).validators(
       list => list.join('').length > 5 && 'too long',
       list => list.length >= 3 && 'too many'
     )
@@ -670,9 +857,7 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with async validator', async () => {
     const initialValue = ['123', '456']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    )).validators(
+    const state = new ArrayFormState(initialValue, createFieldState).validators(
       list => delayValue(list.join('').length > 5 && 'too long')
     )
     state.validate()
@@ -688,9 +873,7 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with mixed sync and async validator', async () => {
     const initialValue = ['123', '']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    )).validators(
+    const state = new ArrayFormState(initialValue, createFieldState).validators(
       list => delayValue(list.join('').length > 5 && 'too long'),
       list => list.length >= 3 && 'too many'
     )
@@ -722,9 +905,7 @@ describe('FormState (mode: array) validation', () => {
   it('should work well with dynamic validator', async () => {
     const options = observable({ checkLength: true })
     const initialValue = ['123', '456']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    )).validators(
+    const state = new ArrayFormState(initialValue, createFieldState).validators(
       list => options.checkLength && list.join('').length > 5 && 'too long',
     )
 
@@ -753,9 +934,7 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well when add validator dynamically', async () => {
     const initialValue = ['123', '', '4']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value)
-    )).validators(
+    const state = new ArrayFormState(initialValue, createFieldState).validators(
       list => list.join('').length > 5 && 'too long'
     )
     state.validate()
@@ -783,9 +962,10 @@ describe('FormState (mode: array) validation', () => {
   it('should work well with fields\' validating', async () => {
     const notEmpty = (value: string) => value === '' && 'empty'
     const initialValue = ['123', '']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value).validators(notEmpty)
-    )).validators(
+    const state = new ArrayFormState(
+      initialValue,
+      value => createFieldState(value).validators(notEmpty),
+    ).validators(
       list => list.join('').length > 5 && 'too long'
     )
     state.validate()
@@ -827,9 +1007,10 @@ describe('FormState (mode: array) validation', () => {
   it('should work well with fields\' async validating', async () => {
     const notEmpty = (value: string) => delayValue(value === '' && 'empty')
     const initialValue = ['123', '']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value).validators(notEmpty)
-    )).validators(
+    const state = new ArrayFormState(
+      initialValue,
+      value => createFieldState(value).validators(notEmpty),
+    ).validators(
       list => delayValue(list.join('').length > 5 && 'too long')
     )
     state.validate()
@@ -872,9 +1053,10 @@ describe('FormState (mode: array) validation', () => {
     const options = observable({ disabled: false })
     const notEmpty = (value: string) => value === '' && 'empty'
     const initialValue = ['123', '456']
-    const state = new FormState(initialValue.map(
-      value => createFieldState(value).validators(notEmpty)
-    )).validators(
+    const state = new ArrayFormState(
+      initialValue,
+      value => createFieldState(value).validators(notEmpty),
+    ).validators(
       list => list.join('').length > 5 && 'too long'
     ).disableValidationWhen(
       () => options.disabled
@@ -903,9 +1085,10 @@ describe('FormState (mode: array) validation', () => {
     const options = observable({ disabled: true })
     const notEmpty = (value: string) => value === '' && 'empty'
     const initialValue = ['123', '456']
-    const disabledState = new FormState(initialValue.map(
-      value => createFieldState(value).validators(notEmpty)
-    )).validators(
+    const disabledState = new ArrayFormState(
+      initialValue,
+      value => createFieldState(value).validators(notEmpty),
+    ).validators(
       list => list.join('').length > 5 && 'too long'
     ).disableValidationWhen(
       () => options.disabled
@@ -931,7 +1114,7 @@ describe('nested FormState', () => {
 
     const shouldDisableInputsState = () => !enabledState.$
 
-    const inputsState = new FormState<FieldState<string>[]>([]).validators(
+    const inputsState = new ArrayFormState<string, FieldState<string>>([], createFieldState).validators(
       list => list.join('').length > 5 && 'too long'
     ).disableValidationWhen(shouldDisableInputsState)
 
@@ -997,5 +1180,119 @@ describe('nested FormState', () => {
     expect(state.$.inputs.$[0].error).toBeUndefined()
     expect(state.$.inputs.$[1].error).toBeUndefined()
     expect(state.$.inputs.$[2].error).toBeUndefined()
+  })
+
+  it('should set & reset well', () => {
+    interface Addr {
+      protocol: string
+      domain: string
+    }
+    interface SourceConfig {
+      type: string
+      addrs: Addr[]
+    }
+    function createAddrState(addr: Addr) {
+      return new FormState({
+        protocol: createFieldState(addr.protocol),
+        domain: createFieldState(addr.domain)
+      })
+    }
+    function createAddrsState(addrs: Addr[]) {
+      return new ArrayFormState(addrs, createAddrState)
+    }
+    function createSourceConfigState(sourceConfig: SourceConfig) {
+      return new FormState({
+        type: createFieldState(sourceConfig.type),
+        addrs: createAddrsState(sourceConfig.addrs)
+      })
+    }
+
+    const addr1 = { protocol: 'http', domain: '1.com' }
+    const addr2 = { protocol: 'http', domain: '2.com' }
+    const addr3 = { protocol: 'https', domain: '2.com' }
+
+    const initialValue = { type: 'foo', addrs: [addr1] }
+    const sourceConfigState = createSourceConfigState(initialValue)
+
+    expect(sourceConfigState.value).toEqual(initialValue)
+    expect(sourceConfigState.dirty).toBe(false)
+
+    const value1 = { type: 'bar', addrs: [addr1, addr2] }
+    sourceConfigState.set(value1)
+    expect(sourceConfigState.value).toEqual(value1)
+    expect(sourceConfigState.dirty).toBe(true)
+
+    sourceConfigState.reset()
+    expect(sourceConfigState.value).toEqual(initialValue)
+    expect(sourceConfigState.dirty).toBe(false)
+
+    sourceConfigState.$.addrs.set([])
+    expect(sourceConfigState.value).toEqual({ ...initialValue, addrs: [] })
+    expect(sourceConfigState.dirty).toBe(true)
+
+    sourceConfigState.reset()
+    expect(sourceConfigState.value).toEqual(initialValue)
+    expect(sourceConfigState.dirty).toBe(false)
+
+    sourceConfigState.$.addrs.set([addr1, addr2, addr3])
+    expect(sourceConfigState.value).toEqual({ ...initialValue, addrs: [addr1, addr2, addr3] })
+    expect(sourceConfigState.dirty).toBe(true)
+
+    sourceConfigState.reset()
+    expect(sourceConfigState.value).toEqual(initialValue)
+    expect(sourceConfigState.dirty).toBe(false)
+
+    sourceConfigState.$.addrs.$[0].$.protocol.set('https')
+    expect(sourceConfigState.value).toEqual({
+      ...initialValue,
+      addrs: [{ ...addr1, protocol: 'https' }]
+    })
+    expect(sourceConfigState.dirty).toBe(true)
+
+    sourceConfigState.reset()
+    expect(sourceConfigState.value).toEqual(initialValue)
+    expect(sourceConfigState.dirty).toBe(false)
+
+    runInAction(() => {
+      sourceConfigState.$.type = createFieldState('baz')
+    })
+    expect(sourceConfigState.value).toEqual({ ...initialValue, type: 'baz' })
+    expect(sourceConfigState.dirty).toBe(true)
+
+    sourceConfigState.reset()
+    expect(sourceConfigState.value).toEqual(initialValue)
+    expect(sourceConfigState.dirty).toBe(false)
+
+    runInAction(() => {
+      sourceConfigState.$.addrs.$.push(createAddrState(addr3))
+    })
+    expect(sourceConfigState.value).toEqual({
+      ...initialValue,
+      addrs: [...initialValue.addrs, addr3]
+    })
+    expect(sourceConfigState.dirty).toBe(true)
+
+    sourceConfigState.reset()
+    expect(sourceConfigState.value).toEqual(initialValue)
+    expect(sourceConfigState.dirty).toBe(false)
+
+    runInAction(() => {
+      sourceConfigState.$.addrs.$[0].$.protocol = createFieldState('https')
+    })
+    expect(sourceConfigState.value).toEqual({
+      ...initialValue,
+      addrs: [{ ...addr1, protocol: 'https' }]
+    })
+    expect(sourceConfigState.dirty).toBe(true)
+
+    sourceConfigState.reset()
+    expect(sourceConfigState.value).toEqual(initialValue)
+    expect(sourceConfigState.dirty).toBe(false)
+
+    sourceConfigState.set(initialValue)
+    expect(sourceConfigState.value).toEqual(initialValue)
+    expect(sourceConfigState.dirty).toBe(false)
+
+    sourceConfigState.dispose()
   })
 })
