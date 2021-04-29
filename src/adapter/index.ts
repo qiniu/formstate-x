@@ -130,7 +130,7 @@ export function getValidateStatus(state: fs.ComposibleValidatable<any>): fsx.Val
   throw new Error(`Expecting ComposibleValidatable value, while got ${typeof state}`)
 }
 
-function getDirtyOfField(state: fs.FieldState<any>, ): boolean {
+function getDirtyOfField(state: fs.FieldState<any>): boolean {
   return !!state.dirty
 }
 

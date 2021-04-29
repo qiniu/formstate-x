@@ -70,19 +70,3 @@ export function debounce(fn: () => void, delay: number) {
 export function isArrayLike(value: unknown): value is unknown[] | IObservableArray {
   return Array.isArray(value) || isObservableArray(value)
 }
-
-export function arrayShallowEqual<T>(src: T[], target: T[]) {
-  return (
-    src.length === target.length
-    && src.every((s, i) => s === target[i])
-  )
-}
-
-export function objectShallowEqual<T extends Record<string, unknown>>(src: T, target: T): boolean {
-  const srcKeys = Object.keys(src)
-  const targetKeys = Object.keys(target)
-  return (
-    srcKeys.length === targetKeys.length
-    && srcKeys.every(key => src[key] === target[key])
-  )
-}

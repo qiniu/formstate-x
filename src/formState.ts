@@ -1,6 +1,6 @@
 import { observable, computed, isObservable, action, autorun, when, reaction, makeObservable } from 'mobx'
 import { Validatable, ValidationResponse, Validator, Validated, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
-import { applyValidators, isPromiseLike, objectShallowEqual, arrayShallowEqual } from './utils'
+import { applyValidators, isPromiseLike } from './utils'
 import Disposable from './disposable'
 
 export abstract class AbstractFormState<TValue> extends Disposable {
