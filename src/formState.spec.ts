@@ -1182,7 +1182,7 @@ describe('nested FormState', () => {
     expect(state.$.inputs.$[2].error).toBeUndefined()
   })
 
-  it('should set & reset well', () => {
+  describe('should set & reset well', () => {
     interface Addr {
       protocol: string
       domain: string
@@ -1212,87 +1212,120 @@ describe('nested FormState', () => {
     const addr3 = { protocol: 'https', domain: '2.com' }
 
     const initialValue = { type: 'foo', addrs: [addr1] }
-    const sourceConfigState = createSourceConfigState(initialValue)
 
-    expect(sourceConfigState.value).toEqual(initialValue)
-    expect(sourceConfigState.dirty).toBe(false)
-
-    const value1 = { type: 'bar', addrs: [addr1, addr2] }
-    sourceConfigState.set(value1)
-    expect(sourceConfigState.value).toEqual(value1)
-    expect(sourceConfigState.dirty).toBe(true)
-
-    sourceConfigState.reset()
-    expect(sourceConfigState.value).toEqual(initialValue)
-    expect(sourceConfigState.dirty).toBe(false)
-
-    sourceConfigState.$.addrs.set([])
-    expect(sourceConfigState.value).toEqual({ ...initialValue, addrs: [] })
-    expect(sourceConfigState.dirty).toBe(true)
-
-    sourceConfigState.reset()
-    expect(sourceConfigState.value).toEqual(initialValue)
-    expect(sourceConfigState.dirty).toBe(false)
-
-    sourceConfigState.$.addrs.set([addr1, addr2, addr3])
-    expect(sourceConfigState.value).toEqual({ ...initialValue, addrs: [addr1, addr2, addr3] })
-    expect(sourceConfigState.dirty).toBe(true)
-
-    sourceConfigState.reset()
-    expect(sourceConfigState.value).toEqual(initialValue)
-    expect(sourceConfigState.dirty).toBe(false)
-
-    sourceConfigState.$.addrs.$[0].$.protocol.set('https')
-    expect(sourceConfigState.value).toEqual({
-      ...initialValue,
-      addrs: [{ ...addr1, protocol: 'https' }]
+    it('with initial status', () => {
+      const sourceConfigState = createSourceConfigState(initialValue)
+      expect(sourceConfigState.value).toEqual(initialValue)
+      expect(sourceConfigState.dirty).toBe(false)
+      sourceConfigState.dispose()
     })
-    expect(sourceConfigState.dirty).toBe(true)
 
-    sourceConfigState.reset()
-    expect(sourceConfigState.value).toEqual(initialValue)
-    expect(sourceConfigState.dirty).toBe(false)
+    it('with set', () => {
+      const sourceConfigState = createSourceConfigState(initialValue)
+      const value1 = { type: 'bar', addrs: [addr1, addr2] }
+      sourceConfigState.set(value1)
+      expect(sourceConfigState.value).toEqual(value1)
+      expect(sourceConfigState.dirty).toBe(true)
 
-    runInAction(() => {
-      sourceConfigState.$.type = createFieldState('baz')
+      sourceConfigState.reset()
+      expect(sourceConfigState.value).toEqual(initialValue)
+      expect(sourceConfigState.dirty).toBe(false)
+      sourceConfigState.dispose()
     })
-    expect(sourceConfigState.value).toEqual({ ...initialValue, type: 'baz' })
-    expect(sourceConfigState.dirty).toBe(true)
 
-    sourceConfigState.reset()
-    expect(sourceConfigState.value).toEqual(initialValue)
-    expect(sourceConfigState.dirty).toBe(false)
+    it('with with array empty-set', () => {
+      const sourceConfigState = createSourceConfigState(initialValue)
+      sourceConfigState.$.addrs.set([])
+      expect(sourceConfigState.value).toEqual({ ...initialValue, addrs: [] })
+      expect(sourceConfigState.dirty).toBe(true)
 
-    runInAction(() => {
-      sourceConfigState.$.addrs.$.push(createAddrState(addr3))
+      sourceConfigState.reset()
+      expect(sourceConfigState.value).toEqual(initialValue)
+      expect(sourceConfigState.dirty).toBe(false)
+      sourceConfigState.dispose()
     })
-    expect(sourceConfigState.value).toEqual({
-      ...initialValue,
-      addrs: [...initialValue.addrs, addr3]
+
+    it('with array set', () => {
+      const sourceConfigState = createSourceConfigState(initialValue)
+      sourceConfigState.$.addrs.set([addr1, addr2, addr3])
+      expect(sourceConfigState.value).toEqual({ ...initialValue, addrs: [addr1, addr2, addr3] })
+      expect(sourceConfigState.dirty).toBe(true)
+
+      sourceConfigState.reset()
+      expect(sourceConfigState.value).toEqual(initialValue)
+      expect(sourceConfigState.dirty).toBe(false)
+      sourceConfigState.dispose()
     })
-    expect(sourceConfigState.dirty).toBe(true)
 
-    sourceConfigState.reset()
-    expect(sourceConfigState.value).toEqual(initialValue)
-    expect(sourceConfigState.dirty).toBe(false)
+    it('with field set', () => {
+      const sourceConfigState = createSourceConfigState(initialValue)
+      sourceConfigState.$.addrs.$[0].$.protocol.set('https')
+      expect(sourceConfigState.value).toEqual({
+        ...initialValue,
+        addrs: [{ ...addr1, protocol: 'https' }]
+      })
+      expect(sourceConfigState.dirty).toBe(true)
 
-    runInAction(() => {
-      sourceConfigState.$.addrs.$[0].$.protocol = createFieldState('https')
+      sourceConfigState.reset()
+      expect(sourceConfigState.value).toEqual(initialValue)
+      expect(sourceConfigState.dirty).toBe(false)
+      sourceConfigState.dispose()
     })
-    expect(sourceConfigState.value).toEqual({
-      ...initialValue,
-      addrs: [{ ...addr1, protocol: 'https' }]
+
+    it('with field change', () => {
+      const sourceConfigState = createSourceConfigState(initialValue)
+      runInAction(() => {
+        sourceConfigState.$.type = createFieldState('baz')
+      })
+      expect(sourceConfigState.value).toEqual({ ...initialValue, type: 'baz' })
+      expect(sourceConfigState.dirty).toBe(true)
+
+      sourceConfigState.reset()
+      expect(sourceConfigState.value).toEqual(initialValue)
+      expect(sourceConfigState.dirty).toBe(false)
+      sourceConfigState.dispose()
     })
-    expect(sourceConfigState.dirty).toBe(true)
 
-    sourceConfigState.reset()
-    expect(sourceConfigState.value).toEqual(initialValue)
-    expect(sourceConfigState.dirty).toBe(false)
+    it('with array field push', () => {
+      const sourceConfigState = createSourceConfigState(initialValue)
+      runInAction(() => {
+        sourceConfigState.$.addrs.$.push(createAddrState(addr3))
+      })
+      expect(sourceConfigState.value).toEqual({
+        ...initialValue,
+        addrs: [...initialValue.addrs, addr3]
+      })
+      expect(sourceConfigState.dirty).toBe(true)
 
-    sourceConfigState.set(initialValue)
-    expect(sourceConfigState.value).toEqual(initialValue)
-    expect(sourceConfigState.dirty).toBe(false)
+      sourceConfigState.reset()
+      expect(sourceConfigState.value).toEqual(initialValue)
+      expect(sourceConfigState.dirty).toBe(false)
+      sourceConfigState.dispose()
+    })
 
-    sourceConfigState.dispose()
+    it('with sub-field change', () => {
+      const sourceConfigState = createSourceConfigState(initialValue)
+      runInAction(() => {
+        sourceConfigState.$.addrs.$[0].$.protocol = createFieldState('https')
+      })
+      expect(sourceConfigState.value).toEqual({
+        ...initialValue,
+        addrs: [{ ...addr1, protocol: 'https' }]
+      })
+      expect(sourceConfigState.dirty).toBe(true)
+
+      sourceConfigState.reset()
+      expect(sourceConfigState.value).toEqual(initialValue)
+      expect(sourceConfigState.dirty).toBe(false)
+      sourceConfigState.dispose()
+    })
+
+    it('with initialValue-set', () => {
+      const sourceConfigState = createSourceConfigState(initialValue)
+      sourceConfigState.set(initialValue)
+      expect(sourceConfigState.value).toEqual(initialValue)
+      expect(sourceConfigState.dirty).toBe(false)
+      sourceConfigState.dispose()
+    })
   })
 })
