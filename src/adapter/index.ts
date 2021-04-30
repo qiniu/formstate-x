@@ -35,12 +35,12 @@ export function xify<T extends fs.ComposibleValidatable<any>>(state: T): Xify<T>
     resetWith(v: ValueOf<T>) { state.reset() },
     set() { throw new Error('`set()` is supported.') },
     dispose() {},
-    _dirtyWith() { return getDirty(state) },
+    _dirtyWith(v: ValueOf<T>) { return getDirty(state) },
     get dirty() { return getDirty(state) },
     get _activated() { return getActivated(state) },
     get _validateStatus() { return getValidateStatus(state) }
   }
-  return observable(stateX)
+  return observable(stateX, undefined, { deep: false })
 }
 
 /** Value of `FieldState`. */

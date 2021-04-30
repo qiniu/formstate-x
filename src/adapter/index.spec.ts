@@ -316,6 +316,43 @@ describe('xify', () => {
     expect(stateX.dirty).toBe(true)
   })
 
+  it('should work well with field state\'s _dirtyWith()', async () => {
+    const state = new fs.FieldState(1).validators(async v => {
+      await delay(100)
+      return v <= 0 && 'positive requried'
+    })
+    const stateX = xify(state)
+
+    expect(stateX._dirtyWith(1)).toBe(false) // actually, `1` is not used
+    expect(stateX._dirtyWith(2)).toBe(false) // actually, `2` is not used
+
+    state.onChange(0)
+    await stateX.validate()
+
+    expect(stateX._dirtyWith(1)).toBe(true) // actually, `1` is not used
+    expect(stateX._dirtyWith(2)).toBe(true) // actually, `2` is not used
+  })
+
+  it('should work well with form state\'s _dirtyWith()', async () => {
+    const numState = new fs.FieldState(1).validators(async v => {
+      await delay(100)
+      return v <= 0 && 'positive requried'
+    })
+    const state = new fs.FormState({
+      num: numState
+    })
+    const stateX = xify(state)
+
+    expect(stateX._dirtyWith({ num: 1 })).toBe(false) // actually, `{ num: 1 }` is not used
+    expect(stateX._dirtyWith({ num: 2 })).toBe(false) // actually, `{ num: 2 }` is not used
+
+    state.$.num.onChange(0)
+    await stateX.validate()
+
+    expect(stateX._dirtyWith({ num: 1 })).toBe(true) // actually, `{ num: 1 }` is not used
+    expect(stateX._dirtyWith({ num: 2 })).toBe(true) // actually, `{ num: 2 }` is not used
+  })
+
   it('should work well with field state\'s _activated', async () => {
     const state = new fs.FieldState(1).validators(async v => {
       await delay(100)
@@ -343,6 +380,73 @@ describe('xify', () => {
     expect(stateX._activated).toBe(true)
     await stateX.validate()
     expect(stateX._activated).toBe(true)
+  })
+
+  it('should work well with field state\'s resetWith()', async () => {
+    const state = new fs.FieldState(1).validators(async v => {
+      await delay(100)
+      return v <= 0 && 'positive requried'
+    })
+    const stateX = xify(state)
+    state.onChange(0)
+    await stateX.validate()
+    stateX.resetWith(2) // actually, `2` is not used
+
+    expect(stateX.validating).toBe(false)
+    expect(stateX.validated).toBe(false)
+    expect(stateX.value).toBe(1)
+    expect(stateX.$).toBe(1)
+    expect(stateX.hasError).toBe(false)
+    expect(stateX.error).toBeUndefined()
+    expect(stateX._activated).toBe(false)
+  })
+
+  it('should work well with form state\'s resetWith()', async () => {
+    const numState = new fs.FieldState(1).validators(async v => {
+      await delay(100)
+      return v <= 0 && 'positive requried'
+    })
+    const state = new fs.FormState({
+      num: numState
+    })
+    const stateX = xify(state)
+    state.$.num.onChange(0)
+    await stateX.validate()
+    stateX.resetWith({ num: 2 }) // actually, `{ num: 2 }` is not used
+
+    expect(stateX.validating).toBe(false)
+    expect(stateX.validated).toBe(false)
+    expect(stateX.value).toEqual({ num: 1 })
+    expect(stateX.$).toEqual({ num: 1 })
+    expect(stateX.hasError).toBe(false)
+    expect(stateX.error).toBeUndefined()
+    expect(stateX.dirty).toBe(false)
+    expect(stateX._activated).toBe(false)
+  })
+
+  it('should throw with field state\'s set', () => {
+    const state = new fs.FieldState(1).validators(async v => {
+      await delay(100)
+      return v <= 0 && 'positive requried'
+    })
+    expect(() => {
+      const stateX = xify(state)
+      stateX.set(2)
+    }).toThrow()
+  })
+
+  it('should throw with form state\'s set', () => {
+    const numState = new fs.FieldState(1).validators(async v => {
+      await delay(100)
+      return v <= 0 && 'positive requried'
+    })
+    const state = new fs.FormState({
+      num: numState
+    })
+    expect(() => {
+      const stateX = xify(state)
+      stateX.set({ num: 2 })
+    }).toThrow()
   })
 
   it('should throw with FormStateLazy', () => {

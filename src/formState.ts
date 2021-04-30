@@ -339,7 +339,7 @@ export class FormState<
   constructor(initialFields: TFields) {
     super()
 
-    this.$ = Object.assign({}, initialFields)
+    this.$ = initialFields
     this.initialValue = this.value
 
     if (!isObservable(this.$)) {
