@@ -33,7 +33,7 @@ export type ValidateResultWithValue<T> = { hasError: false, value: T }
 export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
 
 /** Validatable object (which can be used as a field for `FormState`). */
-export interface Validatable<T, TValue = T> {
+export interface Validatable<T = any, TValue = T> {
   $: T
   value: TValue
   hasError: boolean
@@ -79,7 +79,7 @@ export type ValueOfObjectFields<Fields> = {
 
 /** Value of state (`FormState` or `FieldState`) */
 export type ValueOf<State> = (
-  State extends AbstractFormState<infer TValue>
+  State extends AbstractFormState<infer T, infer TValue>
   ? TValue
   : ValueOfFieldState<State>
 )

@@ -3,7 +3,7 @@ import { Validatable, ValidationResponse, Validator, Validated, ValidateStatus, 
 import { applyValidators, isPromiseLike } from './utils'
 import Disposable from './disposable'
 
-export abstract class AbstractFormState<TValue> extends Disposable {
+export abstract class AbstractFormState<T, TValue> extends Disposable implements Validatable<T, TValue> {
 
   /**
    * If activated (with auto validate).
@@ -12,15 +12,35 @@ export abstract class AbstractFormState<TValue> extends Disposable {
   @observable _activated = false
 
   /**
+   * Fields.
+   */
+  declare abstract $: T
+
+  /**
+  * If value is different with given initial value.
+  */
+  abstract _dirtyWith(initialValue: TValue): boolean
+
+  /**
+  * If value has been touched (different with initial value).
+  */
+  declare abstract dirty: boolean
+
+  /**
    * List of fields.
    */
-  declare protected abstract fieldList: Validatable<any>[]
+  declare protected abstract fieldList: Validatable[]
 
   /**
    * Value that can be consumed by your code.
    * It's a composition of fields' value.
    */
   declare abstract value: TValue
+
+  /**
+   * Set form value synchronously.
+   */
+  abstract set(value: TValue): void
 
   /**
    * The validate status.
@@ -257,7 +277,8 @@ export abstract class AbstractFormState<TValue> extends Disposable {
   }
 }
 
-export type FieldsObject = { [key: string]: Validatable<any> }
+/** Object with validatable fields */
+export type FieldsObject = { [key: string]: Validatable }
 
 /**
  * The state for a form (composition of fields).
@@ -265,13 +286,9 @@ export type FieldsObject = { [key: string]: Validatable<any> }
 export class FormState<
   TFields extends FieldsObject
 > extends AbstractFormState<
-  ValueOfObjectFields<TFields>
-> implements Validatable<
   TFields, ValueOfObjectFields<TFields>
 > {
-  /**
-   * Fields.
-   */
+
   @observable.ref $: TFields
 
   protected initialValue: ValueOfObjectFields<TFields>
@@ -282,17 +299,11 @@ export class FormState<
     )
   }
 
-  /**
-   * If value has been touched.
-   */
   @computed get dirty() {
     return this._dirtyWith(this.initialValue)
   }
 
-  /**
-   * List of fields.
-   */
-  @computed protected get fieldList(): Validatable<any>[] {
+  @computed protected get fieldList(): Validatable[] {
     const fields = this.$
     return Object.keys(fields).map(
       key => fields[key]
@@ -307,10 +318,6 @@ export class FormState<
     })
   }
 
-  /**
-   * Value that can be consumed by your code.
-   * It's a composition of fields' value.
-   */
   @computed get value(): ValueOfObjectFields<TFields> {
     const fields = this.$
     return Object.keys(fields).reduce(
@@ -322,9 +329,6 @@ export class FormState<
     ) as any
   }
 
-  /**
-   * Set form value synchronously.
-   */
   @action set(value: ValueOfObjectFields<TFields>) {
     const fields = this.$
     Object.keys(fields).forEach(key => {
@@ -352,13 +356,9 @@ export class FormState<
 export class ArrayFormState<
   V, T extends Validatable<any, V> = Validatable<any, V>
 > extends AbstractFormState<
-  V[]
-> implements Validatable<
   T[], V[]
 > {
-  /**
-   * Fields.
-   */
+
   @observable.ref $: T[]
 
   _dirtyWith(initialValue: V[]) {
@@ -368,16 +368,10 @@ export class ArrayFormState<
     )
   }
 
-  /**
-   * If value has been touched.
-   */
   @computed get dirty() {
     return this._dirtyWith(this.initialValue)
   }
 
-  /**
-   * List of fields.
-   */
   @computed protected get fieldList(): T[] {
     return this.$
   }
@@ -395,19 +389,12 @@ export class ArrayFormState<
     this.$.push(...this.createFields(this.initialValue))
   }
 
-  /**
-   * Value that can be consumed by your code.
-   * It's a composition of fields' value.
-   */
   @computed get value(): V[] {
     return this.fieldList.map(
       field => field.value
     ) as any
   }
 
-  /**
-   * Set form value synchronously.
-   */
   @action set(value: V[]) {
     let i = 0
     // index exists in both value & fields => set
@@ -430,4 +417,8 @@ export class ArrayFormState<
     this.$ = this.createFields(this.initialValue)
     this.init()
   }
+}
+
+export function isFormState<T, V>(state: Validatable<T, V>): state is AbstractFormState<T, V> {
+  return state instanceof AbstractFormState
 }
