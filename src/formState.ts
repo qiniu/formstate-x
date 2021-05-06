@@ -385,7 +385,9 @@ export class ArrayFormState<
   }
 
   @action protected resetFields() {
-    this.$.splice(0)
+    this.$.splice(0).forEach(field => {
+      field.dispose()
+    })
     this.$.push(...this.createFields(this.initialValue))
   }
 
@@ -407,7 +409,9 @@ export class ArrayFormState<
     }
     // index only exists in fields => truncate
     if (i < this.$.length) {
-      this.$.splice(i)
+      this.$.splice(i).forEach(field => {
+        field.dispose()
+      })
     }
   }
 

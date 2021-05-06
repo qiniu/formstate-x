@@ -629,6 +629,7 @@ describe('FormState (mode: array)', () => {
 
     state.reset()
 
+    const field2Dispose = state.$[1].dispose = jest.fn(state.$[1].dispose)
     const value3 = ['abc']
     state.set(value3)
     expect(state.value).toEqual(value3)
@@ -638,14 +639,17 @@ describe('FormState (mode: array)', () => {
       expect(field._value).toBe(value3[i])
     })
     expect(state.dirty).toBe(true)
+    expect(field2Dispose).toBeCalled()
 
     state.reset()
 
+    const field1Dispose = state.$[0].dispose = jest.fn(state.$[0].dispose)
     const value4: string[] = []
     state.set(value4)
     expect(state.value).toEqual(value4)
     expect(state.$).toHaveLength(value4.length)
     expect(state.dirty).toBe(true)
+    expect(field1Dispose).toBeCalled()
 
     state.dispose()
   })
@@ -671,19 +675,24 @@ describe('FormState (mode: array)', () => {
   it('should reset well with fields changed', async () => {
     const initialValue = ['123', '456']
     const state = new ArrayFormState(initialValue, createFieldState)
+    let disposeFn: () => void
 
     runInAction(() => {
       state.$.pop()
     })
     expect(state.dirty).toBe(true)
 
+    disposeFn = state.$[0].dispose = jest.fn(state.$[0].dispose)
     state.reset()
 
     expect(state.value).toEqual(initialValue)
     expect(state.dirty).toBe(false)
+    expect(disposeFn).toBeCalled()
 
     runInAction(() => {
-      state.$.push(createFieldState('789'))
+      const field = createFieldState('789')
+      disposeFn = field.dispose = jest.fn(field.dispose)
+      state.$.push(field)
     })
     expect(state.dirty).toBe(true)
 
@@ -691,6 +700,7 @@ describe('FormState (mode: array)', () => {
 
     expect(state.value).toEqual(initialValue)
     expect(state.dirty).toBe(false)
+    expect(disposeFn).toBeCalled()
 
     state.set([])
     expect(state.dirty).toBe(true)
@@ -703,10 +713,12 @@ describe('FormState (mode: array)', () => {
     state.set(['456', '789', '012'])
     expect(state.dirty).toBe(true)
 
+    disposeFn = state.$[0].dispose = jest.fn(state.$[2].dispose)
     state.reset()
 
     expect(state.value).toEqual(initialValue)
     expect(state.dirty).toBe(false)
+    expect(disposeFn).toBeCalled()
 
     state.dispose()
   })
