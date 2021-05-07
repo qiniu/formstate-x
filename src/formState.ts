@@ -14,7 +14,7 @@ export abstract class AbstractFormState<T, TValue> extends Disposable implements
   /**
    * Fields.
    */
-  declare abstract $: T
+  declare abstract readonly $: T
 
   /**
   * If value is different with given initial value.
@@ -289,7 +289,7 @@ export class FormState<
   TFields, ValueOfObjectFields<TFields>
 > {
 
-  @observable.ref $: TFields
+  @observable.ref readonly $: TFields
 
   protected initialValue: ValueOfObjectFields<TFields>
 
@@ -359,7 +359,7 @@ export class ArrayFormState<
   T[], V[]
 > {
 
-  @observable.ref $: T[]
+  @observable.ref readonly $: T[]
 
   _dirtyWith(initialValue: V[]) {
     return (

@@ -731,7 +731,7 @@ describe('FormState (mode: array)', () => {
     let validation: any
     runInAction(() => {
       validation = state.validate()
-      state.$ = []
+      ;(state.$ as any) = []
     })
 
     await delay()
