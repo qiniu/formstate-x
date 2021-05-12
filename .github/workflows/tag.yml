@@ -23,7 +23,7 @@ jobs:
           git tag -a $tagName -m "release by Github Actions"
         fi
     - name: Push to repo
-      uses: ad-m/github-push-action@master
+      uses: ad-m/github-push-action@v0.6.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: master
