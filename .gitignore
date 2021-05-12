@@ -3,3 +3,4 @@ lib
 esm
 coverage
 docs
+.vscode
