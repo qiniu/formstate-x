@@ -61,9 +61,26 @@ export abstract class AbstractFormState<T, TValue> extends Disposable implements
   }
 
   /**
-   * The error info of form validation.
+   * The error info of form validation (regardless of disableValidationWhen).
    */
   @observable private _error: Error
+
+  /**
+   * The error info of form validation.
+   */
+  @computed get ownError(): Error {
+    if (this.validationDisabled) {
+      return undefined
+    }
+    return this._error
+  }
+
+  /**
+  * If the state contains form validation error.
+  */
+  @computed get hasOwnError() {
+    return !!this.ownError
+  }
 
   /**
    * The error info of validation (including fields' error info).

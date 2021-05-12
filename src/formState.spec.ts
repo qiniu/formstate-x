@@ -1,7 +1,7 @@
 import { observable, runInAction, isObservable } from 'mobx'
 import FieldState from './fieldState'
 import { FormState, ArrayFormState, isFormState } from './formState'
-import { Validatable, ValidateResultWithError, ValidateResultWithValue } from './types'
+import { Error, Validatable, ValidateResultWithError, ValidateResultWithValue } from './types'
 
 const defaultDelay = 10
 const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
@@ -206,6 +206,8 @@ describe('FormState (mode: object) validation', () => {
 
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(false)
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
@@ -223,6 +225,8 @@ describe('FormState (mode: object) validation', () => {
 
     await delay()
     expect(state.validating).toBe(false)
+    expect(state.hasOwnError).toBe(true)
+    expect(state.ownError).toBe('same')
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('same')
 
@@ -241,6 +245,8 @@ describe('FormState (mode: object) validation', () => {
     await delay()
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
+    expect(state.hasOwnError).toBe(true)
+    expect(state.ownError).toBe('same')
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('same')
 
@@ -254,6 +260,8 @@ describe('FormState (mode: object) validation', () => {
     await delay()
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
@@ -280,6 +288,8 @@ describe('FormState (mode: object) validation', () => {
     expect(state.value).toEqual(initialValue)
     expect(state.dirty).toBe(false)
     expect(state.validating).toBe(false)
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
@@ -440,24 +450,28 @@ describe('FormState (mode: object) validation', () => {
     await delay()
     expect(state.$.foo.error).toBe('empty')
     expect(state.$.bar.error).toBeUndefined()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBe('empty')
 
     state.$.foo.onChange('123')
     await delay()
     expect(state.$.foo.error).toBeUndefined()
     expect(state.$.bar.error).toBeUndefined()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBeUndefined()
 
     state.$.bar.onChange('123')
     await delay()
     expect(state.$.foo.error).toBeUndefined()
     expect(state.$.bar.error).toBeUndefined()
+    expect(state.ownError).toBe('same')
     expect(state.error).toBe('same')
 
     state.$.bar.onChange('')
     await delay()
     expect(state.$.foo.error).toBeUndefined()
     expect(state.$.bar.error).toBe('empty')
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBe('empty')
 
     state.$.bar.onChange('123')
@@ -465,6 +479,7 @@ describe('FormState (mode: object) validation', () => {
     await delay()
     expect(state.$.foo.error).toBeUndefined()
     expect(state.$.bar.error).toBeUndefined()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBeUndefined()
 
     state.$.bar.onChange('123456')
@@ -472,6 +487,7 @@ describe('FormState (mode: object) validation', () => {
     await delay()
     expect(state.$.foo.error).toBeUndefined()
     expect(state.$.bar.error).toBeUndefined()
+    expect(state.ownError).toBe('same')
     expect(state.error).toBe('same')
 
     state.dispose()
@@ -491,24 +507,28 @@ describe('FormState (mode: object) validation', () => {
     await delay()
     expect(state.$.foo.error).toBe('empty')
     expect(state.$.bar.error).toBeUndefined()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBe('empty')
 
     state.$.foo.onChange('123')
     await delay()
     expect(state.$.foo.error).toBeUndefined()
     expect(state.$.bar.error).toBeUndefined()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBeUndefined()
 
     state.$.bar.onChange('123')
     await delay()
     expect(state.$.foo.error).toBeUndefined()
     expect(state.$.bar.error).toBeUndefined()
+    expect(state.ownError).toBe('same')
     expect(state.error).toBe('same')
 
     state.$.bar.onChange('')
     await delay()
     expect(state.$.foo.error).toBeUndefined()
     expect(state.$.bar.error).toBe('empty')
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBe('empty')
 
     state.$.bar.onChange('123')
@@ -516,6 +536,7 @@ describe('FormState (mode: object) validation', () => {
     await delay()
     expect(state.$.foo.error).toBeUndefined()
     expect(state.$.bar.error).toBeUndefined()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBeUndefined()
 
     state.$.bar.onChange('123456')
@@ -523,6 +544,7 @@ describe('FormState (mode: object) validation', () => {
     await delay()
     expect(state.$.foo.error).toBeUndefined()
     expect(state.$.bar.error).toBeUndefined()
+    expect(state.ownError).toBe('same')
     expect(state.error).toBe('same')
 
     state.dispose()
@@ -551,18 +573,30 @@ describe('FormState (mode: object) validation', () => {
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBeUndefined()
 
     state.$.foo.onChange('')
     await state.validate()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
     runInAction(() => options.disabled = false)
 
     await delay()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
+
+    state.$.foo.onChange('123')
+    await state.validate()
+    expect(state.hasOwnError).toBe(true)
+    expect(state.ownError).toBe('same')
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('same')
 
     state.dispose()
   })
@@ -750,6 +784,8 @@ describe('FormState (mode: array) validation', () => {
 
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(false)
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
@@ -766,6 +802,8 @@ describe('FormState (mode: array) validation', () => {
 
     await delay()
     expect(state.$[1].validated).toBe(true)
+    expect(state.hasOwnError).toBe(true)
+    expect(state.ownError).toBe('too long')
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
 
@@ -783,6 +821,8 @@ describe('FormState (mode: array) validation', () => {
     await delay()
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
+    expect(state.hasOwnError).toBe(true)
+    expect(state.ownError).toBe('too long')
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
 
@@ -828,6 +868,8 @@ describe('FormState (mode: array) validation', () => {
     expect(state.value).toEqual(initialValue)
     expect(state.dirty).toBe(false)
     expect(state.validating).toBe(false)
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
@@ -985,18 +1027,21 @@ describe('FormState (mode: array) validation', () => {
     await delay()
     expect(state.$[0].error).toBeUndefined()
     expect(state.$[1].error).toBe('empty')
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBe('empty')
 
     state.$[1].onChange('456')
     await delay()
     expect(state.$[0].error).toBeUndefined()
     expect(state.$[1].error).toBeUndefined()
+    expect(state.ownError).toBe('too long')
     expect(state.error).toBe('too long')
 
     state.$[0].onChange('1')
     await delay()
     expect(state.$[0].error).toBeUndefined()
     expect(state.$[1].error).toBeUndefined()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBeUndefined()
 
     state.$[0].onChange('123')
@@ -1004,6 +1049,7 @@ describe('FormState (mode: array) validation', () => {
     await delay()
     expect(state.$[0].error).toBeUndefined()
     expect(state.$[1].error).toBeUndefined()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBeUndefined()
 
     state.$[0].onChange('1234')
@@ -1011,6 +1057,7 @@ describe('FormState (mode: array) validation', () => {
     await delay()
     expect(state.$[0].error).toBeUndefined()
     expect(state.$[1].error).toBeUndefined()
+    expect(state.ownError).toBe('too long')
     expect(state.error).toBe('too long')
 
     state.dispose()
@@ -1030,18 +1077,21 @@ describe('FormState (mode: array) validation', () => {
     await delay()
     expect(state.$[0].error).toBeUndefined()
     expect(state.$[1].error).toBe('empty')
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBe('empty')
 
     state.$[1].onChange('456')
     await delay()
     expect(state.$[0].error).toBeUndefined()
     expect(state.$[1].error).toBeUndefined()
+    expect(state.ownError).toBe('too long')
     expect(state.error).toBe('too long')
 
     state.$[0].onChange('1')
     await delay()
     expect(state.$[0].error).toBeUndefined()
     expect(state.$[1].error).toBeUndefined()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBeUndefined()
 
     state.$[0].onChange('123')
@@ -1049,6 +1099,7 @@ describe('FormState (mode: array) validation', () => {
     await delay()
     expect(state.$[0].error).toBeUndefined()
     expect(state.$[1].error).toBeUndefined()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBeUndefined()
 
     state.$[0].onChange('1234')
@@ -1056,6 +1107,7 @@ describe('FormState (mode: array) validation', () => {
     await delay()
     expect(state.$[0].error).toBeUndefined()
     expect(state.$[1].error).toBeUndefined()
+    expect(state.ownError).toBe('too long')
     expect(state.error).toBe('too long')
 
     state.dispose()
@@ -1077,18 +1129,31 @@ describe('FormState (mode: array) validation', () => {
     runInAction(() => options.disabled = true)
 
     await state.validate()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
     state.$[0].onChange('')
     await state.validate()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
     runInAction(() => options.disabled = false)
     await delay()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
+
+    state.$[0].onChange('123')
+    await delay()
+    expect(state.hasOwnError).toBe(true)
+    expect(state.ownError).toBe('too long')
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('too long')
 
     state.dispose()
   })
@@ -1157,7 +1222,9 @@ describe('nested FormState', () => {
     })
 
     await state.validate()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBe('empty')
+    expect(state.$.inputs.ownError).toBeUndefined()
     expect(state.$.inputs.$[0].error).toBe('empty')
     expect(state.$.inputs.$[1].error).toBe('empty')
 
@@ -1165,20 +1232,25 @@ describe('nested FormState', () => {
     state.$.inputs.$[1].onChange('456')
 
     await state.validate()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBe('too long')
+    expect(state.$.inputs.error).toBe('too long')
     expect(state.$.inputs.$[0].error).toBeUndefined()
     expect(state.$.inputs.$[1].error).toBeUndefined()
 
     state.$.enabled.onChange(false)
 
     await delay()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBeUndefined()
 
     state.$.enabled.onChange(true)
     state.$.inputs.$[1].onChange('')
 
     await delay()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBe('empty')
+    expect(state.$.inputs.ownError).toBeUndefined()
     expect(state.$.inputs.$[0].error).toBeUndefined()
     expect(state.$.inputs.$[1].error).toBe('empty')
 
@@ -1188,7 +1260,9 @@ describe('nested FormState', () => {
     })
 
     await delay()
+    expect(state.ownError).toBeUndefined()
     expect(state.error).toBe('too long')
+    expect(state.$.inputs.error).toBe('too long')
     expect(state.$.inputs.$[0].error).toBeUndefined()
     expect(state.$.inputs.$[1].error).toBeUndefined()
     expect(state.$.inputs.$[2].error).toBeUndefined()
@@ -1371,6 +1445,7 @@ describe('isFormState', () => {
     if (isFormState(state)) {
       const v: string = state.$[0].$
       const vs: string[] = state.value
+      const ownError: Error = state.ownError
     }
   })
 })
