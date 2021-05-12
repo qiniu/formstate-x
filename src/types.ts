@@ -1,5 +1,5 @@
 import FieldState from './fieldState'
-import FormState from './formState'
+import { AbstractFormState } from './formState'
 
 /** A truthy string or falsy values. */
 export type ValidationResponse =
@@ -32,8 +32,8 @@ export type ValidateResultWithError = { hasError: true, error: Error }
 export type ValidateResultWithValue<T> = { hasError: false, value: T }
 export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
 
-/** Validatable object. */
-export interface Validatable<T, TValue = T> {
+/** Validatable object (which can be used as a field for `FormState`). */
+export interface Validatable<T = any, TValue = T> {
   $: T
   value: TValue
   hasError: boolean
@@ -41,21 +41,24 @@ export interface Validatable<T, TValue = T> {
   validating: boolean
   validated: boolean
   validationDisabled: boolean
+  dirty: boolean
+  _activated: boolean
+  _validateStatus: ValidateStatus
+
   validate(): Promise<ValidateResult<TValue>>
+  set: (value: TValue) => void
+  reset: () => void
+  resetWith: (initialValue: TValue) => void
+  _dirtyWith: (initialValue: TValue) => void
+  dispose: () => void
 
   // To see if there are requirements: enableAutoValidation, disableAutoValidation
   // enableAutoValidation: () => void
   // disableAutoValidation: () => void
 }
 
-/** Composible validatable object (which can be used as a field for `FormState`). */
-export interface ComposibleValidatable<T, TValue = T> extends Validatable<T, TValue> {
-  reset: () => void
-  dispose: () => void
-  dirty: boolean
-  _activated: boolean
-  _validateStatus: ValidateStatus
-}
+/** @deprecated Composible validatable object (which can be used as a field for `FormState`). */
+export interface ComposibleValidatable<T, TValue = T> extends Validatable<T, TValue> {}
 
 /** Function to do dispose. */
 export interface Disposer {
@@ -64,8 +67,8 @@ export interface Disposer {
 
 /** Value of `FieldState`. */
 export type ValueOfFieldState<State> = (
-  State extends FieldState<infer FieldType>
-  ? FieldType
+  State extends FieldState<infer TValue>
+  ? TValue
   : never
 )
 
@@ -74,33 +77,11 @@ export type ValueOfObjectFields<Fields> = {
   [FieldKey in keyof Fields]: ValueOf<Fields[FieldKey]>
 }
 
-/** Value of array-fields. */
-export type ValueOfArrayFields<Fields> = (
-  Fields extends Array<infer Field>
-  ? Array<ValueOf<Field>>
-  : never
-)
-
-/** Value of fields. */
-export type ValueOfFields<Fields> = (
-  Fields extends { [key: string]: ComposibleValidatable<any> }
-  ? ValueOfObjectFields<Fields>
-  : ValueOfArrayFields<Fields>
-)
-
 /** Value of state (`FormState` or `FieldState`) */
 export type ValueOf<State> = (
-  State extends FormState<infer Fields>
-  ? ValueOfFields<Fields>
-  : (
-    State extends FieldState<infer V>
-    ? V
-    : (
-      State extends Validatable<unknown, infer V>
-      ? V
-      : never
-    )
-  )
+  State extends AbstractFormState<infer T, infer TValue>
+  ? TValue
+  : ValueOfFieldState<State>
 )
 
 /** Validate status. */
