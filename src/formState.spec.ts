@@ -1,7 +1,7 @@
 import { observable, runInAction, isObservable } from 'mobx'
 import FieldState from './fieldState'
 import { FormState, ArrayFormState, isFormState } from './formState'
-import { Validatable, ValidateResultWithError, ValidateResultWithValue } from './types'
+import { Error, Validatable, ValidateResultWithError, ValidateResultWithValue } from './types'
 
 const defaultDelay = 10
 const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
@@ -1445,6 +1445,7 @@ describe('isFormState', () => {
     if (isFormState(state)) {
       const v: string = state.$[0].$
       const vs: string[] = state.value
+      const ownError: Error = state.ownError
     }
   })
 })
