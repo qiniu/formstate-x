@@ -1,12 +1,12 @@
 import { observable, computed, action, reaction, autorun, when, makeObservable } from 'mobx'
-import { ComposibleValidatable, Validator, Validated, ValidationResponse, ValidateStatus, Error, ValidateResult } from './types'
+import { Validatable, Validator, Validated, ValidationResponse, ValidateStatus, Error, ValidateResult } from './types'
 import { applyValidators, debounce, isPromiseLike } from './utils'
 import Disposable from './disposable'
 
 /**
  * The state for a field.
  */
-export default class FieldState<TValue> extends Disposable implements ComposibleValidatable<TValue> {
+export default class FieldState<TValue> extends Disposable implements Validatable<TValue> {
 
   /**
    * If activated (with auto validation).
@@ -14,11 +14,15 @@ export default class FieldState<TValue> extends Disposable implements Composible
    */
   @observable _activated = false
 
+  _dirtyWith(initialValue: TValue) {
+    return this.value !== initialValue
+  }
+
   /**
    * If value has been touched (different with `initialValue`)
    */
   @computed get dirty() {
-    return this.value !== this.initialValue
+    return this._dirtyWith(this.initialValue)
   }
 
   /**
@@ -112,14 +116,21 @@ export default class FieldState<TValue> extends Disposable implements Composible
   }
 
   /**
-   * Reset to initial status.
+   * Reset to specific status.
    */
-  @action reset() {
-    this.$ = this.value = this._value = this.initialValue
+  @action resetWith(initialValue: TValue) {
+    this.$ = this.value = this._value = this.initialValue = initialValue
     this._activated = false
     this._validateStatus = ValidateStatus.NotValidated
     this._error = undefined
     this.validation = undefined
+  }
+
+  /**
+   * Reset to initial status.
+   */
+  @action reset() {
+    this.resetWith(this.initialValue)
   }
 
   /**
