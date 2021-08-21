@@ -3,8 +3,8 @@ import { asyncResponsesAnd, isEmpty, isArrayLike } from './utils'
 
 const defaultDelay = 10
 
-function delay<T>(value?: T, delay: number = defaultDelay + 10): Promise<T> {
-  return new Promise(
+function delay<T>(value?: T, delay: number = defaultDelay + 10): Promise<T | undefined> {
+  return new Promise<T | undefined>(
     resolve => setTimeout(() => resolve(value), delay)
   )
 }
