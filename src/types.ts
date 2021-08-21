@@ -34,7 +34,7 @@ export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValu
 
 /** Validatable object (which can be used as a field for `FormState`). */
 export interface Validatable<T = any, TValue = T> {
-  $: T
+  readonly $: T
   value: TValue
   hasError: boolean
   error: Error
@@ -47,6 +47,7 @@ export interface Validatable<T = any, TValue = T> {
 
   validate(): Promise<ValidateResult<TValue>>
   set: (value: TValue) => void
+  onChange: (value: TValue) => void
   reset: () => void
   resetWith: (initialValue: TValue) => void
   _dirtyWith: (initialValue: TValue) => void

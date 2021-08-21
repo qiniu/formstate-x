@@ -43,6 +43,11 @@ export abstract class AbstractFormState<T, TValue> extends Disposable implements
   abstract set(value: TValue): void
 
   /**
+   * Set form value on change event.
+   */
+  abstract onChange(value: TValue): void
+
+  /**
    * The validate status.
    */
   @observable _validateStatus: ValidateStatus = ValidateStatus.NotValidated
@@ -306,7 +311,7 @@ export class FormState<
   TFields, ValueOfObjectFields<TFields>
 > {
 
-  @observable.ref readonly $: TFields
+  @observable.ref readonly $: Readonly<TFields>
 
   protected initialValue: ValueOfObjectFields<TFields>
 
@@ -353,6 +358,13 @@ export class FormState<
     })
   }
 
+  @action onChange(value: ValueOfObjectFields<TFields>) {
+    const fields = this.$
+    Object.keys(fields).forEach(key => {
+      fields[key].onChange(value[key])
+    })
+  }
+
   constructor(initialFields: TFields) {
     super()
 
@@ -373,10 +385,14 @@ export class FormState<
 export class ArrayFormState<
   V, T extends Validatable<any, V> = Validatable<any, V>
 > extends AbstractFormState<
-  T[], V[]
+  readonly T[], V[]
 > {
 
-  @observable.ref readonly $: T[]
+  @observable.ref protected fieldList: T[]
+
+  @computed get $(): readonly T[] {
+    return this.fieldList
+  }
 
   _dirtyWith(initialValue: V[]) {
     return (
@@ -389,9 +405,9 @@ export class ArrayFormState<
     return this._dirtyWith(this.initialValue)
   }
 
-  @computed protected get fieldList(): T[] {
-    return this.$
-  }
+  // @computed protected get fieldList(): T[] {
+  //   return this.$ as T[]
+  // }
 
   private createFields(value: V[]): T[] {
     return observable(
@@ -402,10 +418,11 @@ export class ArrayFormState<
   }
 
   @action protected resetFields() {
-    this.$.splice(0).forEach(field => {
+    const fields = this.fieldList
+    fields.splice(0).forEach(field => {
       field.dispose()
     })
-    this.$.push(...this.createFields(this.initialValue))
+    fields.push(...this.createFields(this.initialValue))
   }
 
   @computed get value(): V[] {
@@ -414,28 +431,89 @@ export class ArrayFormState<
     ) as any
   }
 
-  @action set(value: V[]) {
+  private _remove(fromIndex: number, num: number) {
+    this.fieldList.splice(fromIndex, num).forEach(field => {
+      field.dispose()
+    })
+  }
+
+  private _insert(fromIndex: number, ...fieldValues: V[]) {
+    const fields = fieldValues.map(this.createFieldState)
+    this.fieldList.splice(fromIndex, 0, ...fields)
+  }
+
+  private _set(value: V[], withOnChange = false) {
     let i = 0
-    // index exists in both value & fields => set
-    for (; i < value.length && i < this.$.length; i++) {
-      this.$[i].set(value[i])
+    // items exists in both value & fields => set
+    for (; i < value.length && i < this.fieldList.length; i++) {
+      if (withOnChange) this.fieldList[i].onChange(value[i])
+      else this.fieldList[i].set(value[i])
     }
-    // index only exists in value => append
-    for (; i < value.length; i++) {
-      this.$.push(this.createFieldState(value[i]))
+    // items only exists in fields => truncate
+    if (i < this.fieldList.length) {
+      this._remove(i, this.fieldList.length - i)
     }
-    // index only exists in fields => truncate
-    if (i < this.$.length) {
-      this.$.splice(i).forEach(field => {
-        field.dispose()
-      })
+    // items exists in value but not in fields => add
+    if (i < value.length) {
+      this._insert(i, ...value.slice(i))
     }
+  }
+
+  @action set(value: V[]) {
+    this._set(value)
+  }
+
+  @action onChange(value: V[]) {
+    this._set(value, true)
+    this._activated = true
+  }
+  
+  /**
+   * remove fields
+   * @param fromIndex index of first field to remove
+   * @param num number of fields to remove
+   */
+  @action remove(fromIndex: number, num = 1) {
+    if (num <= 0) return
+    this._remove(fromIndex, num)
+    this._activated = true
+  }
+
+  /**
+   * insert fields
+   * @param fromIndex index of first field to insert
+   * @param ...fieldValues field values to insert
+   */
+  @action insert(fromIndex: number, fieldValue: V, ...moreFieldValues: V[]) {
+    this._insert(fromIndex, fieldValue, ...moreFieldValues)
+    this._activated = true
+  }
+
+  /**
+   * append fields to the end of field list
+   * @param ...fieldValues field values to append
+   */
+  @action append(fieldValue: V, ...moreFieldValues: V[]) {
+    this._insert(this.fieldList.length, fieldValue, ...moreFieldValues)
+    this._activated = true
+  }
+
+  /**
+   * move field from one index to another
+   * @param fromIndex index of field to move
+   * @param toIndex index to move to
+   */
+  @action move(fromIndex: number, toIndex: number) {
+    const item = this.fieldList[fromIndex]
+    this.fieldList.splice(fromIndex, 1)
+    this.fieldList.splice(toIndex, 0, item)
+    this._activated = true
   }
 
   constructor(protected initialValue: V[], private createFieldState: (v: V) => T) {
     super()
 
-    this.$ = this.createFields(this.initialValue)
+    this.fieldList = this.createFields(this.initialValue)
     this.init()
   }
 }
