@@ -34,6 +34,7 @@ export function xify<T extends fs.ComposibleValidatable<any>>(state: T): Xify<T>
     reset() { state.reset() },
     resetWith(v: ValueOf<T>) { state.reset() },
     set() { throw new Error('`set()` is supported.') },
+    onChange() { throw new Error('`onChange()` is supported.') },
     dispose() {},
     _dirtyWith(v: ValueOf<T>) { return getDirty(state) },
     get dirty() { return getDirty(state) },
