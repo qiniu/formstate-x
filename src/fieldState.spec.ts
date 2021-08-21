@@ -6,7 +6,7 @@ const defaultDelay = 10
 const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
 
 async function delay(millisecond: number = stableDelay) {
-  await new Promise(resolve => setTimeout(() => resolve(), millisecond))
+  await new Promise<void>(resolve => setTimeout(() => resolve(), millisecond))
 }
 
 async function delayValue<T>(value: T, millisecond: number = defaultDelay) {
