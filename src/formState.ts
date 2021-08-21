@@ -428,7 +428,7 @@ export class ArrayFormState<
   @computed get value(): V[] {
     return this.fieldList.map(
       field => field.value
-    ) as any
+    )
   }
 
   private _remove(fromIndex: number, num: number) {
@@ -504,8 +504,11 @@ export class ArrayFormState<
    * @param toIndex index to move to
    */
   @action move(fromIndex: number, toIndex: number) {
-    const item = this.fieldList[fromIndex]
-    this.fieldList.splice(fromIndex, 1)
+    if (fromIndex < 0) fromIndex = this.fieldList.length + fromIndex
+    if (toIndex < 0) toIndex = this.fieldList.length + toIndex
+    if (fromIndex === toIndex) return
+
+    const [item] = this.fieldList.splice(fromIndex, 1)
     this.fieldList.splice(toIndex, 0, item)
     this._activated = true
   }

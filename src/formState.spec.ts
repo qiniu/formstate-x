@@ -595,7 +595,9 @@ describe('FormState (mode: array)', () => {
 
   it('should set well', async () => {
     const initialValue = ['123', '456']
-    const state = new ArrayFormState(initialValue, createFieldState)
+    const state = new ArrayFormState(initialValue, createFieldState).validators(
+      v => v.length > 2 && 'too long'
+    )
 
     const value1 = ['123', '456', '789']
     state.set(value1)
@@ -606,6 +608,7 @@ describe('FormState (mode: array)', () => {
       expect(field._value).toBe(value1[i])
     })
     expect(state.dirty).toBe(true)
+    expect(state.hasError).toBe(false)
 
     state.reset()
 
@@ -618,6 +621,7 @@ describe('FormState (mode: array)', () => {
       expect(field._value).toBe(value2[i])
     })
     expect(state.dirty).toBe(true)
+    expect(state.hasError).toBe(false)
 
     state.reset()
 
@@ -631,6 +635,7 @@ describe('FormState (mode: array)', () => {
       expect(field._value).toBe(value3[i])
     })
     expect(state.dirty).toBe(true)
+    expect(state.hasError).toBe(false)
     expect(field2Dispose).toBeCalled()
 
     state.reset()
@@ -641,9 +646,244 @@ describe('FormState (mode: array)', () => {
     expect(state.value).toEqual(value4)
     expect(state.$).toHaveLength(value4.length)
     expect(state.dirty).toBe(true)
+    expect(state.hasError).toBe(false)
     expect(field1Dispose).toBeCalled()
 
     state.dispose()
+  })
+
+  it('should onChange well', async () => {
+    const initialValue = ['123', '456']
+    const state = new ArrayFormState(initialValue, createFieldState).validators(
+      v => v.length > 2 && 'too long'
+    )
+
+    const value1 = ['123', '456', '789']
+    state.onChange(value1)
+    await delay()
+    expect(state.value).toEqual(value1)
+    expect(state.$).toHaveLength(value1.length)
+    state.$.forEach((field, i) => {
+      expect(field.value).toBe(value1[i])
+      expect(field._value).toBe(value1[i])
+    })
+    expect(state.dirty).toBe(true)
+    expect(state.hasError).toBe(true)
+
+    state.reset()
+
+    const value2 = ['456', '789', '012']
+    state.onChange(value2)
+    await delay()
+    expect(state.value).toEqual(value2)
+    expect(state.$).toHaveLength(value2.length)
+    state.$.forEach((field, i) => {
+      expect(field.value).toBe(value2[i])
+      expect(field._value).toBe(value2[i])
+    })
+    expect(state.dirty).toBe(true)
+    expect(state.hasError).toBe(true)
+
+    state.reset()
+
+    const field2Dispose = state.$[1].dispose = jest.fn(state.$[1].dispose)
+    const value3 = ['abc']
+    state.onChange(value3)
+    await delay()
+    expect(state.value).toEqual(value3)
+    expect(state.$).toHaveLength(value3.length)
+    state.$.forEach((field, i) => {
+      expect(field.value).toBe(value3[i])
+      expect(field._value).toBe(value3[i])
+    })
+    expect(state.dirty).toBe(true)
+    expect(field2Dispose).toBeCalled()
+    expect(state.hasError).toBe(false)
+
+    state.reset()
+
+    const field1Dispose = state.$[0].dispose = jest.fn(state.$[0].dispose)
+    const value4: string[] = []
+    state.onChange(value4)
+    await delay()
+    expect(state.value).toEqual(value4)
+    expect(state.$).toHaveLength(value4.length)
+    expect(state.dirty).toBe(true)
+    expect(field1Dispose).toBeCalled()
+
+    state.dispose()
+  })
+
+  describe('remove', () => {
+
+    function createState(initialValue: string[]) {
+      return new ArrayFormState(initialValue, createFieldState).validators(
+        v => v.length === 0 && 'empty'
+      )
+    }
+
+    it('should work well', async () => {
+      const state = createState(['123', '456', '789'])
+
+      state.remove(2)
+      expect(state.$.length).toBe(2)
+      expect(state.value).toEqual(['123', '456'])
+
+      state.remove(1)
+      expect(state.$.length).toBe(1)
+      expect(state.value).toEqual(['123'])
+
+      state.remove(0)
+      expect(state.$.length).toBe(0)
+      expect(state.value).toEqual([])
+      expect(state.hasError).toBe(true)
+    })
+
+    it('should work well with num', async () => {
+      const state = createState(['123', '456', '789'])
+
+      state.remove(0, 2)
+      expect(state.$.length).toBe(1)
+      expect(state.value).toEqual(['789'])
+
+      state.remove(0, 1)
+      expect(state.$.length).toBe(0)
+      expect(state.value).toEqual([])
+      expect(state.hasError).toBe(true)
+    })
+
+    it('should work well with negative index', async () => {
+      const state = createState(['123', '456', '789'])
+
+      state.remove(-1)
+      expect(state.$.length).toBe(2)
+      expect(state.value).toEqual(['123', '456'])
+
+      state.remove(-2, 2)
+      expect(state.$.length).toBe(0)
+      expect(state.value).toEqual([])
+      expect(state.hasError).toBe(true)
+    })
+  })
+
+  describe('insert', () => {
+
+    function createState(initialValue: string[]) {
+      return new ArrayFormState(initialValue, createFieldState).validators(
+        v => v.length > 2 && 'too long'
+      )
+    }
+
+    it('should work well', async () => {
+      const state = createState([])
+
+      state.insert(0, '123')
+      expect(state.$.length).toBe(1)
+      expect(state.value).toEqual(['123'])
+
+      state.insert(0, '456')
+      expect(state.$.length).toBe(2)
+      expect(state.value).toEqual(['456', '123'])
+
+      state.insert(1, '789')
+      expect(state.$.length).toBe(3)
+      expect(state.value).toEqual(['456', '789', '123'])
+      expect(state.hasError).toBe(true)
+    })
+
+    it('should work well with more field values', async () => {
+      const state = createState(['123'])
+
+      state.insert(0, '456', '789')
+      expect(state.$.length).toBe(3)
+      expect(state.value).toEqual(['456', '789', '123'])
+      expect(state.hasError).toBe(true)
+    })
+
+    it('should work well with negative index', async () => {
+      const state = createState(['123'])
+
+      state.insert(-1, '456')
+      expect(state.$.length).toBe(2)
+      expect(state.value).toEqual(['456', '123'])
+
+      state.insert(-1, '789', '012')
+      expect(state.$.length).toBe(4)
+      expect(state.value).toEqual(['456', '789', '012', '123'])
+      expect(state.hasError).toBe(true)
+    })
+  })
+
+  describe('append', () => {
+
+    function createState(initialValue: string[]) {
+      return new ArrayFormState(initialValue, createFieldState).validators(
+        v => v.length > 2 && 'too long'
+      )
+    }
+
+    it('should work well', async () => {
+      const state = createState(['123'])
+
+      state.append('456')
+      expect(state.$.length).toBe(2)
+      expect(state.value).toEqual(['123', '456'])
+
+      state.append('789', '012')
+      expect(state.$.length).toBe(4)
+      expect(state.value).toEqual(['123', '456', '789', '012'])
+      expect(state.hasError).toBe(true)
+    })
+  })
+
+  describe('move', () => {
+
+    function createState(initialValue: string[]) {
+      return new ArrayFormState(initialValue, createFieldState).validators(
+        v => v.length > 2 && 'too long'
+      )
+    }
+
+    it('should work well', async () => {
+      const state = createState(['123', '456', '789'])
+
+      state.move(1, 2)
+      expect(state.value).toEqual(['123', '789', '456'])
+
+      state.move(0, 2)
+      expect(state.value).toEqual(['789', '456', '123'])
+
+      state.move(1, 0)
+      expect(state.value).toEqual(['456', '789', '123'])
+    })
+
+    it('should work well with negative index', async () => {
+      const state = createState(['a', 'b', 'c', 'd'])
+
+      state.move(-1, 0)
+      expect(state.value).toEqual(['d', 'a', 'b', 'c'])
+
+      state.move(1, -1)
+      expect(state.value).toEqual(['d', 'b', 'c', 'a'])
+
+      state.move(0, 2)
+      expect(state.value).toEqual(['b', 'c', 'd', 'a'])
+
+      state.move(-2, -1)
+      expect(state.value).toEqual(['b', 'c', 'a', 'd'])
+
+      state.move(3, 1)
+      expect(state.value).toEqual(['b', 'd', 'c', 'a'])
+    })
+
+    it('should activate state', () => {
+      const state = createState(['a', 'b', 'c', 'd'])
+      expect(state.hasError).toBe(false)
+
+      state.move(1, 0)
+      expect(state.value).toEqual(['b', 'a', 'c', 'd'])
+      expect(state.hasError).toBe(true)
+    })
   })
 
   it('should reset well', async () => {
