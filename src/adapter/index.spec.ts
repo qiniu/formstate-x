@@ -5,7 +5,7 @@ import { xify, getValue, getValidateStatus, getDirty, getActivated } from '.'
 const stableDelay = 200 * 2 + 10 // [onChange debounce] + [async validate] + [buffer]
 
 async function delay(millisecond: number = stableDelay) {
-  await new Promise(resolve => setTimeout(() => resolve(), millisecond))
+  await new Promise<void>(resolve => setTimeout(() => resolve(), millisecond))
 }
 
 describe('xify', () => {

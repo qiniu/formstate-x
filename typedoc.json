@@ -1,8 +1,7 @@
 {
-  "mode": "file",
+  "entryPoints": ["./src/index.ts", "./src/adapter/index.ts"],
   "out": "docs",
   "exclude": "src/utils.ts",
-  "excludeNotExported": true,
   "excludePrivate": true,
   "excludeProtected": true,
   "theme": "./node_modules/typedoc-twilio-theme/bin"
