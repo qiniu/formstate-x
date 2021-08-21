@@ -405,10 +405,6 @@ export class ArrayFormState<
     return this._dirtyWith(this.initialValue)
   }
 
-  // @computed protected get fieldList(): T[] {
-  //   return this.$ as T[]
-  // }
-
   private createFields(value: V[]): T[] {
     return observable(
       value.map(this.createFieldState),
@@ -444,7 +440,7 @@ export class ArrayFormState<
 
   private _set(value: V[], withOnChange = false) {
     let i = 0
-    // items exists in both value & fields => set
+    // items exists in both value & fields => do field change 
     for (; i < value.length && i < this.fieldList.length; i++) {
       if (withOnChange) this.fieldList[i].onChange(value[i])
       else this.fieldList[i].set(value[i])
