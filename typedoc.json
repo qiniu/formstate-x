@@ -1,5 +1,5 @@
 {
-  "packages": ".",
+  "entryPoints": ["./src/index.ts", "./src/adapter/index.ts"],
   "out": "docs",
   "exclude": "src/utils.ts",
   "excludePrivate": true,
