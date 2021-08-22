@@ -15,7 +15,7 @@ async function delayValue<T>(value: T, millisecond: number = defaultDelay) {
 }
 
 function createFieldState<T>(initialValue: T) {
-  return new FieldState(initialValue, defaultDelay)
+  return new FieldState(initialValue, { delay: defaultDelay })
 }
 
 describe('FieldState', () => {
@@ -23,9 +23,8 @@ describe('FieldState', () => {
     const initialValue = '123'
     const state = new FieldState(initialValue)
 
-    expect(state._value).toBe(initialValue)
+    expect(state._rawValue).toBe(initialValue)
     expect(state.value).toBe(initialValue)
-    expect(state.$).toBe(initialValue)
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -39,42 +38,33 @@ describe('FieldState', () => {
 
     const value = '123'
     state.onChange(value)
-    expect(state._value).toBe(value)
+    expect(state._rawValue).toBe(value)
     expect(state.value).toBe(initialValue)
-    expect(state.$).toBe(initialValue)
 
     await delay()
-    expect(state._value).toBe(value)
+    expect(state._rawValue).toBe(value)
     expect(state.value).toBe(value)
-    expect(state.$).toBe(value)
     expect(state.dirty).toBe(true)
 
     const newValue = '789'
     state.onChange('456')
     state.onChange(newValue)
-    expect(state._value).toBe(newValue)
+    expect(state._rawValue).toBe(newValue)
     expect(state.value).toBe(value)
-    expect(state.$).toBe(value)
 
     await delay()
-    expect(state._value).toBe(newValue)
+    expect(state._rawValue).toBe(newValue)
     expect(state.value).toBe(newValue)
-    expect(state.$).toBe(newValue)
     expect(state.dirty).toBe(true)
 
     const invalidValue = '123456'
     state.onChange(invalidValue)
-    expect(state._value).toBe(invalidValue)
+    expect(state._rawValue).toBe(invalidValue)
     expect(state.value).toBe(newValue)
-    expect(state.$).toBe(newValue)
 
     await delay()
-    expect(state._value).toBe(invalidValue)
+    expect(state._rawValue).toBe(invalidValue)
     expect(state.value).toBe(invalidValue)
-    expect(state.$).toBe(newValue)
-
-    await delay()
-    expect(state.$).toBe(newValue)
 
     state.dispose()
   })
@@ -85,7 +75,7 @@ describe('FieldState', () => {
 
     const value = '123'
     state.set(value)
-    expect(state._value).toBe(value)
+    expect(state._rawValue).toBe(value)
     expect(state.value).toBe(value)
     expect(state.dirty).toBe(true)
 
@@ -100,7 +90,7 @@ describe('FieldState', () => {
 
     state.validate()
     await delay()
-    expect(state._value).toBe(value)
+    expect(state._rawValue).toBe(value)
     expect(state.value).toBe(value)
     expect(state.dirty).toBe(true)
 
@@ -115,18 +105,50 @@ describe('FieldState', () => {
     await delay()
     state.reset()
 
-    expect(state._value).toBe(initialValue)
+    expect(state._rawValue).toBe(initialValue)
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
 
     state.onChange('456')
     state.reset()
 
-    expect(state._value).toBe(initialValue)
+    expect(state._rawValue).toBe(initialValue)
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
 
     state.dispose()
+  })
+
+  it('should work well with fromRaw & toRaw', async () => {
+    const state = new FieldState(12345678901, {
+      delay: defaultDelay,
+      rawValue: {
+        parse: (rawValue: string) => parseInt(rawValue, 10),
+        get: (value: number) => value.toString()
+      }
+    }).validators(
+      v => v <= 0 && 'positive required'
+    ).rawValidators(
+      v => v === '' && 'required'
+    )
+
+    expect(state.value).toBe(12345678901)
+    expect(state._rawValue).toBe('12345678901')
+
+    state.set(12345678902)
+    expect(state.value).toBe(12345678902)
+    expect(state._rawValue).toBe('12345678902')
+
+    state.onChange('')
+    await delay()
+    expect(state.value).toBeNaN()
+    expect(Number.isNaN(state.value)).toBeTruthy()
+    expect(state.error).toBe('required')
+
+    state.set(0)
+    await state.validate()
+    expect(state._rawValue).toBe('0')
+    expect(state.error).toBe('positive required')
   })
 })
 
@@ -212,7 +234,7 @@ describe('FieldState validation', () => {
     await delay()
 
     state.reset()
-    expect(state._value).toBe(initialValue)
+    expect(state._rawValue).toBe(initialValue)
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
     expect(state.validating).toBe(false)
@@ -388,7 +410,7 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with delay', async () => {
-    const state = new FieldState('0', 1000)
+    const state = new FieldState('0', { delay: 1000 })
 
     state.onChange('1')
     expect(state.value).toBe('0')

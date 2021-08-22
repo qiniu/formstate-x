@@ -16,7 +16,7 @@ async function delayValue<T>(value: T, millisecond: number = defaultDelay) {
 }
 
 function createFieldState<T>(initialValue: T) {
-  return new FieldState(initialValue, defaultDelay)
+  return new FieldState(initialValue, { delay: defaultDelay })
 }
 
 describe('FormState (mode: object)', () => {
@@ -701,7 +701,7 @@ describe('FormState (mode: array)', () => {
     expect(state.$).toHaveLength(value1.length)
     state.$.forEach((field, i) => {
       expect(field.value).toBe(value1[i])
-      expect(field._value).toBe(value1[i])
+      expect(field._rawValue).toBe(value1[i])
     })
     expect(state.dirty).toBe(true)
     expect(state.hasError).toBe(false)
@@ -714,7 +714,7 @@ describe('FormState (mode: array)', () => {
     expect(state.$).toHaveLength(value2.length)
     state.$.forEach((field, i) => {
       expect(field.value).toBe(value2[i])
-      expect(field._value).toBe(value2[i])
+      expect(field._rawValue).toBe(value2[i])
     })
     expect(state.dirty).toBe(true)
     expect(state.hasError).toBe(false)
@@ -728,7 +728,7 @@ describe('FormState (mode: array)', () => {
     expect(state.$).toHaveLength(value3.length)
     state.$.forEach((field, i) => {
       expect(field.value).toBe(value3[i])
-      expect(field._value).toBe(value3[i])
+      expect(field._rawValue).toBe(value3[i])
     })
     expect(state.dirty).toBe(true)
     expect(state.hasError).toBe(false)
@@ -761,7 +761,7 @@ describe('FormState (mode: array)', () => {
     expect(state.$).toHaveLength(value1.length)
     state.$.forEach((field, i) => {
       expect(field.value).toBe(value1[i])
-      expect(field._value).toBe(value1[i])
+      expect(field._rawValue).toBe(value1[i])
     })
     expect(state.dirty).toBe(true)
     expect(state.hasError).toBe(true)
@@ -775,7 +775,7 @@ describe('FormState (mode: array)', () => {
     expect(state.$).toHaveLength(value2.length)
     state.$.forEach((field, i) => {
       expect(field.value).toBe(value2[i])
-      expect(field._value).toBe(value2[i])
+      expect(field._rawValue).toBe(value2[i])
     })
     expect(state.dirty).toBe(true)
     expect(state.hasError).toBe(true)
@@ -790,7 +790,7 @@ describe('FormState (mode: array)', () => {
     expect(state.$).toHaveLength(value3.length)
     state.$.forEach((field, i) => {
       expect(field.value).toBe(value3[i])
-      expect(field._value).toBe(value3[i])
+      expect(field._rawValue).toBe(value3[i])
     })
     expect(state.dirty).toBe(true)
     expect(field2Dispose).toBeCalled()

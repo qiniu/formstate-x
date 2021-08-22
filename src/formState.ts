@@ -1,9 +1,19 @@
 import { observable, computed, isObservable, action, autorun, when, reaction, makeObservable } from 'mobx'
-import { Validatable, ValidationResponse, Validator, Validated, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
-import { applyValidators, isPromiseLike } from './utils'
+import { Validatable, ValidationResponse, Validator, Validated, ValidateStatus, Error, ValidateResult, ValueOfObjectFields, RawValueOptions } from './types'
+import { responsesAnd, isPromiseLike } from './utils'
 import Disposable from './disposable'
 
-export abstract class AbstractFormState<T, TValue> extends Disposable implements Validatable<T, TValue> {
+export interface FormStateInitOptionsWithRaw<TValue, TRawValue> {
+  rawValue: RawValueOptions<TValue, TRawValue>
+}
+
+export type FormStateInitOptions<TValue, TRawValue> = (
+  (<T>() => T extends TValue ? 1 : 2) extends (<T>() => T extends TRawValue ? 1 : 2)
+  ? (FormStateInitOptionsWithRaw<TValue, TRawValue> | void)
+  : FormStateInitOptionsWithRaw<TValue, TRawValue>
+)
+
+export abstract class AbstractFormState<T, TValue, TRawValue = TValue> extends Disposable implements Validatable<TValue, TRawValue> {
 
   /**
    * If activated (with auto validate).
@@ -26,16 +36,23 @@ export abstract class AbstractFormState<T, TValue> extends Disposable implements
   */
   declare abstract dirty: boolean
 
+  declare protected abstract parseRawValue: (rawValue: TRawValue) => TValue
+  declare protected abstract getRawValue: (value: TValue) => TRawValue
+
   /**
    * List of fields.
    */
   declare protected abstract fieldList: Validatable[]
 
+  @observable.ref private rawValue!: TRawValue
+
   /**
    * Value that can be consumed by your code.
    * It's a composition of fields' value.
    */
-  declare abstract value: TValue
+  @computed get value(): TValue {
+    return this.parseRawValue(this.rawValue)
+  }
 
   /**
    * Set form value synchronously.
@@ -45,7 +62,7 @@ export abstract class AbstractFormState<T, TValue> extends Disposable implements
   /**
    * Set form value on change event.
    */
-  abstract onChange(value: TValue): void
+  abstract onChange(value: TRawValue): void
 
   /**
    * The validate status.
@@ -144,6 +161,19 @@ export abstract class AbstractFormState<T, TValue> extends Disposable implements
     return this
   }
 
+  /**
+   * List of validator function for raw value.
+   */
+   @observable.shallow private _rawValidators: Validator<TRawValue>[] = []
+
+   /**
+    * Add raw validator functions.
+    */
+   @action rawValidators(...rawValidators: Validator<TRawValue>[]) {
+     this._rawValidators.push(...rawValidators)
+     return this
+   }
+
   protected abstract declare initialValue: TValue
 
   /**
@@ -174,22 +204,31 @@ export abstract class AbstractFormState<T, TValue> extends Disposable implements
   /**
    * Current validation info.
    */
-  @observable.ref private validation?: Validated<TValue>
+  @observable.ref private validation?: Validated<TValue, TRawValue>
 
   /**
    * Do validation.
    */
   private _validate() {
-    const value = this.value
+    const { rawValue, value, _rawValidators: rawValidators, _validators: validators } = this
 
     action('set-validateStatus-when-_validate', () => {
       this._validateStatus = ValidateStatus.Validating
     })()
 
-    const response = applyValidators(value, this._validators)
+    function* validate() {
+      for (const validator of rawValidators) {
+        yield validator(rawValue)
+      }
+      for (const validator of validators) {
+        yield validator(value)
+      }
+    }
+
+    const response = responsesAnd(validate())
 
     action('set-validation-when-_validate', () => {
-      this.validation = { value, response }
+      this.validation = { value, rawValue, response }
     })()
   }
 
@@ -306,16 +345,17 @@ export type FieldsObject = { [key: string]: Validatable }
  * The state for a form (composition of fields).
  */
 export class FormState<
-  TFields extends FieldsObject
+  TFields extends FieldsObject,
+  TValue = ValueOfObjectFields<TFields>
 > extends AbstractFormState<
-  TFields, ValueOfObjectFields<TFields>
+  TFields, TValue, ValueOfObjectFields<TFields>
 > {
 
   @observable.ref readonly $: Readonly<TFields>
 
-  protected initialValue: ValueOfObjectFields<TFields>
+  protected initialValue: TValue
 
-  _dirtyWith(initialValue: ValueOfObjectFields<TFields>) {
+  _dirtyWith(initialValue: TValue) {
     return Object.keys(this.$).some(
       key => this.$[key]._dirtyWith(initialValue[key])
     )
@@ -365,7 +405,7 @@ export class FormState<
     })
   }
 
-  constructor(initialFields: TFields) {
+  constructor(initialFields: TFields, options: FormStateInitOptions<TValue, TRawValue>) {
     super()
 
     this.$ = initialFields

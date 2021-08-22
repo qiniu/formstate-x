@@ -1,5 +1,6 @@
 import { observable } from 'mobx'
-import { asyncResponsesAnd, isEmpty, isArrayLike } from './utils'
+import { ValidationResponse, ValidatorResponse } from './types'
+import { asyncResponsesAnd, responsesAnd, isEmpty, isArrayLike } from './utils'
 
 const defaultDelay = 10
 
@@ -88,5 +89,73 @@ describe('isArrayLike', () => {
   it('should recognize object with invalid length', () => {
     expect(isArrayLike({ length: -1 })).toBe(false)
     expect(isArrayLike({ length: 2.3 })).toBe(false)
+  })
+})
+
+describe('responsesAnd', () => {
+
+  it('should work well', async () => {
+    expect(isEmpty(responsesAnd(['', null, undefined, false]) as ValidationResponse)).toBeTruthy()
+    expect(responsesAnd((['foo', 'bar']))).toBe('foo')
+    expect(responsesAnd(([null, 'foo', 'bar']))).toBe('foo')
+    expect(responsesAnd((['bar', undefined, 'foo']))).toBe('bar')
+    expect(responsesAnd((['bar', 'foo', false]))).toBe('bar')
+  })
+
+  it('should work well with async responses', async () => {
+    expect(isEmpty(await responsesAnd([
+      delay(''),
+      delay(null),
+      delay(undefined),
+      delay(false)
+    ]))).toBeTruthy()
+    expect(await responsesAnd([
+      delay(null),
+      delay('foo'),
+      delay('bar')
+    ])).toBe('foo')
+    expect(await responsesAnd([
+      delay('foo', 20),
+      delay(null, 10),
+      delay('bar', 30)
+    ])).toBe('foo')
+    expect(await responsesAnd([
+      delay('foo', 30),
+      delay(null, 20),
+      delay('bar', 10)
+    ])).toBe('bar')
+    expect(responsesAnd([
+      delay('bar'),
+      'foo',
+      delay(null)
+    ])).toBe('foo')
+    expect(await responsesAnd([
+      '',
+      delay('foo'),
+      delay('bar')
+    ])).toBe('foo')
+  })
+
+  it('should avoid unnecessary calls', () => {
+    const validators = [
+      () => null,
+      () => 'foo',
+      () => 'bar',
+      () => delay('baz')
+    ].map(
+      (fn: () => ValidatorResponse) => jest.fn(fn)
+    )
+
+    function* validate() {
+      for (const validator of validators) {
+        yield validator()
+      }
+    }
+
+    expect(responsesAnd(validate())).toBe('foo')
+    expect(validators[0]).toBeCalledTimes(1)
+    expect(validators[1]).toBeCalledTimes(1)
+    expect(validators[2]).not.toBeCalled()
+    expect(validators[3]).not.toBeCalled()
   })
 })

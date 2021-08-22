@@ -10,9 +10,8 @@ export function isEmpty(response: ValidationResponse): boolean {
 }
 
 export function asyncResponsesAnd(asyncResponses: Array<Promise<ValidationResponse>>): ValidatorResponse {
-  if (asyncResponses.length === 0) {
-    return null
-  }
+  if (asyncResponses.length === 0) return null
+  if (asyncResponses.length === 1) return asyncResponses[0]
   return new Promise(resolve => {
     // 任一不通过，则不通过
     asyncResponses.forEach(asyncResponse => asyncResponse.then(Response => {
@@ -29,25 +28,14 @@ export function asyncResponsesAnd(asyncResponses: Array<Promise<ValidationRespon
   })
 }
 
-export function applyValidators<TValue>(value: TValue, validators: Validator<TValue>[]) {
-  if (validators.length === 0) {
-    return null
-  }
-
-  if (validators.length === 1) {
-    return validators[0](value)
-  }
-
+export function responsesAnd(responses: Iterable<ValidatorResponse>): ValidatorResponse {
   const asyncResponses: Array<Promise<ValidationResponse>> = []
 
-  for (const validator of validators) {
-    const response = validator(value)
-
+  for (const response of responses) {
     if (isPromiseLike(response)) {
       asyncResponses.push(response)
       continue
     }
-
     // 任一不通过，则不通过
     if (!isEmpty(response)) {
       return response
@@ -56,6 +44,15 @@ export function applyValidators<TValue>(value: TValue, validators: Validator<TVa
 
   return asyncResponsesAnd(asyncResponses)
 }
+
+// export function applyValidators<TValue>(value: TValue, validators: Validator<TValue>[]): ValidatorResponse {
+//   function* validate() {
+//     for (const validator of validators) {
+//       yield validator(value)
+//     }
+//   }
+//   return responsesAnd(validate())
+// }
 
 export function debounce(fn: () => void, delay: number) {
   let timeout: any = null

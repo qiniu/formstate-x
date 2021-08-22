@@ -13,9 +13,10 @@ export type ValidatorResponse =
   ValidationResponse
   | Promise<ValidationResponse>
 
-export type Validated<TValue> = {
+export type Validated<TValue, TRawValue> = {
   value: TValue // value for the response
-  response: ValidatorResponse // response for the value
+  rawValue: TRawValue // raw value for the response
+  response: ValidatorResponse // response of validation
 }
 
 /**
@@ -33,8 +34,7 @@ export type ValidateResultWithValue<T> = { hasError: false, value: T }
 export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
 
 /** Validatable object (which can be used as a field for `FormState`). */
-export interface Validatable<T = any, TValue = T> {
-  readonly $: T
+export interface Validatable<TValue = unknown, TRawValue = TValue> {
   value: TValue
   hasError: boolean
   error: Error
@@ -47,7 +47,7 @@ export interface Validatable<T = any, TValue = T> {
 
   validate(): Promise<ValidateResult<TValue>>
   set: (value: TValue) => void
-  onChange: (value: TValue) => void
+  onChange: (value: TRawValue) => void
   reset: () => void
   resetWith: (initialValue: TValue) => void
   _dirtyWith: (initialValue: TValue) => void
@@ -57,9 +57,6 @@ export interface Validatable<T = any, TValue = T> {
   // enableAutoValidation: () => void
   // disableAutoValidation: () => void
 }
-
-/** @deprecated Composible validatable object (which can be used as a field for `FormState`). */
-export interface ComposibleValidatable<T, TValue = T> extends Validatable<T, TValue> {}
 
 /** Function to do dispose. */
 export interface Disposer {
@@ -93,4 +90,9 @@ export enum ValidateStatus {
   Validating, // 校验中
   /** current validation finished */
   Validated // 校验完成
+}
+
+export interface RawValueOptions<TValue, TRawValue> {
+  parse: (rawValue: TRawValue) => TValue
+  get: (value: TValue) => TRawValue
 }

@@ -11,7 +11,7 @@ describe('bindInput', () => {
 
     const value = '123'
     binds.onChange(value)
-    expect(field._value).toBe(value)
+    expect(field._rawValue).toBe(value)
 
     const newBinds = bindInput(field)
     expect(newBinds.value).toBe(value)
@@ -25,7 +25,7 @@ describe('bindInput', () => {
     expect(typeof binds.onChange).toBe('function')
 
     binds.onChange(123)
-    expect(field._value).toBe('123')
+    expect(field._rawValue).toBe('123')
 
     const newBinds = bindInput(field)
     expect(newBinds.value).toBe('123')

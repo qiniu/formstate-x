@@ -1,12 +1,31 @@
 import { observable, computed, action, reaction, autorun, when, makeObservable } from 'mobx'
-import { Validatable, Validator, Validated, ValidationResponse, ValidateStatus, Error, ValidateResult } from './types'
-import { applyValidators, debounce, isPromiseLike } from './utils'
+import { Validatable, Validator, Validated, ValidationResponse, ValidateStatus, Error, ValidateResult, RawValueOptions } from './types'
+import { debounce, isPromiseLike, responsesAnd } from './utils'
 import Disposable from './disposable'
+
+export interface FieldStateInitOptionsWithoutRaw {
+  delay?: number
+}
+
+export interface FieldStateInitOptionsWithRaw<TValue, TRawValue> extends FieldStateInitOptionsWithoutRaw {
+  delay?: number
+  rawValue: RawValueOptions<TValue, TRawValue>
+}
+
+export type FieldStateInitOptions<TValue, TRawValue> = (
+  (<T>() => T extends TValue ? 1 : 2) extends (<T>() => T extends TRawValue ? 1 : 2)
+  ? (FieldStateInitOptionsWithoutRaw | FieldStateInitOptionsWithRaw<TValue, TRawValue>)
+  : FieldStateInitOptionsWithRaw<TValue, TRawValue>
+)
+
+function echo<T>(v: T) {
+  return v
+}
 
 /**
  * The state for a field.
  */
-export default class FieldState<TValue> extends Disposable implements Validatable<TValue> {
+export default class FieldState<TValue, TRawValue = TValue> extends Disposable implements Validatable<TValue, TRawValue> {
 
   /**
    * If activated (with auto validation).
@@ -25,22 +44,24 @@ export default class FieldState<TValue> extends Disposable implements Validatabl
     return this._dirtyWith(this.initialValue)
   }
 
+  private parseRawValue: (rawValue: TRawValue) => TValue
+  private getRawValue: (value: TValue) => TRawValue
+
   /**
    * Value that reacts to `onChange` immediately.
    * You should only use it to bind with UI input componnet.
    */
-  @observable.ref _value!: TValue
+  @observable.ref _rawValue!: TRawValue
+
+  @observable.ref private rawValue!: TRawValue
 
   /**
    * Value that can be consumed by your code.
    * It's synced from `_value` with debounce of 200ms.
    */
-  @observable.ref value!: TValue
-
-  /**
-   * Value that has bean validated with no error, AKA "safe".
-   */
-  @observable.ref $!: TValue
+  @computed get value(): TValue {
+    return this.parseRawValue(this.rawValue)
+  }
 
   /**
    * The validate status.
@@ -89,12 +110,12 @@ export default class FieldState<TValue> extends Disposable implements Validatabl
   }
 
   /**
-   * List of validator functions.
+   * List of validator function for value.
    */
   @observable.shallow private _validators: Validator<TValue>[] = []
 
   /**
-   * Add validator function.
+   * Add validator functions.
    */
   @action validators(...validators: Validator<TValue>[]) {
     this._validators.push(...validators)
@@ -102,24 +123,38 @@ export default class FieldState<TValue> extends Disposable implements Validatabl
   }
 
   /**
+   * List of validator function for raw value.
+   */
+  @observable.shallow private _rawValidators: Validator<TRawValue>[] = []
+
+  /**
+   * Add raw validator functions.
+   */
+  @action rawValidators(...rawValidators: Validator<TRawValue>[]) {
+    this._rawValidators.push(...rawValidators)
+    return this
+  }
+
+  /**
    * Set `_value` on change event.
    */
-  @action onChange(value: TValue) {
-    this._value = value
+  @action onChange(value: TRawValue) {
+    this._rawValue = value
   }
 
   /**
    * Set `value` (& `_value`) synchronously.
    */
   @action set(value: TValue) {
-    this.value = this._value = value
+    this.rawValue = this._rawValue = this.getRawValue(value)
   }
 
   /**
    * Reset to specific status.
    */
   @action resetWith(initialValue: TValue) {
-    this.$ = this.value = this._value = this.initialValue = initialValue
+    this.initialValue = initialValue
+    this.rawValue = this._rawValue = this.getRawValue(initialValue)
     this._activated = false
     this._validateStatus = ValidateStatus.NotValidated
     this._error = undefined
@@ -136,15 +171,15 @@ export default class FieldState<TValue> extends Disposable implements Validatabl
   /**
    * Current validation info.
    */
-  @observable.ref private validation?: Validated<TValue>
+  @observable.ref private validation?: Validated<TValue, TRawValue>
 
   /**
    * Do validation.
    */
   private _validate() {
-    const value = this.value
-    // 如果 value 已经过期，则不处理
-    if (value !== this._value) {
+    const { rawValue, value, _rawValidators: rawValidators, _validators: validators } = this
+    // 如果 rawValue 已经过期，则不处理
+    if (rawValue !== this._rawValue) {
       return
     }
 
@@ -152,10 +187,19 @@ export default class FieldState<TValue> extends Disposable implements Validatabl
       this._validateStatus = ValidateStatus.Validating
     })()
 
-    const response = applyValidators(value, this._validators)
+    function* validate() {
+      for (const rawValidator of rawValidators) {
+        yield rawValidator(rawValue)
+      }
+      for (const validator of validators) {
+        yield validator(value)
+      }
+    }
+
+    const response = responsesAnd(validate())
 
     action('set-validation-when-_validate', () => {
-      this.validation = { value, response }
+      this.validation = { rawValue, value, response }
     })()
   }
 
@@ -168,7 +212,7 @@ export default class FieldState<TValue> extends Disposable implements Validatabl
     action('activate-and-sync-_value-when-validate', () => {
       this._activated = true
       // 若有用户交互产生的变更（因 debounce）尚未同步，同步之，确保本次 validate 结果是相对稳定的
-      this.value = this._value
+      this.rawValue = this._rawValue
     })()
 
     // 若 `validation` 未发生变更，意味着未发生新的校验行为
@@ -225,7 +269,7 @@ export default class FieldState<TValue> extends Disposable implements Validatabl
 
     if (
       validation !== this.validation // 如果 validation 已过期，则不生效
-      || validation.value !== this._value // 如果 value 已过期，则不生效
+      || validation.rawValue !== this._rawValue // 如果 value 已过期，则不生效
     ) {
       return
     }
@@ -240,36 +284,38 @@ export default class FieldState<TValue> extends Disposable implements Validatabl
     })()
   }
 
-  constructor(private initialValue: TValue, delay = 200) {
+  constructor(private initialValue: TValue, options?: FieldStateInitOptions<TValue, TRawValue>) {
     super()
-
     makeObservable(this)
+
+    const delay = options?.delay ?? 200
+
+    if (options && 'rawValue' in options) {
+      const optionsWithRaw = options as FieldStateInitOptionsWithRaw<TValue, TRawValue>
+      this.parseRawValue = optionsWithRaw.rawValue.parse
+      this.getRawValue = optionsWithRaw.rawValue.get
+    } else {
+      this.parseRawValue = this.getRawValue = echo as any
+    }
 
     this.reset()
 
     // debounced reaction to `_value` change
     this.addDisposer(reaction(
-      () => this._value,
+      () => this._rawValue,
       // use debounce instead of reactionOptions.delay
       // cause the later do throttle in fact, not debounce
       // see https://github.com/mobxjs/mobx/issues/1956
       debounce(() => {
-        if (this.value !== this._value) {
+        if (this.rawValue !== this._rawValue) {
           action('sync-value-when-_value-changed', () => {
-            this.value = this._value
+            this.rawValue = this._rawValue
             this._validateStatus = ValidateStatus.NotValidated
             this._activated = true
           })()
         }
       }, delay),
       { name: 'reaction-when-_value-change' }
-    ))
-
-    // auto sync when validate ok: this.value -> this.$
-    this.addDisposer(reaction(
-      () => this.validated && !this.hasError,
-      validateOk => validateOk && (this.$ = this.value),
-      { name: 'sync-$-when-validatedOk' }
     ))
 
     // auto validate: this.value -> this.validation
