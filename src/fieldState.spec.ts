@@ -25,7 +25,7 @@ describe('FieldState', () => {
 
     expect(state._value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
-    expect(state.$).toBe(initialValue)
+    expect(state.safeValue).toBe(initialValue)
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -41,12 +41,12 @@ describe('FieldState', () => {
     state.onChange(value)
     expect(state._value).toBe(value)
     expect(state.value).toBe(initialValue)
-    expect(state.$).toBe(initialValue)
+    expect(state.safeValue).toBe(initialValue)
 
     await delay()
     expect(state._value).toBe(value)
     expect(state.value).toBe(value)
-    expect(state.$).toBe(value)
+    expect(state.safeValue).toBe(value)
     expect(state.dirty).toBe(true)
 
     const newValue = '789'
@@ -54,27 +54,27 @@ describe('FieldState', () => {
     state.onChange(newValue)
     expect(state._value).toBe(newValue)
     expect(state.value).toBe(value)
-    expect(state.$).toBe(value)
+    expect(state.safeValue).toBe(value)
 
     await delay()
     expect(state._value).toBe(newValue)
     expect(state.value).toBe(newValue)
-    expect(state.$).toBe(newValue)
+    expect(state.safeValue).toBe(newValue)
     expect(state.dirty).toBe(true)
 
     const invalidValue = '123456'
     state.onChange(invalidValue)
     expect(state._value).toBe(invalidValue)
     expect(state.value).toBe(newValue)
-    expect(state.$).toBe(newValue)
+    expect(state.safeValue).toBe(newValue)
 
     await delay()
     expect(state._value).toBe(invalidValue)
     expect(state.value).toBe(invalidValue)
-    expect(state.$).toBe(newValue)
+    expect(state.safeValue).toBe(newValue)
 
     await delay()
-    expect(state.$).toBe(newValue)
+    expect(state.safeValue).toBe(newValue)
 
     state.dispose()
   })

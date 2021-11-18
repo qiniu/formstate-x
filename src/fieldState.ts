@@ -1,12 +1,12 @@
 import { observable, computed, action, reaction, autorun, when, makeObservable } from 'mobx'
-import { Validatable, Validator, Validated, ValidationResponse, ValidateStatus, Error, ValidateResult } from './types'
+import { State, Validator, Validated, ValidationResponse, ValidateStatus, Error, ValidateResult, Bindable } from './types'
 import { applyValidators, debounce, isPromiseLike } from './utils'
 import Disposable from './disposable'
 
 /**
  * The state for a field.
  */
-export default class FieldState<TValue> extends Disposable implements Validatable<TValue> {
+export default class FieldState<TValue> extends Disposable implements State<TValue>, Bindable<TValue> {
 
   /**
    * If activated (with auto validation).
@@ -40,7 +40,7 @@ export default class FieldState<TValue> extends Disposable implements Validatabl
   /**
    * Value that has bean validated with no error, AKA "safe".
    */
-  @observable.ref $!: TValue
+  @observable.ref safeValue!: TValue
 
   /**
    * The validate status.
@@ -119,7 +119,7 @@ export default class FieldState<TValue> extends Disposable implements Validatabl
    * Reset to specific status.
    */
   @action resetWith(initialValue: TValue) {
-    this.$ = this.value = this._value = this.initialValue = initialValue
+    this.safeValue = this.value = this._value = this.initialValue = initialValue
     this._activated = false
     this._validateStatus = ValidateStatus.NotValidated
     this._error = undefined
@@ -268,7 +268,7 @@ export default class FieldState<TValue> extends Disposable implements Validatabl
     // auto sync when validate ok: this.value -> this.$
     this.addDisposer(reaction(
       () => this.validated && !this.hasError,
-      validateOk => validateOk && (this.$ = this.value),
+      validateOk => validateOk && (this.safeValue = this.value),
       { name: 'sync-$-when-validatedOk' }
     ))
 

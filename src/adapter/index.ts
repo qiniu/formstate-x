@@ -7,7 +7,7 @@ import * as fs from 'formstate'
 import * as fsx from '..'
 import { observable } from 'mobx'
 
-export type Xify<T> = fsx.Validatable<ValueOf<T>> & {
+export type Xify<T> = fsx.State<ValueOf<T>> & {
   origin: T
 }
 
@@ -15,7 +15,6 @@ export type Xify<T> = fsx.Validatable<ValueOf<T>> & {
 export function xify<T extends fs.ComposibleValidatable<any>>(state: T): Xify<T> {
   const stateX: Xify<T> = {
     origin: state,
-    get $() { return getValue(state, true) },
     get value() {
       // 这里理应有 200ms 的延迟（UI input -> value 的 debounce）
       // 考虑有额外的复杂度，且这里不影响逻辑（只影响性能），故不做处理

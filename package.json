@@ -10,14 +10,16 @@
   "module": "esm/index.js",
   "scripts": {
     "clean": "rm -rf ./esm ./lib ./docs",
-    "test": "jest",
+    "lint": "tsc --noEmit",
+    "test": "jest ./src",
+    "validate": "npm run lint && npm run test",
     "coverage": "rm -rf coverage && jest --coverage",
     "build:esm": "rm -rf ./esm && tsc --module es6 --outDir ./esm",
     "build:lib": "rm -rf ./lib && tsc",
     "build:doc": "rm -rf ./docs && typedoc && cp -r ./assets ./docs",
     "build": "npm run build:esm && npm run build:lib",
     "prepublishOnly": "npm run test && npm run build",
-    "ci": "tsc --noEmit && npm run coverage && npm run build && npm run build:doc"
+    "ci": "npm run lint && npm run coverage && npm run build && npm run build:doc"
   },
   "keywords": [
     "form",

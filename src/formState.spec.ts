@@ -1,7 +1,7 @@
 import { observable, isObservable } from 'mobx'
 import FieldState from './fieldState'
 import { FormState, ArrayFormState, isFormState } from './formState'
-import { Error, Validatable, ValidateResultWithError, ValidateResultWithValue } from './types'
+import { Error, State, ValidateResultWithError, ValidateResultWithValue } from './types'
 
 const defaultDelay = 10
 const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
@@ -30,9 +30,9 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(initialValue)
     expect(isObservable(state.$)).toBe(true)
     expect(state.$.foo).toBeInstanceOf(FieldState)
-    expect(state.$.foo.$).toBe(initialValue.foo)
+    expect(state.$.foo.safeValue).toBe(initialValue.foo)
     expect(state.$.bar).toBeInstanceOf(FieldState)
-    expect(state.$.bar.$).toBe(initialValue.bar)
+    expect(state.$.bar.safeValue).toBe(initialValue.bar)
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -65,8 +65,8 @@ describe('FormState (mode: object)', () => {
     await delay()
 
     expect(state.value).toEqual(value)
-    expect(state.$.foo.$).toBe(value.foo)
-    expect(state.$.bar.$).toBe(value.bar)
+    expect(state.$.foo.safeValue).toBe(value.foo)
+    expect(state.$.bar.safeValue).toBe(value.bar)
     expect(state.dirty).toBe(true)
 
     state.dispose()
@@ -191,8 +191,8 @@ describe('FormState (mode: object)', () => {
     state.reset()
 
     expect(state.value).toEqual(initialValue)
-    expect(state.$.foo.$).toBe(initialValue.foo)
-    expect(state.$.bar.$).toBe(initialValue.bar)
+    expect(state.$.foo.safeValue).toBe(initialValue.foo)
+    expect(state.$.bar.safeValue).toBe(initialValue.bar)
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -665,7 +665,7 @@ describe('FormState (mode: array)', () => {
     expect(state.$).toHaveLength(initialValue.length)
     state.$.forEach((field, i) => {
       expect(field).toBeInstanceOf(FieldState)
-      expect(field.$).toBe(initialValue[i])
+      expect(field.safeValue).toBe(initialValue[i])
     })
     expect(state.dirty).toBe(false)
 
@@ -682,7 +682,7 @@ describe('FormState (mode: array)', () => {
 
     expect(state.value).toEqual(value)
     state.$.forEach((field, i) => {
-      expect(field.$).toBe(value[i])
+      expect(field.safeValue).toBe(value[i])
     })
     expect(state.dirty).toBe(true)
 
@@ -993,7 +993,7 @@ describe('FormState (mode: array)', () => {
 
     expect(state.value).toEqual(initialValue)
     state.$.forEach((field, i) => {
-      expect(field.$).toBe(initialValue[i])
+      expect(field.safeValue).toBe(initialValue[i])
     })
     expect(state.dirty).toBe(false)
 
@@ -1472,7 +1472,7 @@ describe('nested FormState', () => {
 
     const createInputDuplicateValidator = (currentInputState: FieldState<string>) => (value: string) => {
       for (const inputState of state.$.inputs.$) {
-        if (inputState !== currentInputState && value === inputState.$) {
+        if (inputState !== currentInputState && value === inputState.value) {
           return 'duplicated'
         }
       }
@@ -1484,7 +1484,7 @@ describe('nested FormState', () => {
       return inputState.validators(duplicateValidator)
     }
 
-    const shouldDisableInputsState = () => !enabledState.$
+    const shouldDisableInputsState = () => !enabledState.safeValue
 
     const inputsState = new ArrayFormState([], createInputState).validators(
       list => list.join('').length > 5 && 'too long'
@@ -1694,13 +1694,13 @@ describe('isFormState', () => {
   })
 
   it('should work with correct typing info', () => {
-    let state: Validatable<readonly Validatable<string>[], string[]> = new ArrayFormState(
+    let state: State<string[]> = new ArrayFormState(
       ['123'],
       v => new FieldState(v)
     )
     if (isFormState(state)) {
-      const v: string = state.$[0].$
-      const vs: string[] = state.value
+      const value: string = (state.$ as Array<State<string>>)[0].value
+      const values: string[] = state.value
       const ownError: Error = state.ownError
     }
   })

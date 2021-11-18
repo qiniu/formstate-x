@@ -30,7 +30,6 @@ describe('xify', () => {
     const state = new fs.FieldState(0)
     const stateX = xify(state)
     expect(stateX.value).toBe(0)
-    expect(stateX.$).toBe(0)
     expect(stateX.origin).toBe(state)
   })
 
@@ -43,7 +42,6 @@ describe('xify', () => {
     })
     const stateX = xify(state)
     expect(stateX.value).toEqual({ a: 'a', b: { c: 1 } })
-    expect(stateX.$).toEqual({ a: 'a', b: { c: 1 } })
     expect(stateX.origin).toBe(state)
   })
 
@@ -55,7 +53,6 @@ describe('xify', () => {
       })
     ]))
     expect(stateX.value).toEqual(['a', { c: 1 }])
-    expect(stateX.$).toEqual(['a', { c: 1 }])
   })
 
   it('should work well with field state\'s error', async () => {
@@ -150,17 +147,13 @@ describe('xify', () => {
       return v <= 0 && 'positive required'
     })
     const stateX = xify(state)
-    expect(stateX.$).toBe(1)
 
     state.onChange(0)
     await state.validate()
-    expect(stateX.$).toBe(1)
 
     state.onChange(2)
     const validated = state.validate()
-    expect(stateX.$).toBe(1)
     await validated
-    expect(stateX.$).toBe(2)
   })
 
   it('should work well with form state\'s $', async () => {
@@ -172,17 +165,13 @@ describe('xify', () => {
       num: numState
     })
     const stateX = xify(state)
-    expect(stateX.$).toEqual({ num: 1 })
 
     state.$.num.onChange(0)
     await state.validate()
-    expect(stateX.$).toEqual({ num: 1 })
 
     state.$.num.onChange(2)
     const validated = state.validate()
-    expect(stateX.$).toEqual({ num: 1 })
     await validated
-    expect(stateX.$).toEqual({ num: 2 })
   })
 
   it('should work well with field state\'s validate()', async () => {
@@ -237,7 +226,6 @@ describe('xify', () => {
     expect(stateX.validating).toBe(false)
     expect(stateX.validated).toBe(false)
     expect(stateX.value).toBe(1)
-    expect(stateX.$).toBe(1)
     expect(stateX.hasError).toBe(false)
     expect(stateX.error).toBeUndefined()
     expect(stateX._activated).toBe(false)
@@ -259,7 +247,6 @@ describe('xify', () => {
     expect(stateX.validating).toBe(false)
     expect(stateX.validated).toBe(false)
     expect(stateX.value).toEqual({ num: 1 })
-    expect(stateX.$).toEqual({ num: 1 })
     expect(stateX.hasError).toBe(false)
     expect(stateX.error).toBeUndefined()
     expect(stateX.dirty).toBe(false)
@@ -395,7 +382,6 @@ describe('xify', () => {
     expect(stateX.validating).toBe(false)
     expect(stateX.validated).toBe(false)
     expect(stateX.value).toBe(1)
-    expect(stateX.$).toBe(1)
     expect(stateX.hasError).toBe(false)
     expect(stateX.error).toBeUndefined()
     expect(stateX._activated).toBe(false)
@@ -417,7 +403,6 @@ describe('xify', () => {
     expect(stateX.validating).toBe(false)
     expect(stateX.validated).toBe(false)
     expect(stateX.value).toEqual({ num: 1 })
-    expect(stateX.$).toEqual({ num: 1 })
     expect(stateX.hasError).toBe(false)
     expect(stateX.error).toBeUndefined()
     expect(stateX.dirty).toBe(false)

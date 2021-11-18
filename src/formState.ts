@@ -1,9 +1,9 @@
 import { observable, computed, isObservable, action, autorun, when, reaction, makeObservable } from 'mobx'
-import { Validatable, ValidationResponse, Validator, Validated, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
+import { State, ValidationResponse, Validator, Validated, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
 import { applyValidators, isPromiseLike } from './utils'
 import Disposable from './disposable'
 
-export abstract class AbstractFormState<T, TValue> extends Disposable implements Validatable<T, TValue> {
+export abstract class AbstractFormState<T, TValue> extends Disposable implements State<TValue> {
 
   /**
    * If activated (with auto validate).
@@ -29,7 +29,7 @@ export abstract class AbstractFormState<T, TValue> extends Disposable implements
   /**
    * List of fields.
    */
-  declare protected abstract fieldList: Validatable[]
+  declare protected abstract fieldList: State[]
 
   /**
    * Value that can be consumed by your code.
@@ -300,7 +300,7 @@ export abstract class AbstractFormState<T, TValue> extends Disposable implements
 }
 
 /** Object with validatable fields */
-export type FieldsObject = { [key: string]: Validatable }
+export type FieldsObject = { [key: string]: State }
 
 /**
  * The state for a form (composition of fields).
@@ -325,7 +325,7 @@ export class FormState<
     return this._dirtyWith(this.initialValue)
   }
 
-  @computed protected get fieldList(): Validatable[] {
+  @computed protected get fieldList(): State[] {
     const fields = this.$
     return Object.keys(fields).map(
       key => fields[key]
@@ -383,7 +383,7 @@ export class FormState<
  * The state for a array form (list of fields).
  */
 export class ArrayFormState<
-  V, T extends Validatable<any, V> = Validatable<any, V>
+  V, T extends State<V> = State<V>
 > extends AbstractFormState<
   readonly T[], V[]
 > {
@@ -517,6 +517,6 @@ export class ArrayFormState<
   }
 }
 
-export function isFormState<T, V>(state: Validatable<T, V>): state is AbstractFormState<T, V> {
+export function isFormState<T = unknown, V = any>(state: State<V>): state is AbstractFormState<T, V> {
   return state instanceof AbstractFormState
 }

@@ -33,9 +33,8 @@ export type ValidateResultWithValue<T> = { hasError: false, value: T }
 export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
 
 /** Validatable object (which can be used as a field for `FormState`). */
-export interface Validatable<T = any, TValue = T> {
-  readonly $: T
-  value: TValue
+export interface State<V = any> {
+  value: V
   hasError: boolean
   error: Error
   validating: boolean
@@ -45,21 +44,14 @@ export interface Validatable<T = any, TValue = T> {
   _activated: boolean
   _validateStatus: ValidateStatus
 
-  validate(): Promise<ValidateResult<TValue>>
-  set: (value: TValue) => void
-  onChange: (value: TValue) => void
+  validate(): Promise<ValidateResult<V>>
+  set: (value: V) => void
+  onChange: (value: V) => void
   reset: () => void
-  resetWith: (initialValue: TValue) => void
-  _dirtyWith: (initialValue: TValue) => void
+  resetWith: (initialValue: V) => void
+  _dirtyWith: (initialValue: V) => void
   dispose: () => void
-
-  // To see if there are requirements: enableAutoValidation, disableAutoValidation
-  // enableAutoValidation: () => void
-  // disableAutoValidation: () => void
 }
-
-/** @deprecated Composible validatable object (which can be used as a field for `FormState`). */
-export interface ComposibleValidatable<T, TValue = T> extends Validatable<T, TValue> {}
 
 /** Function to do dispose. */
 export interface Disposer {
@@ -79,11 +71,7 @@ export type ValueOfObjectFields<Fields> = {
 }
 
 /** Value of state (`FormState` or `FieldState`) */
-export type ValueOf<State> = (
-  State extends AbstractFormState<infer T, infer TValue>
-  ? TValue
-  : ValueOfFieldState<State>
-)
+export type ValueOf<S> = S extends State<infer V> ? V : never
 
 /** Validate status. */
 export enum ValidateStatus {
@@ -93,4 +81,9 @@ export enum ValidateStatus {
   Validating, // 校验中
   /** current validation finished */
   Validated // 校验完成
+}
+
+export interface Bindable<T> {
+  _value: T
+  onChange: (v: T) => void
 }
