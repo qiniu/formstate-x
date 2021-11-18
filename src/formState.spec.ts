@@ -123,6 +123,61 @@ describe('FormState (mode: object)', () => {
     state.dispose()
   })
 
+  it('should onChange well', async () => {
+    const initialValue = { foo: 123, bar: '456' }
+    const state = new FormState({
+      foo: createFieldState(initialValue.foo),
+      bar: createFieldState(initialValue.bar)
+    })
+
+    const value1 = { foo: 0, bar: '' }
+    state.onChange(value1)
+    await delay()
+    expect(state.value).toEqual(value1)
+    expect(state.$.foo.value).toBe(value1.foo)
+    expect(state.$.foo._value).toBe(value1.foo)
+    expect(state.$.bar.value).toBe(value1.bar)
+    expect(state.$.bar._value).toBe(value1.bar)
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    const value2 = { foo: 123, bar: '' }
+    state.onChange(value2)
+    await delay()
+    expect(state.value).toEqual(value2)
+    expect(state.$.foo.value).toBe(value2.foo)
+    expect(state.$.foo._value).toBe(value2.foo)
+    expect(state.$.bar.value).toBe(value2.bar)
+    expect(state.$.bar._value).toBe(value2.bar)
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    const value3 = { foo: 0, bar: '456' }
+    state.onChange(value3)
+    await delay()
+    expect(state.value).toEqual(value3)
+    expect(state.$.foo.value).toBe(value3.foo)
+    expect(state.$.foo._value).toBe(value3.foo)
+    expect(state.$.bar.value).toBe(value3.bar)
+    expect(state.$.bar._value).toBe(value3.bar)
+    expect(state.dirty).toBe(true)
+
+    state.reset()
+
+    state.onChange(initialValue)
+    await delay()
+    expect(state.value).toEqual(initialValue)
+    expect(state.$.foo.value).toBe(initialValue.foo)
+    expect(state.$.foo._value).toBe(initialValue.foo)
+    expect(state.$.bar.value).toBe(initialValue.bar)
+    expect(state.$.bar._value).toBe(initialValue.bar)
+    expect(state.dirty).toBe(false)
+
+    state.dispose()
+  })
+
   it('should reset well', async () => {
     const initialValue = { foo: 123, bar: '456' }
     const state = new FormState({
@@ -160,6 +215,47 @@ describe('FormState (mode: object) validation', () => {
     expect(state.error).toBeUndefined()
 
     state.dispose()
+  })
+
+  describe('should work well with onChange()', () => {
+
+    it('and form validator', async () => {
+      const initialValue = { foo: '', bar: '123' }
+      const state = new FormState({
+        foo: createFieldState(initialValue.foo),
+        bar: createFieldState(initialValue.bar)
+      }).validators(({ foo, bar }) => foo === bar && 'same')
+  
+      state.onChange({ foo: '123', bar: '123' })
+  
+      await delay()
+      expect(state.validating).toBe(false)
+      expect(state.hasOwnError).toBe(true)
+      expect(state.ownError).toBe('same')
+      expect(state.hasError).toBe(true)
+      expect(state.error).toBe('same')
+  
+      state.dispose()
+    })
+
+    it('and field validator', async () => {
+      const initialValue = { foo: '', bar: '123' }
+      const state = new FormState({
+        foo: createFieldState(initialValue.foo),
+        bar: createFieldState(initialValue.bar).validators(v => !v && 'empty')
+      })
+  
+      state.onChange({ foo: '123', bar: '' })
+  
+      await delay()
+      expect(state.validating).toBe(false)
+      expect(state.hasOwnError).toBe(false)
+      expect(state.ownError).toBeUndefined()
+      expect(state.hasError).toBe(true)
+      expect(state.error).toBe('empty')
+  
+      state.dispose()
+    })
   })
 
   it('should work well with fields onChange()', async () => {
