@@ -31,7 +31,7 @@ export type ValidateResultWithError = { hasError: true, error: Error }
 export type ValidateResultWithValue<T> = { hasError: false, value: T }
 export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
 
-/** Validatable object (which can be used as a field for `FormState`). */
+/** interface for State */
 export interface IState<V = any> {
   /** Value that can be consumed by your code. */
   value: V
@@ -59,10 +59,12 @@ export interface IState<V = any> {
   resetWith(initialValue: V): void
   /** Check if dirty with given initial value */
   dirtyWith(initialValue: V): boolean
-  /** Do dispose */
-  dispose(): void
   /** Add validator function. */
   validators(...validators: Array<Validator<V>>): this
+  /** Configure when to disable validation. */
+  disableValidationWhen(predict: () => boolean): this
+  /** Do dispose */
+  dispose(): void
 }
 
 /** Function to do dispose. */

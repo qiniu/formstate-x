@@ -3,11 +3,40 @@ import { Error, IState, Validated, ValidateResult, ValidateStatus, Validator } f
 import Disposable from './disposable'
 import { applyValidators } from './utils'
 
-export default abstract class State<V> extends Disposable implements IState<V> {
+export abstract class StateUtils extends Disposable {
+
+  declare abstract error: Error
+
+  /** If the state contains error. */
+  @computed get hasError() {
+    return !!this.error
+  }
+
+  declare abstract validateStatus: ValidateStatus
+
+  /** If the state is doing a validation. */
+  @computed get validating() {
+    return this.validateStatus === ValidateStatus.Validating
+  }
+
+  /**
+   * If the validation has been done.
+   * It does not means validation passed.
+   */
+  @computed get validated() {
+    return this.validateStatus === ValidateStatus.Validated
+  }
+
+  constructor() {
+    super()
+    makeObservable(this)
+  }
+}
+
+export default abstract class State<V> extends StateUtils implements IState<V> {
 
   declare abstract value: V
   declare abstract initialValue: V
-  declare abstract error: Error
   declare abstract activated: boolean
   abstract validate(): Promise<ValidateResult<V>>
   abstract set(value: V): void
@@ -24,24 +53,6 @@ export default abstract class State<V> extends Disposable implements IState<V> {
 
   @computed get validateStatus() {
     return this.validationDisabled ? ValidateStatus.NotValidated : this.rawValidateStatus
-  }
-
-  /** If the state contains error. */
-  @computed get hasError() {
-    return !!this.error
-  }
-
-  /** If the state is doing a validation. */
-  @computed get validating() {
-    return this.validateStatus === ValidateStatus.Validating
-  }
-
-  /**
-   * If the validation has been done.
-   * It does not means validation passed.
-   */
-  @computed get validated() {
-    return this.validateStatus === ValidateStatus.Validated
   }
 
   reset() {

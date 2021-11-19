@@ -1,6 +1,6 @@
-import { observable, computed, action, reaction, autorun, when, makeObservable } from 'mobx'
-import { IState, Validator, Validated, ValidationResponse, ValidateStatus, Error, ValidateResult, Bindable } from './types'
-import { applyValidators, debounce, isPromiseLike } from './utils'
+import { observable, computed, action, reaction, autorun, makeObservable } from 'mobx'
+import { IState, ValidationResponse, ValidateStatus, Error, ValidateResult, Bindable } from './types'
+import { is, debounce, isPromiseLike } from './utils'
 import State from './state'
 
 /**
@@ -15,7 +15,7 @@ export default class FieldState<V> extends State<V> implements IState<V>, Bindab
   @observable activated = false
 
   dirtyWith(initialValue: V) {
-    return this.value !== initialValue
+    return !is(this.value, initialValue)
   }
 
   /**
@@ -29,11 +29,6 @@ export default class FieldState<V> extends State<V> implements IState<V>, Bindab
    * It's synced from `_value` with debounce of 200ms.
    */
   @observable.ref value!: V
-
-  /**
-   * Value that has bean validated with no error, AKA "safe".
-   */
-  @observable.ref safeValue!: V
 
   /**
    * The original error info of validation.
@@ -72,7 +67,7 @@ export default class FieldState<V> extends State<V> implements IState<V>, Bindab
    * Reset to specific status.
    */
   @action resetWith(initialValue: V) {
-    this.safeValue = this.value = this._value = this.initialValue = initialValue
+    this.value = this._value = this.initialValue = initialValue
     this.activated = false
     this.rawValidateStatus = ValidateStatus.NotValidated
     this._error = undefined
@@ -117,7 +112,7 @@ export default class FieldState<V> extends State<V> implements IState<V>, Bindab
 
     if (
       validation !== this.validation // 如果 validation 已过期，则不生效
-      || validation.value !== this._value // 如果 value 已过期，则不生效
+      || !is(validation.value, this._value) // 如果 value 已过期，则不生效
     ) {
       return
     }
@@ -146,7 +141,7 @@ export default class FieldState<V> extends State<V> implements IState<V>, Bindab
       // cause the later do throttle in fact, not debounce
       // see https://github.com/mobxjs/mobx/issues/1956
       debounce(() => {
-        if (this.value !== this._value) {
+        if (!is(this.value, this._value)) {
           action('sync-value-when-_value-changed', () => {
             this.value = this._value
             this.rawValidateStatus = ValidateStatus.NotValidated
@@ -157,20 +152,13 @@ export default class FieldState<V> extends State<V> implements IState<V>, Bindab
       { name: 'reaction-when-_value-change' }
     ))
 
-    // auto sync when validate ok: this.value -> this.$
-    this.addDisposer(reaction(
-      () => this.validated && !this.hasError,
-      validateOk => validateOk && (this.safeValue = this.value),
-      { name: 'sync-$-when-validatedOk' }
-    ))
-
     // auto validate: this.value -> this.validation
     this.addDisposer(autorun(
       () => {
         if (
           this.validationDisabled
           || !this.activated
-          || this.value !== this._value // 如果 value 已经过期，则不处理
+          || !is(this.value, this._value) // 如果 value 已经过期，则不处理
         ) {
           return
         }

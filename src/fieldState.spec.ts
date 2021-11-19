@@ -25,7 +25,6 @@ describe('FieldState', () => {
 
     expect(state._value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
-    expect(state.safeValue).toBe(initialValue)
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -41,12 +40,10 @@ describe('FieldState', () => {
     state.onChange(value)
     expect(state._value).toBe(value)
     expect(state.value).toBe(initialValue)
-    expect(state.safeValue).toBe(initialValue)
 
     await delay()
     expect(state._value).toBe(value)
     expect(state.value).toBe(value)
-    expect(state.safeValue).toBe(value)
     expect(state.dirty).toBe(true)
 
     const newValue = '789'
@@ -54,27 +51,20 @@ describe('FieldState', () => {
     state.onChange(newValue)
     expect(state._value).toBe(newValue)
     expect(state.value).toBe(value)
-    expect(state.safeValue).toBe(value)
 
     await delay()
     expect(state._value).toBe(newValue)
     expect(state.value).toBe(newValue)
-    expect(state.safeValue).toBe(newValue)
     expect(state.dirty).toBe(true)
 
     const invalidValue = '123456'
     state.onChange(invalidValue)
     expect(state._value).toBe(invalidValue)
     expect(state.value).toBe(newValue)
-    expect(state.safeValue).toBe(newValue)
 
     await delay()
     expect(state._value).toBe(invalidValue)
     expect(state.value).toBe(invalidValue)
-    expect(state.safeValue).toBe(newValue)
-
-    await delay()
-    expect(state.safeValue).toBe(newValue)
 
     state.dispose()
   })
@@ -436,5 +426,16 @@ describe('FieldState validation', () => {
     await when(() => field.validated)
 
     expect(field.error).toBe('bar')
+  })
+
+  it('should work well with NaN', async () => {
+    const state = createFieldState(Number.NaN).validators(
+      () => 'error'
+    )
+    state.validate()
+    await delay()
+    expect(state.validating).toBe(false)
+    expect(state.validated).toBe(true)
+    expect(state.error).toBe('error')
   })
 })

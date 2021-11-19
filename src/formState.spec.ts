@@ -30,9 +30,7 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(initialValue)
     expect(isObservable(state.$)).toBe(true)
     expect(state.$.foo).toBeInstanceOf(FieldState)
-    expect(state.$.foo.safeValue).toBe(initialValue.foo)
     expect(state.$.bar).toBeInstanceOf(FieldState)
-    expect(state.$.bar.safeValue).toBe(initialValue.bar)
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -65,8 +63,6 @@ describe('FormState (mode: object)', () => {
     await delay()
 
     expect(state.value).toEqual(value)
-    expect(state.$.foo.safeValue).toBe(value.foo)
-    expect(state.$.bar.safeValue).toBe(value.bar)
     expect(state.dirty).toBe(true)
 
     state.dispose()
@@ -191,8 +187,6 @@ describe('FormState (mode: object)', () => {
     state.reset()
 
     expect(state.value).toEqual(initialValue)
-    expect(state.$.foo.safeValue).toBe(initialValue.foo)
-    expect(state.$.bar.safeValue).toBe(initialValue.bar)
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -665,7 +659,6 @@ describe('FormState (mode: array)', () => {
     expect(state.$).toHaveLength(initialValue.length)
     state.$.forEach((field, i) => {
       expect(field).toBeInstanceOf(FieldState)
-      expect(field.safeValue).toBe(initialValue[i])
     })
     expect(state.dirty).toBe(false)
 
@@ -681,9 +674,6 @@ describe('FormState (mode: array)', () => {
     await delay()
 
     expect(state.value).toEqual(value)
-    state.$.forEach((field, i) => {
-      expect(field.safeValue).toBe(value[i])
-    })
     expect(state.dirty).toBe(true)
 
     state.dispose()
@@ -992,9 +982,6 @@ describe('FormState (mode: array)', () => {
     state.reset()
 
     expect(state.value).toEqual(initialValue)
-    state.$.forEach((field, i) => {
-      expect(field.safeValue).toBe(initialValue[i])
-    })
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -1484,11 +1471,9 @@ describe('nested FormState', () => {
       return inputState.validators(duplicateValidator)
     }
 
-    const shouldDisableInputsState = () => !enabledState.safeValue
-
     const inputsState = new ArrayFormState([], createInputState).validators(
       list => list.join('').length > 5 && 'too long'
-    ).disableValidationWhen(shouldDisableInputsState)
+    ).disableValidationWhen(() => !enabledState.value)
 
     const state = new FormState({
       inputs: inputsState,

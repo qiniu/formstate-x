@@ -1,7 +1,6 @@
-import { observable, computed, isObservable, action, autorun, when, reaction, makeObservable, override } from 'mobx'
-import { IState, ValidationResponse, Validator, Validated, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
-import { applyValidators, isPromiseLike } from './utils'
-import Disposable from './disposable'
+import { observable, computed, isObservable, action, autorun, reaction, makeObservable, override } from 'mobx'
+import { IState, ValidationResponse, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
+import { isPromiseLike } from './utils'
 import State from './state'
 
 export abstract class AbstractFormState<T, V> extends State<V> implements IState<V> {
@@ -24,27 +23,24 @@ export abstract class AbstractFormState<T, V> extends State<V> implements IState
    */
   declare abstract value: V
 
-  // /** The validate status of form validation */
-  // @observable protected rawValidateStatus: ValidateStatus = ValidateStatus.NotValidated
-
-  @override get validateStatus() {
+  @override override get validateStatus() {
     if (this.validationDisabled) {
       return ValidateStatus.NotValidated
     }
     const fieldList = this.fieldList.filter(field => !field.validationDisabled)
     if (
-      this.rawValidateStatus === ValidateStatus.NotValidated
-      && fieldList.every(field => field.validateStatus === ValidateStatus.NotValidated)
+      this.rawValidateStatus === ValidateStatus.Validating
+      || fieldList.some(field => field.validateStatus === ValidateStatus.Validating)
     ) {
-      return ValidateStatus.NotValidated
+      return ValidateStatus.Validating
     }
     if (
-      this.validateStatus === ValidateStatus.Validated
+      this.rawValidateStatus === ValidateStatus.Validated
       && fieldList.every(field => field.validateStatus === ValidateStatus.Validated)
     ) {
       return ValidateStatus.Validated
     }
-    return ValidateStatus.Validating
+    return ValidateStatus.NotValidated
   }
 
   /**

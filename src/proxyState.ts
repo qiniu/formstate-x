@@ -1,15 +1,18 @@
 import { computed } from 'mobx'
-import { IState } from './types'
-import State from './state'
+import { StateUtils } from './state'
+import { IState, Validator } from './types'
 
-export default class ProxyState<TValue = any, TRawValue = any> extends State<TValue> implements IState<TValue> {
+export default class ProxyState<Value = any, RawValue = any, S extends IState<RawValue> = IState<any>> extends StateUtils implements IState<Value> {
 
   constructor(
-    private $: IState<TRawValue>,
-    private parseRawValue: (v: TRawValue) => TValue,
-    private getRawValue: (v: TValue) => TRawValue
+    public $: S,
+    private parseRawValue: (v: RawValue) => Value,
+    private getRawValue: (v: Value) => RawValue
   ) {
     super()
+    this.addDisposer(
+      () => this.$.dispose()
+    )
   }
 
   @computed get value() {
@@ -36,9 +39,7 @@ export default class ProxyState<TValue = any, TRawValue = any> extends State<TVa
     return this.$.activated
   }
 
-  @computed protected get rawValidateStatus() {
-    return this.$.validateStatus
-  }
+  @computed get validateStatus() { return this.$.validateStatus }
 
   async validate() {
     const result = await this.$.validate()
@@ -46,11 +47,11 @@ export default class ProxyState<TValue = any, TRawValue = any> extends State<TVa
     return { ...result, value: this.value }
   }
 
-  set(value: TValue) {
+  set(value: Value) {
     this.$.set(this.getRawValue(value))
   }
 
-  onChange(value: TValue) {
+  onChange(value: Value) {
     this.$.onChange(this.getRawValue(value))
   }
 
@@ -58,12 +59,25 @@ export default class ProxyState<TValue = any, TRawValue = any> extends State<TVa
     this.$.reset()
   }
 
-  resetWith(initialValue: TValue) {
+  resetWith(initialValue: Value) {
     this.$.resetWith(this.getRawValue(initialValue))
   }
 
-  dirtyWith(initialValue: TValue) {
+  dirtyWith(initialValue: Value) {
     return this.$.dirtyWith(this.getRawValue(initialValue))
+  }
+
+  validators(...validators: Array<Validator<Value>>) {
+    const rawValidators = validators.map(validator => (
+      (rawValue: RawValue) => validator(this.parseRawValue(rawValue))
+    ))
+    this.$.validators(...rawValidators)
+    return this
+  }
+
+  disableValidationWhen(predict: () => boolean) {
+    this.$.disableValidationWhen(predict)
+    return this
   }
 
 }
