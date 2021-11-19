@@ -13,7 +13,7 @@
     "lint": "tsc --noEmit",
     "test": "jest ./src",
     "validate": "npm run lint && npm run test",
-    "coverage": "rm -rf coverage && jest --coverage",
+    "coverage": "rm -rf coverage && jest --coverage ./src",
     "build:esm": "rm -rf ./esm && tsc --module es6 --outDir ./esm",
     "build:lib": "rm -rf ./lib && tsc",
     "build:doc": "rm -rf ./docs && typedoc && cp -r ./assets ./docs",

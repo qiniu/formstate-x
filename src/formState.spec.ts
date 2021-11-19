@@ -835,6 +835,14 @@ describe('FormState (mode: array)', () => {
       expect(state.value).toEqual([])
       expect(state.hasError).toBe(true)
     })
+
+    it('should do nothing with non-positive num', () => {
+      const state = createState(['123', '456'])
+      state.remove(0, 0)
+      expect(state.value).toEqual(['123', '456'])
+      state.remove(0, -1)
+      expect(state.value).toEqual(['123', '456'])
+    })
   })
 
   describe('insert', () => {
@@ -954,6 +962,16 @@ describe('FormState (mode: array)', () => {
       state.move(1, 0)
       expect(state.value).toEqual(['b', 'a', 'c', 'd'])
       expect(state.hasError).toBe(true)
+    })
+
+    it('should do nothing with the same fromIndex & toIndex', () => {
+      const state = createState(['123', '456', '789'])
+      state.move(1, 1)
+      expect(state.value).toEqual(['123', '456', '789'])
+      state.move(1, -2)
+      expect(state.value).toEqual(['123', '456', '789'])
+      state.move(-1, 2)
+      expect(state.value).toEqual(['123', '456', '789'])
     })
   })
 
