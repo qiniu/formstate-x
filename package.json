@@ -35,9 +35,12 @@
   "devDependencies": {
     "@types/jest": "^25.2.1",
     "@types/node": "^12.7.12",
+    "dumi": "^1.1.32",
     "formstate": "^2.0.0",
     "jest": "~26.6.1",
     "mobx": "^6.0.4",
+    "mobx-react": "^7.2.1",
+    "react-icecream": "^2.1.2",
     "ts-jest": "~26.4.2",
     "typedoc": "~0.21.6",
     "typedoc-twilio-theme": "^1.0.0",
