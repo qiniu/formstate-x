@@ -2,29 +2,29 @@ import { computed } from 'mobx'
 import { StateUtils } from './state'
 import { IState, Validator } from './types'
 
-export default class ProxyState<Value = any, RawValue = any, S extends IState<RawValue> = IState<any>> extends StateUtils implements IState<Value> {
+export default class ProxyState<Value = any, TargetValue = any, TargetState extends IState<TargetValue> = IState<any>> extends StateUtils implements IState<Value> {
 
-  /** The proxied state */
-  public $: S
+  /** The proxy-target state */
+  public $: TargetState
 
   constructor(
-    state: S,
-    private parseRawValue: (v: RawValue) => Value,
-    private getRawValue: (v: Value) => RawValue
+    targetState: TargetState,
+    private parseTargetValue: (v: TargetValue) => Value,
+    private getTargetValue: (v: Value) => TargetValue
   ) {
     super()
-    this.$ = state
+    this.$ = targetState
     this.addDisposer(
       () => this.$.dispose()
     )
   }
 
   @computed get value() {
-    return this.parseRawValue(this.$.value)
+    return this.parseTargetValue(this.$.value)
   }
 
   @computed get initialValue() {
-    return this.parseRawValue(this.$.value)
+    return this.parseTargetValue(this.$.value)
   }
 
   @computed get error() {
@@ -43,6 +43,7 @@ export default class ProxyState<Value = any, RawValue = any, S extends IState<Ra
     return this.$.activated
   }
 
+  /** Current validate status */
   @computed get validateStatus() { return this.$.validateStatus }
 
   async validate() {
@@ -52,11 +53,11 @@ export default class ProxyState<Value = any, RawValue = any, S extends IState<Ra
   }
 
   set(value: Value) {
-    this.$.set(this.getRawValue(value))
+    this.$.set(this.getTargetValue(value))
   }
 
   onChange(value: Value) {
-    this.$.onChange(this.getRawValue(value))
+    this.$.onChange(this.getTargetValue(value))
   }
 
   reset() {
@@ -64,16 +65,16 @@ export default class ProxyState<Value = any, RawValue = any, S extends IState<Ra
   }
 
   resetWith(initialValue: Value) {
-    this.$.resetWith(this.getRawValue(initialValue))
+    this.$.resetWith(this.getTargetValue(initialValue))
   }
 
   dirtyWith(initialValue: Value) {
-    return this.$.dirtyWith(this.getRawValue(initialValue))
+    return this.$.dirtyWith(this.getTargetValue(initialValue))
   }
 
   validators(...validators: Array<Validator<Value>>) {
     const rawValidators = validators.map(validator => (
-      (rawValue: RawValue) => validator(this.parseRawValue(rawValue))
+      (rawValue: TargetValue) => validator(this.parseTargetValue(rawValue))
     ))
     this.$.validators(...rawValidators)
     return this

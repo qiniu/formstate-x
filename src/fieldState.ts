@@ -26,7 +26,7 @@ export default class FieldState<V> extends State<V> implements IState<V>, Bindab
 
   /**
    * Value that can be consumed by your code.
-   * It's synced from `_value` with debounce of 200ms.
+   * It's synced from `_value` with debounce (default to 200ms).
    */
   @observable.ref value!: V
 
@@ -64,7 +64,7 @@ export default class FieldState<V> extends State<V> implements IState<V>, Bindab
   }
 
   /**
-   * Reset to specific status.
+   * Reset with specific intial value.
    */
   @action resetWith(initialValue: V) {
     this.value = this._value = this.initialValue = initialValue

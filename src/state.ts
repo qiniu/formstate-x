@@ -5,6 +5,7 @@ import { applyValidators } from './utils'
 
 export abstract class StateUtils extends Disposable {
 
+  /** The error info of validation */
   declare abstract error: Error
 
   /** If the state contains error. */
@@ -21,7 +22,7 @@ export abstract class StateUtils extends Disposable {
 
   /**
    * If the validation has been done.
-   * It does not means validation passed.
+   * It does not mean validation passed.
    */
   @computed get validated() {
     return this.validateStatus === ValidateStatus.Validated
@@ -51,6 +52,7 @@ export default abstract class State<V> extends StateUtils implements IState<V> {
   /** The raw validate status (regardless of `validationDisabled`) */
   @observable protected rawValidateStatus: ValidateStatus = ValidateStatus.NotValidated
 
+  /** Current validate status. */
   @computed get validateStatus() {
     return this.validationDisabled ? ValidateStatus.NotValidated : this.rawValidateStatus
   }
@@ -62,7 +64,7 @@ export default abstract class State<V> extends StateUtils implements IState<V> {
   /** List of validator functions. */
   @observable.shallow private validatorList: Validator<V>[] = []
 
-  /** * Add validator function. */
+  /** Add validator function. */
   @action validators(...validators: Validator<V>[]) {
     this.validatorList.push(...validators)
     return this

@@ -33,7 +33,7 @@ export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValu
 
 /** interface for State */
 export interface IState<V = any> {
-  /** Value that can be consumed by your code. */
+  /** Value in the state. */
   value: V
   /** Initial value */
   initialValue: V
@@ -45,7 +45,7 @@ export interface IState<V = any> {
   dirty: boolean
   /** If activated (with auto validate). */
   activated: boolean
-  /** The validate status. */
+  /** Current validate status. */
   validateStatus: ValidateStatus
   /** Fire a validation behavior. */
   validate(): Promise<ValidateResult<V>>

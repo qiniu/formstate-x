@@ -9,11 +9,6 @@ export interface InputBindings<T, E = T> {
   onChange(event: E): void
 }
 
-export interface IBindable<T> {
-  _value: T
-  onChange: (v: T) => void
-}
-
 /**
  * Helper method to bind state to your input component.
  * You can define your own bindInput by specifying `getValue`.
