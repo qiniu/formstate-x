@@ -1,7 +1,7 @@
 import { observable, isObservable } from 'mobx'
 import FieldState from './fieldState'
 import { FormState, ArrayFormState, isFormState } from './formState'
-import { Error, State, ValidateResultWithError, ValidateResultWithValue } from './types'
+import { Error, IState, ValidateResultWithError, ValidateResultWithValue } from './types'
 
 const defaultDelay = 10
 const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
@@ -1694,12 +1694,12 @@ describe('isFormState', () => {
   })
 
   it('should work with correct typing info', () => {
-    let state: State<string[]> = new ArrayFormState(
+    let state: IState<string[]> = new ArrayFormState(
       ['123'],
       v => new FieldState(v)
     )
     if (isFormState(state)) {
-      const value: string = (state.$ as Array<State<string>>)[0].value
+      const value: string = (state.$ as Array<IState<string>>)[0].value
       const values: string[] = state.value
       const ownError: Error = state.ownError
     }

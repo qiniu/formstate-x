@@ -1,82 +1,69 @@
 import { computed } from 'mobx'
-import { State } from './types'
-import Disposable from './disposable'
+import { IState } from './types'
+import State from './state'
 
-export default class ProxyState<TValue = any, TRawValue = any> extends Disposable implements State<TValue> {
+export default class ProxyState<TValue = any, TRawValue = any> extends State<TValue> implements IState<TValue> {
 
   constructor(
-    private raw: State<TRawValue>,
+    private $: IState<TRawValue>,
     private parseRawValue: (v: TRawValue) => TValue,
     private getRawValue: (v: TValue) => TRawValue
   ) {
     super()
-    this.addDisposer(() => this.raw.dispose())
-  }
-
-  @computed get $() {
-    return this.raw
   }
 
   @computed get value() {
-    return this.parseRawValue(this.raw.value)
+    return this.parseRawValue(this.$.value)
   }
 
-  @computed get hasError() {
-    return this.raw.hasError
+  @computed get initialValue() {
+    return this.parseRawValue(this.$.value)
   }
 
   @computed get error() {
-    return this.raw.error
-  }
-
-  @computed get validating() {
-    return this.raw.validating
-  }
-
-  @computed get validated() {
-    return this.raw.validated
+    return this.$.error
   }
 
   @computed get validationDisabled() {
-    return this.raw.validationDisabled
+    return this.$.validationDisabled
   }
 
   @computed get dirty() {
-    return this.raw.dirty
+    return this.$.dirty
   }
 
-  @computed get _activated() {
-    return this.raw._activated
+  @computed get activated() {
+    return this.$.activated
   }
 
-  @computed get _validateStatus() {
-    return this.raw._validateStatus
+  @computed protected get rawValidateStatus() {
+    return this.$.validateStatus
   }
 
   async validate() {
-    const result = await this.raw.validate()
+    const result = await this.$.validate()
     if (result.hasError) return result
     return { ...result, value: this.value }
   }
 
   set(value: TValue) {
-    this.raw.set(this.getRawValue(value))
+    this.$.set(this.getRawValue(value))
   }
 
   onChange(value: TValue) {
-    this.raw.onChange(this.getRawValue(value))
+    this.$.onChange(this.getRawValue(value))
   }
 
   reset() {
-    this.raw.reset()
+    this.$.reset()
   }
 
   resetWith(initialValue: TValue) {
-    this.raw.resetWith(this.getRawValue(initialValue))
+    this.$.resetWith(this.getRawValue(initialValue))
   }
 
-  _dirtyWith(initialValue: TValue) {
-    return this.raw._dirtyWith(this.getRawValue(initialValue))
+  dirtyWith(initialValue: TValue) {
+    return this.$.dirtyWith(this.getRawValue(initialValue))
   }
 
 }

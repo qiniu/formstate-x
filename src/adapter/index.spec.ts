@@ -94,18 +94,18 @@ describe('xify', () => {
   it('should work well with field state\'s validate status (sync validator)', async () => {
     const state = new fs.FieldState(0).validators(v => v !== 0 && 'expect zero')
     const stateX = xify(state)
-    expect(stateX._validateStatus).toBe(fsx.ValidateStatus.NotValidated)
+    expect(stateX.validateStatus).toBe(fsx.ValidateStatus.NotValidated)
 
     state.onChange(1)
     await state.validate()
-    expect(stateX._validateStatus).toBe(fsx.ValidateStatus.Validated)
+    expect(stateX.validateStatus).toBe(fsx.ValidateStatus.Validated)
 
     state.onChange(0)
     await state.validate()
-    expect(stateX._validateStatus).toBe(fsx.ValidateStatus.Validated)
+    expect(stateX.validateStatus).toBe(fsx.ValidateStatus.Validated)
 
     stateX.reset()
-    expect(stateX._validateStatus).toBe(fsx.ValidateStatus.NotValidated)
+    expect(stateX.validateStatus).toBe(fsx.ValidateStatus.NotValidated)
   })
 
   it('should work well with field state\'s validate status (async validator)', async () => {
@@ -114,13 +114,13 @@ describe('xify', () => {
       return v !== 0 && 'expect zero'
     })
     const stateX = xify(state)
-    expect(stateX._validateStatus).toBe(fsx.ValidateStatus.NotValidated)
+    expect(stateX.validateStatus).toBe(fsx.ValidateStatus.NotValidated)
 
     state.onChange(1)
     const validated = state.validate()
-    expect(stateX._validateStatus).toBe(fsx.ValidateStatus.Validating)
+    expect(stateX.validateStatus).toBe(fsx.ValidateStatus.Validating)
     await validated
-    expect(stateX._validateStatus).toBe(fsx.ValidateStatus.Validated)
+    expect(stateX.validateStatus).toBe(fsx.ValidateStatus.Validated)
   })
 
   it('should work well with form state\'s validate status', async () => {
@@ -132,13 +132,13 @@ describe('xify', () => {
       num: numState
     })
     const stateX = xify(state)
-    expect(stateX._validateStatus).toBe(fsx.ValidateStatus.NotValidated)
+    expect(stateX.validateStatus).toBe(fsx.ValidateStatus.NotValidated)
 
     state.$.num.onChange(1)
     const validated = state.validate()
-    expect(stateX._validateStatus).toBe(fsx.ValidateStatus.Validating)
+    expect(stateX.validateStatus).toBe(fsx.ValidateStatus.Validating)
     await validated
-    expect(stateX._validateStatus).toBe(fsx.ValidateStatus.Validated)
+    expect(stateX.validateStatus).toBe(fsx.ValidateStatus.Validated)
   })
 
   it('should work well with field state\'s $', async () => {
@@ -228,7 +228,7 @@ describe('xify', () => {
     expect(stateX.value).toBe(1)
     expect(stateX.hasError).toBe(false)
     expect(stateX.error).toBeUndefined()
-    expect(stateX._activated).toBe(false)
+    expect(stateX.activated).toBe(false)
   })
 
   it('should work well with form state\'s reset()', async () => {
@@ -250,7 +250,7 @@ describe('xify', () => {
     expect(stateX.hasError).toBe(false)
     expect(stateX.error).toBeUndefined()
     expect(stateX.dirty).toBe(false)
-    expect(stateX._activated).toBe(false)
+    expect(stateX.activated).toBe(false)
   })
 
   it('should work well with field state\'s dispose()', () => {
@@ -310,14 +310,14 @@ describe('xify', () => {
     })
     const stateX = xify(state)
 
-    expect(stateX._dirtyWith(1)).toBe(false) // actually, `1` is not used
-    expect(stateX._dirtyWith(2)).toBe(false) // actually, `2` is not used
+    expect(stateX.dirtyWith(1)).toBe(false) // actually, `1` is not used
+    expect(stateX.dirtyWith(2)).toBe(false) // actually, `2` is not used
 
     state.onChange(0)
     await stateX.validate()
 
-    expect(stateX._dirtyWith(1)).toBe(true) // actually, `1` is not used
-    expect(stateX._dirtyWith(2)).toBe(true) // actually, `2` is not used
+    expect(stateX.dirtyWith(1)).toBe(true) // actually, `1` is not used
+    expect(stateX.dirtyWith(2)).toBe(true) // actually, `2` is not used
   })
 
   it('should work well with form state\'s _dirtyWith()', async () => {
@@ -330,14 +330,14 @@ describe('xify', () => {
     })
     const stateX = xify(state)
 
-    expect(stateX._dirtyWith({ num: 1 })).toBe(false) // actually, `{ num: 1 }` is not used
-    expect(stateX._dirtyWith({ num: 2 })).toBe(false) // actually, `{ num: 2 }` is not used
+    expect(stateX.dirtyWith({ num: 1 })).toBe(false) // actually, `{ num: 1 }` is not used
+    expect(stateX.dirtyWith({ num: 2 })).toBe(false) // actually, `{ num: 2 }` is not used
 
     state.$.num.onChange(0)
     await stateX.validate()
 
-    expect(stateX._dirtyWith({ num: 1 })).toBe(true) // actually, `{ num: 1 }` is not used
-    expect(stateX._dirtyWith({ num: 2 })).toBe(true) // actually, `{ num: 2 }` is not used
+    expect(stateX.dirtyWith({ num: 1 })).toBe(true) // actually, `{ num: 1 }` is not used
+    expect(stateX.dirtyWith({ num: 2 })).toBe(true) // actually, `{ num: 2 }` is not used
   })
 
   it('should work well with field state\'s _activated', async () => {
@@ -346,11 +346,11 @@ describe('xify', () => {
       return v <= 0 && 'positive required'
     })
     const stateX = xify(state)
-    expect(stateX._activated).toBe(false)
+    expect(stateX.activated).toBe(false)
     state.onChange(0)
-    expect(stateX._activated).toBe(true)
+    expect(stateX.activated).toBe(true)
     await stateX.validate()
-    expect(stateX._activated).toBe(true)
+    expect(stateX.activated).toBe(true)
   })
 
   it('should work well with form state\'s _activated', async () => {
@@ -362,11 +362,11 @@ describe('xify', () => {
       num: numState
     })
     const stateX = xify(state)
-    expect(stateX._activated).toBe(false)
+    expect(stateX.activated).toBe(false)
     state.$.num.onChange(0)
-    expect(stateX._activated).toBe(true)
+    expect(stateX.activated).toBe(true)
     await stateX.validate()
-    expect(stateX._activated).toBe(true)
+    expect(stateX.activated).toBe(true)
   })
 
   it('should work well with field state\'s resetWith()', async () => {
@@ -384,7 +384,7 @@ describe('xify', () => {
     expect(stateX.value).toBe(1)
     expect(stateX.hasError).toBe(false)
     expect(stateX.error).toBeUndefined()
-    expect(stateX._activated).toBe(false)
+    expect(stateX.activated).toBe(false)
   })
 
   it('should work well with form state\'s resetWith()', async () => {
@@ -406,7 +406,7 @@ describe('xify', () => {
     expect(stateX.hasError).toBe(false)
     expect(stateX.error).toBeUndefined()
     expect(stateX.dirty).toBe(false)
-    expect(stateX._activated).toBe(false)
+    expect(stateX.activated).toBe(false)
   })
 
   it('should throw with field state\'s set', () => {

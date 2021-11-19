@@ -1,5 +1,4 @@
 import FieldState from './fieldState'
-import { AbstractFormState } from './formState'
 
 /** A truthy string or falsy values. */
 export type ValidationResponse =
@@ -33,24 +32,37 @@ export type ValidateResultWithValue<T> = { hasError: false, value: T }
 export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
 
 /** Validatable object (which can be used as a field for `FormState`). */
-export interface State<V = any> {
+export interface IState<V = any> {
+  /** Value that can be consumed by your code. */
   value: V
-  hasError: boolean
+  /** Initial value */
+  initialValue: V
+  /** The error info of validation */
   error: Error
-  validating: boolean
-  validated: boolean
+  /** If validation disabled. TODO: disable or disable validation? */
   validationDisabled: boolean
+  /** If value has been touched (different with `initialValue`) */
   dirty: boolean
-  _activated: boolean
-  _validateStatus: ValidateStatus
-
+  /** If activated (with auto validate). */
+  activated: boolean
+  /** The validate status. */
+  validateStatus: ValidateStatus
+  /** Fire a validation behavior. */
   validate(): Promise<ValidateResult<V>>
-  set: (value: V) => void
-  onChange: (value: V) => void
-  reset: () => void
-  resetWith: (initialValue: V) => void
-  _dirtyWith: (initialValue: V) => void
-  dispose: () => void
+  /** Set `value` synchronously. */
+  set(value: V): void
+  /** Handler for change event. */
+  onChange(value: V): void
+  /** Reset to initial status. */
+  reset(): void
+  /** Reset to specific status. */
+  resetWith(initialValue: V): void
+  /** Check if dirty with given initial value */
+  dirtyWith(initialValue: V): boolean
+  /** Do dispose */
+  dispose(): void
+  /** Add validator function. */
+  validators(...validators: Array<Validator<V>>): this
 }
 
 /** Function to do dispose. */
@@ -71,7 +83,7 @@ export type ValueOfObjectFields<Fields> = {
 }
 
 /** Value of state (`FormState` or `FieldState`) */
-export type ValueOf<S> = S extends State<infer V> ? V : never
+export type ValueOf<S> = S extends IState<infer V> ? V : never
 
 /** Validate status. */
 export enum ValidateStatus {

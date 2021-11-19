@@ -7,7 +7,7 @@ import * as fs from 'formstate'
 import * as fsx from '..'
 import { observable } from 'mobx'
 
-export type Xify<T> = fsx.State<ValueOf<T>> & {
+export type Xify<T> = fsx.IState<ValueOf<T>> & {
   origin: T
 }
 
@@ -22,8 +22,8 @@ export function xify<T extends fs.ComposibleValidatable<any>>(state: T): Xify<T>
     },
     get hasError() { return !!this.error },
     get error() { return getError(state) },
-    get validating() { return this._validateStatus === fsx.ValidateStatus.Validating },
-    get validated() { return this._validateStatus === fsx.ValidateStatus.Validated },
+    get validating() { return this.validateStatus === fsx.ValidateStatus.Validating },
+    get validated() { return this.validateStatus === fsx.ValidateStatus.Validated },
     validationDisabled: false,
     async validate() {
       await state.validate()
@@ -35,10 +35,10 @@ export function xify<T extends fs.ComposibleValidatable<any>>(state: T): Xify<T>
     set() { throw new Error('`set()` is not supported.') },
     onChange() { throw new Error('`onChange()` is not supported.') },
     dispose() {},
-    _dirtyWith(v: ValueOf<T>) { return getDirty(state) },
+    dirtyWith(v: ValueOf<T>) { return getDirty(state) },
     get dirty() { return getDirty(state) },
-    get _activated() { return getActivated(state) },
-    get _validateStatus() { return getValidateStatus(state) }
+    get activated() { return getActivated(state) },
+    get validateStatus() { return getValidateStatus(state) }
   }
   return observable(stateX, undefined, { deep: false })
 }
