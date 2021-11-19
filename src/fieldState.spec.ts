@@ -1,22 +1,7 @@
 import { when, observable, runInAction } from 'mobx'
 import FieldState from './fieldState'
 import { ValidateResultWithError, ValidateResultWithValue } from './types'
-
-const defaultDelay = 10
-const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
-
-async function delay(millisecond: number = stableDelay) {
-  await new Promise<void>(resolve => setTimeout(() => resolve(), millisecond))
-}
-
-async function delayValue<T>(value: T, millisecond: number = defaultDelay) {
-  await delay(millisecond)
-  return value
-}
-
-function createFieldState<T>(initialValue: T) {
-  return new FieldState(initialValue, defaultDelay)
-}
+import { delay, delayValue, createFieldState } from './testUtils'
 
 describe('FieldState', () => {
   it('should initialize well', () => {

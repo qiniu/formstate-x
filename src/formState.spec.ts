@@ -2,22 +2,7 @@ import { observable, isObservable } from 'mobx'
 import FieldState from './fieldState'
 import { FormState, ArrayFormState, isFormState } from './formState'
 import { Error, IState, ValidateResultWithError, ValidateResultWithValue } from './types'
-
-const defaultDelay = 10
-const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
-
-async function delay(millisecond: number = stableDelay) {
-  await new Promise<void>(resolve => setTimeout(() => resolve(), millisecond))
-}
-
-async function delayValue<T>(value: T, millisecond: number = defaultDelay) {
-  await delay(millisecond)
-  return value
-}
-
-function createFieldState<T>(initialValue: T) {
-  return new FieldState(initialValue, defaultDelay)
-}
+import { delay, delayValue, createFieldState, assertType } from './testUtils'
 
 describe('FormState (mode: object)', () => {
   it('should initialize well', () => {
@@ -657,7 +642,7 @@ describe('FormState (mode: array)', () => {
 
     expect(state.value).toEqual(initialValue)
     expect(state.$).toHaveLength(initialValue.length)
-    state.$.forEach((field, i) => {
+    state.$.forEach(field => {
       expect(field).toBeInstanceOf(FieldState)
     })
     expect(state.dirty).toBe(false)
@@ -1039,7 +1024,7 @@ describe('FormState (mode: array)', () => {
       value => value.length <= 0 && 'empty'
     )
 
-    const validation = state.validate()
+    state.validate()
     state.set([])
 
     await delay()
@@ -1684,9 +1669,9 @@ describe('isFormState', () => {
       v => new FieldState(v)
     )
     if (isFormState(state)) {
-      const value: string = (state.$ as Array<IState<string>>)[0].value
-      const values: string[] = state.value
-      const ownError: Error = state.ownError
+      assertType<string>((state.$ as Array<IState<string>>)[0].value)
+      assertType<string[]>(state.value)
+      assertType<Error>(state.ownError)
     }
   })
 })

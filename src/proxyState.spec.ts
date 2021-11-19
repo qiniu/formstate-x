@@ -1,24 +1,8 @@
 import { observable, runInAction, when } from 'mobx'
 import { ValidateResultWithError, ValidateResultWithValue } from './types'
-import FieldState from './fieldState'
 import ProxyState from './proxyState'
 import { FormState } from './formState'
-
-const defaultDelay = 10
-const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
-
-async function delay(millisecond: number = stableDelay) {
-  await new Promise<void>(resolve => setTimeout(() => resolve(), millisecond))
-}
-
-async function delayValue<T>(value: T, millisecond: number = defaultDelay) {
-  await delay(millisecond)
-  return value
-}
-
-function createFieldState<T>(initialValue: T) {
-  return new FieldState(initialValue, defaultDelay)
-}
+import { delay, delayValue, createFieldState, assertType } from './testUtils'
 
 function createNumState(initialValue: number = 0) {
   function parseNum(str: string) {
@@ -73,8 +57,8 @@ describe('ProxyState (for FieldState)', () => {
     }
 
     const sourceItemState = createSourceItemState()
-    const sourceItem: SourceItem = sourceItemState.value
-    const rawHost: string = sourceItemState.$.host.$.value
+    assertType<SourceItem>(sourceItemState.value)
+    assertType<string>(sourceItemState.$.host.$.value)
   })
 
   it('should initialize well', () => {
@@ -471,9 +455,9 @@ describe('ProxyState (for FormState)', () => {
     }
 
     const sourceItemState = createSourceItemState()
-    const sourceItem: SourceItem = sourceItemState.value
-    const host: Host = sourceItemState.$.host.$.value
-    const hostname: string = sourceItemState.$.host.$.$.hostname.value
+    assertType<SourceItem>(sourceItemState.value)
+    assertType<Host>(sourceItemState.$.host.$.value)
+    assertType<string>(sourceItemState.$.host.$.$.hostname.value)
   })
 
   it('should initialize well', () => {
