@@ -4,12 +4,16 @@ import { IState, Validator } from './types'
 
 export default class ProxyState<Value = any, RawValue = any, S extends IState<RawValue> = IState<any>> extends StateUtils implements IState<Value> {
 
+  /** The proxied state */
+  public $: S
+
   constructor(
-    public $: S,
+    state: S,
     private parseRawValue: (v: RawValue) => Value,
     private getRawValue: (v: Value) => RawValue
   ) {
     super()
+    this.$ = state
     this.addDisposer(
       () => this.$.dispose()
     )
