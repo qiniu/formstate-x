@@ -1,7 +1,7 @@
 node_modules
-lib
-esm
-coverage
-# docs
+/lib
+/esm
+/coverage
+/dumi/src
 .umi
 .vscode

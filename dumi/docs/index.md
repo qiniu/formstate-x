@@ -1,5 +1,3 @@
-# formstate-x
-
 [![](https://github.com/qiniu/formstate-x/workflows/CI/badge.svg)](https://github.com/qiniu/formstate-x/actions?query=workflow%3ACI+branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/qiniu/formstate-x/badge.svg?branch=master)](https://coveralls.io/github/qiniu/formstate-x?branch=master)
 [![](https://github.com/qiniu/formstate-x/workflows/Doc/badge.svg)](https://github.com/qiniu/formstate-x/actions?query=workflow%3ADoc+branch%3Amaster)
@@ -11,7 +9,7 @@ What we offer:
 
 * **Type safety**: written in [Typescript](https://typescriptlang.org), you can compose complex form state without loss of type information
 
-    ![Demo](../assets/demo.gif)
+    ![Demo](../../assets/demo.gif)
 
 * **Reactive**: based on [MobX](https://mobx.js.org), every dependency's change causes reaction automatically and you can easily react to state's change
 * **UI-independent**: formstate-x only deals with state / data, you can easily use it with any UI library you like
