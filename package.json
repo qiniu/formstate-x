@@ -11,9 +11,9 @@
   "scripts": {
     "clean": "rm -rf ./esm ./lib ./docs",
     "lint": "tsc --noEmit",
-    "test": "jest ./src",
+    "test": "jest",
     "validate": "npm run lint && npm run test",
-    "coverage": "rm -rf coverage && jest --coverage ./src",
+    "coverage": "rm -rf coverage && jest --coverage",
     "build:esm": "rm -rf ./esm && tsc --module es6 --outDir ./esm",
     "build:lib": "rm -rf ./lib && tsc",
     "build:doc": "rm -rf ./docs && typedoc && cp -r ./assets ./docs",
@@ -43,5 +43,8 @@
     "typedoc-twilio-theme": "^1.0.0",
     "typescript": "^4.1.5"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "engines": {
+    "node": ">=12.0.0"
+  }
 }
