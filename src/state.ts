@@ -6,14 +6,14 @@ import { applyValidators } from './utils'
 export abstract class StateUtils extends Disposable {
 
   /** The error info of validation */
-  declare abstract error: Error
+  abstract error: Error
 
   /** If the state contains error. */
   @computed get hasError() {
     return !!this.error
   }
 
-  declare abstract validateStatus: ValidateStatus
+  abstract validateStatus: ValidateStatus
 
   /** If the state is doing a validation. */
   @computed get validating() {
@@ -36,9 +36,9 @@ export abstract class StateUtils extends Disposable {
 
 export default abstract class State<V> extends StateUtils implements IState<V> {
 
-  declare abstract value: V
-  declare abstract initialValue: V
-  declare abstract activated: boolean
+  abstract value: V
+  abstract initialValue: V
+  abstract activated: boolean
   abstract validate(): Promise<ValidateResult<V>>
   abstract set(value: V): void
   abstract onChange(value: V): void

@@ -12,16 +12,10 @@ export abstract class AbstractFormState<T, V> extends State<V> implements IState
   @observable activated = false
 
   /** Fields. */
-  declare abstract readonly $: T
+  abstract readonly $: T
 
   /** List of fields. */
-  declare protected abstract fieldList: IState[]
-
-  /**
-   * Value that can be consumed by your code.
-   * It's a composition of fields' value.
-   */
-  declare abstract value: V
+  protected abstract fieldList: IState[]
 
   @override override get validateStatus() {
     if (this.validationDisabled) {
@@ -82,8 +76,6 @@ export abstract class AbstractFormState<T, V> extends State<V> implements IState
   @action setError(error: ValidationResponse) {
     this._error = error ? error : undefined
   }
-
-  abstract declare initialValue: V
 
   /** Reset fields */
   protected abstract resetFields(initialValue: V): void
