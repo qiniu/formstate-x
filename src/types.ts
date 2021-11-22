@@ -96,8 +96,3 @@ export enum ValidateStatus {
   /** current validation finished */
   Validated // 校验完成
 }
-
-export interface Bindable<T> {
-  _value: T
-  onChange: (v: T) => void
-}

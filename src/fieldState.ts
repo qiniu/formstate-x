@@ -1,12 +1,12 @@
 import { observable, computed, action, reaction, autorun, makeObservable } from 'mobx'
-import { IState, ValidationResponse, ValidateStatus, Error, ValidateResult, Bindable } from './types'
+import { IState, ValidationResponse, ValidateStatus, Error, ValidateResult } from './types'
 import { is, debounce, isPromiseLike } from './utils'
 import State from './state'
 
 /**
  * The state for a field.
  */
-export default class FieldState<V> extends State<V> implements IState<V>, Bindable<V> {
+export default class FieldState<V> extends State<V> implements IState<V> {
 
   /**
    * If activated (with auto validation).
