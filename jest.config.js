@@ -4,6 +4,7 @@ module.exports = {
   setupFiles: [
     '<rootDir>/src/testSetup.ts'
   ],
+  roots: ['<rootDir>/src'],
   globals: {
     'ts-jest': {
       // 使用特定的 tsconfig，指定 compile target 为 es6

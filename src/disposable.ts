@@ -18,7 +18,7 @@ export default class Disposable {
   }
 
   /**
-   * Do dispose by calling all disposer functions.
+   * Do dispose.
    */
   dispose() {
     this.disposers.forEach(
