@@ -1,22 +1,7 @@
 import { when, observable, runInAction } from 'mobx'
 import FieldState from './fieldState'
 import { ValidateResultWithError, ValidateResultWithValue } from './types'
-
-const defaultDelay = 10
-const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
-
-async function delay(millisecond: number = stableDelay) {
-  await new Promise<void>(resolve => setTimeout(() => resolve(), millisecond))
-}
-
-async function delayValue<T>(value: T, millisecond: number = defaultDelay) {
-  await delay(millisecond)
-  return value
-}
-
-function createFieldState<T>(initialValue: T) {
-  return new FieldState(initialValue, defaultDelay)
-}
+import { delay, delayValue, createFieldState } from './testUtils'
 
 describe('FieldState', () => {
   it('should initialize well', () => {
@@ -25,7 +10,6 @@ describe('FieldState', () => {
 
     expect(state._value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
-    expect(state.$).toBe(initialValue)
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -41,12 +25,10 @@ describe('FieldState', () => {
     state.onChange(value)
     expect(state._value).toBe(value)
     expect(state.value).toBe(initialValue)
-    expect(state.$).toBe(initialValue)
 
     await delay()
     expect(state._value).toBe(value)
     expect(state.value).toBe(value)
-    expect(state.$).toBe(value)
     expect(state.dirty).toBe(true)
 
     const newValue = '789'
@@ -54,27 +36,20 @@ describe('FieldState', () => {
     state.onChange(newValue)
     expect(state._value).toBe(newValue)
     expect(state.value).toBe(value)
-    expect(state.$).toBe(value)
 
     await delay()
     expect(state._value).toBe(newValue)
     expect(state.value).toBe(newValue)
-    expect(state.$).toBe(newValue)
     expect(state.dirty).toBe(true)
 
     const invalidValue = '123456'
     state.onChange(invalidValue)
     expect(state._value).toBe(invalidValue)
     expect(state.value).toBe(newValue)
-    expect(state.$).toBe(newValue)
 
     await delay()
     expect(state._value).toBe(invalidValue)
     expect(state.value).toBe(invalidValue)
-    expect(state.$).toBe(newValue)
-
-    await delay()
-    expect(state.$).toBe(newValue)
 
     state.dispose()
   })
@@ -436,5 +411,16 @@ describe('FieldState validation', () => {
     await when(() => field.validated)
 
     expect(field.error).toBe('bar')
+  })
+
+  it('should work well with NaN', async () => {
+    const state = createFieldState(Number.NaN).validators(
+      () => 'error'
+    )
+    state.validate()
+    await delay()
+    expect(state.validating).toBe(false)
+    expect(state.validated).toBe(true)
+    expect(state.error).toBe('error')
   })
 })

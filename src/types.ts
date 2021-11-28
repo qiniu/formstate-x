@@ -1,5 +1,4 @@
 import FieldState from './fieldState'
-import { AbstractFormState } from './formState'
 
 /** A truthy string or falsy values. */
 export type ValidationResponse =
@@ -32,34 +31,41 @@ export type ValidateResultWithError = { hasError: true, error: Error }
 export type ValidateResultWithValue<T> = { hasError: false, value: T }
 export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
 
-/** Validatable object (which can be used as a field for `FormState`). */
-export interface Validatable<T = any, TValue = T> {
-  readonly $: T
-  value: TValue
-  hasError: boolean
+/** interface for State */
+export interface IState<V = any> {
+  /** Value in the state. */
+  value: V
+  /** Initial value */
+  initialValue: V
+  /** The error info of validation */
   error: Error
-  validating: boolean
-  validated: boolean
+  /** If validation disabled. TODO: disable or disable validation? */
   validationDisabled: boolean
+  /** If value has been touched (different with `initialValue`) */
   dirty: boolean
-  _activated: boolean
-  _validateStatus: ValidateStatus
-
-  validate(): Promise<ValidateResult<TValue>>
-  set: (value: TValue) => void
-  onChange: (value: TValue) => void
-  reset: () => void
-  resetWith: (initialValue: TValue) => void
-  _dirtyWith: (initialValue: TValue) => void
-  dispose: () => void
-
-  // To see if there are requirements: enableAutoValidation, disableAutoValidation
-  // enableAutoValidation: () => void
-  // disableAutoValidation: () => void
+  /** If activated (with auto validate). */
+  activated: boolean
+  /** Current validate status. */
+  validateStatus: ValidateStatus
+  /** Fire a validation behavior. */
+  validate(): Promise<ValidateResult<V>>
+  /** Set `value` synchronously. */
+  set(value: V): void
+  /** Handler for change event. */
+  onChange(value: V): void
+  /** Reset to initial status. */
+  reset(): void
+  /** Reset to specific status. */
+  resetWith(initialValue: V): void
+  /** Check if dirty with given initial value */
+  dirtyWith(initialValue: V): boolean
+  /** Add validator function. */
+  validators(...validators: Array<Validator<V>>): this
+  /** Configure when to disable validation. */
+  disableValidationWhen(predict: () => boolean): this
+  /** Do dispose */
+  dispose(): void
 }
-
-/** @deprecated Composible validatable object (which can be used as a field for `FormState`). */
-export interface ComposibleValidatable<T, TValue = T> extends Validatable<T, TValue> {}
 
 /** Function to do dispose. */
 export interface Disposer {
@@ -79,11 +85,7 @@ export type ValueOfObjectFields<Fields> = {
 }
 
 /** Value of state (`FormState` or `FieldState`) */
-export type ValueOf<State> = (
-  State extends AbstractFormState<infer T, infer TValue>
-  ? TValue
-  : ValueOfFieldState<State>
-)
+export type ValueOf<S> = S extends IState<infer V> ? V : never
 
 /** Validate status. */
 export enum ValidateStatus {

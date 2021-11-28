@@ -1,23 +1,8 @@
 import { observable, isObservable } from 'mobx'
 import FieldState from './fieldState'
 import { FormState, ArrayFormState, isFormState } from './formState'
-import { Error, Validatable, ValidateResultWithError, ValidateResultWithValue } from './types'
-
-const defaultDelay = 10
-const stableDelay = defaultDelay * 3 // [onChange debounce] + [async validate] + [buffer]
-
-async function delay(millisecond: number = stableDelay) {
-  await new Promise<void>(resolve => setTimeout(() => resolve(), millisecond))
-}
-
-async function delayValue<T>(value: T, millisecond: number = defaultDelay) {
-  await delay(millisecond)
-  return value
-}
-
-function createFieldState<T>(initialValue: T) {
-  return new FieldState(initialValue, defaultDelay)
-}
+import { Error, IState, ValidateResultWithError, ValidateResultWithValue } from './types'
+import { delay, delayValue, createFieldState, assertType } from './testUtils'
 
 describe('FormState (mode: object)', () => {
   it('should initialize well', () => {
@@ -30,9 +15,7 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(initialValue)
     expect(isObservable(state.$)).toBe(true)
     expect(state.$.foo).toBeInstanceOf(FieldState)
-    expect(state.$.foo.$).toBe(initialValue.foo)
     expect(state.$.bar).toBeInstanceOf(FieldState)
-    expect(state.$.bar.$).toBe(initialValue.bar)
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -65,8 +48,6 @@ describe('FormState (mode: object)', () => {
     await delay()
 
     expect(state.value).toEqual(value)
-    expect(state.$.foo.$).toBe(value.foo)
-    expect(state.$.bar.$).toBe(value.bar)
     expect(state.dirty).toBe(true)
 
     state.dispose()
@@ -191,8 +172,6 @@ describe('FormState (mode: object)', () => {
     state.reset()
 
     expect(state.value).toEqual(initialValue)
-    expect(state.$.foo.$).toBe(initialValue.foo)
-    expect(state.$.bar.$).toBe(initialValue.bar)
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -663,9 +642,8 @@ describe('FormState (mode: array)', () => {
 
     expect(state.value).toEqual(initialValue)
     expect(state.$).toHaveLength(initialValue.length)
-    state.$.forEach((field, i) => {
+    state.$.forEach(field => {
       expect(field).toBeInstanceOf(FieldState)
-      expect(field.$).toBe(initialValue[i])
     })
     expect(state.dirty).toBe(false)
 
@@ -681,9 +659,6 @@ describe('FormState (mode: array)', () => {
     await delay()
 
     expect(state.value).toEqual(value)
-    state.$.forEach((field, i) => {
-      expect(field.$).toBe(value[i])
-    })
     expect(state.dirty).toBe(true)
 
     state.dispose()
@@ -860,6 +835,14 @@ describe('FormState (mode: array)', () => {
       expect(state.value).toEqual([])
       expect(state.hasError).toBe(true)
     })
+
+    it('should do nothing with non-positive num', () => {
+      const state = createState(['123', '456'])
+      state.remove(0, 0)
+      expect(state.value).toEqual(['123', '456'])
+      state.remove(0, -1)
+      expect(state.value).toEqual(['123', '456'])
+    })
   })
 
   describe('insert', () => {
@@ -980,6 +963,16 @@ describe('FormState (mode: array)', () => {
       expect(state.value).toEqual(['b', 'a', 'c', 'd'])
       expect(state.hasError).toBe(true)
     })
+
+    it('should do nothing with the same fromIndex & toIndex', () => {
+      const state = createState(['123', '456', '789'])
+      state.move(1, 1)
+      expect(state.value).toEqual(['123', '456', '789'])
+      state.move(1, -2)
+      expect(state.value).toEqual(['123', '456', '789'])
+      state.move(-1, 2)
+      expect(state.value).toEqual(['123', '456', '789'])
+    })
   })
 
   it('should reset well', async () => {
@@ -992,9 +985,6 @@ describe('FormState (mode: array)', () => {
     state.reset()
 
     expect(state.value).toEqual(initialValue)
-    state.$.forEach((field, i) => {
-      expect(field.$).toBe(initialValue[i])
-    })
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -1052,7 +1042,7 @@ describe('FormState (mode: array)', () => {
       value => value.length <= 0 && 'empty'
     )
 
-    const validation = state.validate()
+    state.validate()
     state.set([])
 
     await delay()
@@ -1472,7 +1462,7 @@ describe('nested FormState', () => {
 
     const createInputDuplicateValidator = (currentInputState: FieldState<string>) => (value: string) => {
       for (const inputState of state.$.inputs.$) {
-        if (inputState !== currentInputState && value === inputState.$) {
+        if (inputState !== currentInputState && value === inputState.value) {
           return 'duplicated'
         }
       }
@@ -1484,11 +1474,9 @@ describe('nested FormState', () => {
       return inputState.validators(duplicateValidator)
     }
 
-    const shouldDisableInputsState = () => !enabledState.$
-
     const inputsState = new ArrayFormState([], createInputState).validators(
       list => list.join('').length > 5 && 'too long'
-    ).disableValidationWhen(shouldDisableInputsState)
+    ).disableValidationWhen(() => !enabledState.value)
 
     const state = new FormState({
       inputs: inputsState,
@@ -1694,14 +1682,14 @@ describe('isFormState', () => {
   })
 
   it('should work with correct typing info', () => {
-    let state: Validatable<readonly Validatable<string>[], string[]> = new ArrayFormState(
+    let state: IState<string[]> = new ArrayFormState(
       ['123'],
       v => new FieldState(v)
     )
     if (isFormState(state)) {
-      const v: string = state.$[0].$
-      const vs: string[] = state.value
-      const ownError: Error = state.ownError
+      assertType<string>((state.$ as Array<IState<string>>)[0].value)
+      assertType<string[]>(state.value)
+      assertType<Error>(state.ownError)
     }
   })
 })

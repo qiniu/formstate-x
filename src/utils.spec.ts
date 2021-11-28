@@ -1,13 +1,6 @@
 import { observable } from 'mobx'
 import { asyncResponsesAnd, isEmpty, isArrayLike } from './utils'
-
-const defaultDelay = 10
-
-function delay<T>(value?: T, delay: number = defaultDelay + 10): Promise<T | undefined> {
-  return new Promise<T | undefined>(
-    resolve => setTimeout(() => resolve(value), delay)
-  )
-}
+import { delayValue as delay } from './testUtils'
 
 describe('asyncResponsesAnd', () => {
   it('should work well with empty responses', async () => {
@@ -19,7 +12,7 @@ describe('asyncResponsesAnd', () => {
     const result = await asyncResponsesAnd([delay(null)])
     expect(isEmpty(result)).toBe(true)
 
-    const result2 = await asyncResponsesAnd([
+    await asyncResponsesAnd([
       delay(null, 30),
       delay(undefined, 10),
       delay(false, 20)
