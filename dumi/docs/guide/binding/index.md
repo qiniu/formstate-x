@@ -4,7 +4,7 @@ order: 4
 toc: menu
 ---
 
-In this part, We will talk about using formstate-x with a third-party UI library. You can make formstate-x bindings to them easily.
+In this part, We will introduce how to use formstate-x with a 3rd-party UI library.
 
 ### Material-UI
 
