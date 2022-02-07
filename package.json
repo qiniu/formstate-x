@@ -9,14 +9,17 @@
   "main": "lib/index.js",
   "module": "esm/index.js",
   "scripts": {
-    "clean": "rm -rf ./esm ./lib ./docs",
+    "clean": "rm -rf ./esm ./lib ./dumi/dist",
     "lint": "tsc --noEmit",
     "test": "jest",
     "validate": "npm run lint && npm run test",
     "coverage": "rm -rf coverage && jest --coverage",
+    "dev:doc:src": "rm -rf ./dumi/src && tsc --module es6 --outDir ./dumi/src --inlineSources --watch",
+    "dev:doc": "npm run build:doc:src && APP_ROOT=dumi dumi dev",
     "build:esm": "rm -rf ./esm && tsc --module es6 --outDir ./esm",
     "build:lib": "rm -rf ./lib && tsc",
-    "build:doc": "rm -rf ./docs && typedoc && cp -r ./assets ./docs",
+    "build:doc:src": "rm -rf ./dumi/src && tsc --module es6 --outDir ./dumi/src --inlineSources",
+    "build:doc": "rm -rf ./dumi/dist && npm run build:doc:src && APP_ROOT=dumi dumi build",
     "build": "npm run build:esm && npm run build:lib",
     "prepublishOnly": "npm run test && npm run build",
     "ci": "npm run lint && npm run coverage && npm run build && npm run build:doc"
@@ -33,18 +36,23 @@
   "author": "nighca@live.cn",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/jest": "^25.2.1",
-    "@types/node": "^12.7.12",
+    "@emotion/react": "^11.5.0",
+    "@emotion/styled": "^11.3.0",
+    "@mui/icons-material": "^5.1.1",
+    "@mui/material": "^5.1.1",
+    "@types/jest": "^27.0.0",
+    "@types/node": "^16.0.0",
+    "antd": "^4.16.13",
+    "dumi": "^1.1.32",
     "formstate": "^2.0.0",
-    "jest": "~26.6.1",
+    "jest": "^27.0.0",
     "mobx": "^6.0.4",
-    "ts-jest": "~26.4.2",
-    "typedoc": "~0.21.6",
-    "typedoc-twilio-theme": "^1.0.0",
+    "mobx-react": "^7.2.1",
+    "react-icecream": "^2.1.2",
+    "ts-jest": "^27.0.0",
     "typescript": "^4.1.5"
   },
-  "dependencies": {},
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=16.0.0"
   }
 }

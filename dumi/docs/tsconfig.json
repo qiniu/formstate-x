@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "declaration": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "strict": true,
+    "noImplicitOverride": false,
+    "experimentalDecorators": true,
+    "useDefineForClassFields": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "lib": ["ESNext", "DOM"],
+    "paths": {
+      "formstate-x": ["../src"],
+      "formstate-x/bindings/*": ["../src/bindings/*"]
+    },
+    "jsx": "react"
+  }
+}
