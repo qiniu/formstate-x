@@ -1,15 +1,8 @@
-import { observable, computed, isObservable, action, autorun, reaction, makeObservable, override } from 'mobx'
-import { IState, ValidationResponse, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
-import { isPromiseLike } from './utils'
-import State from './state'
+import { observable, computed, isObservable, action, reaction, makeObservable, override } from 'mobx'
+import { IState, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
+import HasValueAndValidators from './state'
 
-export abstract class AbstractFormState<T, V> extends State<V> implements IState<V> {
-
-  /**
-   * If activated (with auto validate).
-   * Form will only be activated when `validate()` called or some field activated.
-   */
-  @observable activated = false
+export abstract class AbstractFormState<T, V> extends HasValueAndValidators<V> implements IState<V> {
 
   /** Fields. */
   abstract readonly $: T
@@ -37,11 +30,6 @@ export abstract class AbstractFormState<T, V> extends State<V> implements IState
     return ValidateStatus.NotValidated
   }
 
-  /**
-   * The error info of form validation (regardless of disableValidationWhen).
-   */
-  @observable private _error: Error
-
   /** The error info of form validation. */
   @computed get ownError(): Error {
     if (this.validationDisabled) {
@@ -55,9 +43,7 @@ export abstract class AbstractFormState<T, V> extends State<V> implements IState
     return !!this.ownError
   }
 
-  /**
-   * The error info of validation (including fields' error info).
-   */
+  /** The error info of validation (including fields' error info). */
   @computed get error() {
     if (this.validationDisabled) {
       return undefined
@@ -70,11 +56,6 @@ export abstract class AbstractFormState<T, V> extends State<V> implements IState
         return field.error
       }
     }
-  }
-
-  /** Set error info of form. */
-  @action setError(error: ValidationResponse) {
-    this._error = error ? error : undefined
   }
 
   /** Reset fields */
@@ -90,73 +71,22 @@ export abstract class AbstractFormState<T, V> extends State<V> implements IState
     this.resetFields(initialValue)
   }
 
-  /**
-   * Fire a validation behavior.
-   */
-  async validate(): Promise<ValidateResult<V>> {
-    action('activate-when-validate', () => {
-      this.activated = true
-    })()
-
-    this.doValidation()
+  override async validate(): Promise<ValidateResult<V>> {
     this.fieldList.forEach(
       field => field.validate()
     )
 
-    return this.getValidateResult()
+    return super.validate()
   }
 
-  /**
-   * Apply validation.
-   */
-  private async applyValidation() {
-    const validation = this.validation
-    if (!validation) {
-      return
-    }
-
-    const error = (
-      isPromiseLike(validation.response)
-      ? await validation.response
-      : validation.response
-    )
-
-    // 如果 validation 已过期，则不生效
-    if (validation !== this.validation) {
-      return
-    }
-
-    action('endValidation', () => {
-      this.validation = undefined
-      this.rawValidateStatus = ValidateStatus.Validated
-
-      if (error !== this.error) {
-        this.setError(error)
-      }
-    })()
-  }
-
-  protected init() {
-    makeObservable(this)
+  protected override init() {
+    super.init()
 
     // auto activate: any field activated -> form activated
     this.addDisposer(reaction(
       () => this.fieldList.some(field => field.activated),
       someFieldActivated => someFieldActivated && !this.activated && (this.activated = true),
-      { fireImmediately: true }
-    ))
-
-    // auto validate: this.value -> this.validation
-    this.addDisposer(autorun(
-      () => !this.validationDisabled && this.activated && this.doValidation(),
-      { name: 'autorun-check-&-_validate' }
-    ))
-
-    // auto apply validate result: this.validation -> this.error
-    this.addDisposer(reaction(
-      () => this.validation,
-      () => this.applyValidation(),
-      { name: 'applyValidation-when-validation-change' }
+      { fireImmediately: true, name: 'activate-form-when-field-activated' }
     ))
 
     // dispose fields when dispose
@@ -165,6 +95,11 @@ export abstract class AbstractFormState<T, V> extends State<V> implements IState
         field => field.dispose()
       )
     })
+  }
+
+  constructor() {
+    super()
+    makeObservable(this)
   }
 }
 
@@ -232,6 +167,7 @@ export class FormState<
 
   constructor(initialFields: TFields) {
     super()
+    makeObservable(this)
 
     this.$ = initialFields
     this.initialValue = this.value
@@ -372,6 +308,7 @@ export class ArrayFormState<
 
   constructor(public initialValue: V[], private createFieldState: (v: V) => T) {
     super()
+    makeObservable(this)
 
     this.fieldList = this.createFields(this.initialValue)
     this.init()

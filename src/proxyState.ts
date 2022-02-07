@@ -1,8 +1,12 @@
 import { computed } from 'mobx'
-import { StateUtils } from './state'
+import { HasErrorAndValidateStatus } from './state'
 import { IState, Validator } from './types'
 
-export default class ProxyState<Value = any, TargetValue = any, TargetState extends IState<TargetValue> = IState<TargetValue>> extends StateUtils implements IState<Value> {
+export default class ProxyState<
+  Value = any,
+  TargetValue = any,
+  TargetState extends IState<TargetValue> = IState<TargetValue>
+> extends HasErrorAndValidateStatus implements IState<Value> {
 
   /** The proxy-target state */
   public $: TargetState

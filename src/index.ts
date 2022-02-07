@@ -1,6 +1,7 @@
 export * from './types'
-export { default as FieldState } from './fieldState'
 export * from './fieldState'
+export { default as FieldState } from './fieldState'
 export * from './formState'
 export { default as ProxyState } from './proxyState'
+export { default as DebouncedFieldState } from './debouncedFieldState'
 export * from './bind'

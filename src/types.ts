@@ -49,13 +49,13 @@ export interface IState<V = any> {
   validateStatus: ValidateStatus
   /** Fire a validation behavior. */
   validate(): Promise<ValidateResult<V>>
-  /** Set `value` synchronously. */
+  /** Set `value` imperatively. */
   set(value: V): void
   /** Handler for change event. */
   onChange(value: V): void
   /** Reset to initial status. */
   reset(): void
-  /** Reset to specific status. */
+  /** Reset with specific intial value. */
   resetWith(initialValue: V): void
   /** Check if dirty with given initial value */
   dirtyWith(initialValue: V): boolean

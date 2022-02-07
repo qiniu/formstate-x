@@ -1,8 +1,9 @@
 import { observable, runInAction, when } from 'mobx'
 import { ValidateResultWithError, ValidateResultWithValue } from './types'
 import ProxyState from './proxyState'
+import FieldState from './fieldState'
 import { FormState } from './formState'
-import { delay, delayValue, createFieldState, assertType } from './testUtils'
+import { delay, delayValue, assertType } from './testUtils'
 
 function createNumState(initialValue: number = 0) {
   function parseNum(str: string) {
@@ -13,7 +14,7 @@ function createNumState(initialValue: number = 0) {
     return Number.isNaN(num) ? '' : (num + '')
   }
   return new ProxyState(
-    createFieldState(stringifyNum(initialValue)),
+    new FieldState(stringifyNum(initialValue)),
     parseNum,
     stringifyNum
   )
@@ -39,7 +40,7 @@ describe('ProxyState (for FieldState)', () => {
     }
 
     function createHostState() {
-      const rawState = createFieldState('')
+      const rawState = new FieldState('')
       return new ProxyState(rawState, parseHost, stringifyHost)
     }
 
@@ -80,8 +81,6 @@ describe('ProxyState (for FieldState)', () => {
 
     const value = 10
     state.onChange(value)
-    expect(state.value).toBe(initialValue)
-
     await delay()
     expect(state.value).toBe(value)
     expect(state.dirty).toBe(true)
@@ -89,16 +88,12 @@ describe('ProxyState (for FieldState)', () => {
     const newValue = 100
     state.onChange(50)
     state.onChange(newValue)
-    expect(state.value).toBe(value)
-
     await delay()
     expect(state.value).toBe(newValue)
     expect(state.dirty).toBe(true)
 
     const invalidValue = 200
     state.onChange(invalidValue)
-    expect(state.value).toBe(newValue)
-
     await delay()
     expect(state.value).toBe(invalidValue)
 
@@ -474,8 +469,8 @@ function stringifyHost(host: Host) {
 function createHostState(hostStr: string = '127.0.0.1:80') {
   const host = parseHost(hostStr)
   const rawState = new FormState({
-    hostname: createFieldState(host.hostname),
-    port: createFieldState(host.port)
+    hostname: new FieldState(host.hostname),
+    port: new FieldState(host.port)
   })
   return new ProxyState(rawState, stringifyHost, parseHost)
 }
@@ -536,12 +531,6 @@ describe('ProxyState (for FormState)', () => {
     const state = createHostState('127.0.0.1:80')
 
     state.onChange('qiniu.com:443')
-    expect(state.value).toBe('127.0.0.1:80')
-    expect(state.$.$.hostname.value).toBe('127.0.0.1')
-    expect(state.$.$.hostname._value).toBe('qiniu.com')
-    expect(state.$.$.port.value).toBe(80)
-    expect(state.$.$.port._value).toBe(443)
-
     await delay()
     expect(state.value).toEqual('qiniu.com:443')
     expect(state.$.$.hostname.value).toBe('qiniu.com')
@@ -554,9 +543,7 @@ describe('ProxyState (for FormState)', () => {
     await delay()
     expect(state.value).toEqual('127.0.0.1:80')
     expect(state.$.$.hostname.value).toBe('127.0.0.1')
-    expect(state.$.$.hostname._value).toBe('127.0.0.1')
     expect(state.$.$.port.value).toBe(80)
-    expect(state.$.$.port._value).toBe(80)
     expect(state.dirty).toBe(false)
 
     state.dispose()
@@ -572,9 +559,7 @@ describe('ProxyState (for FormState)', () => {
 
     expect(state.value).toEqual('127.0.0.1:80')
     expect(state.$.$.hostname.value).toBe('127.0.0.1')
-    expect(state.$.$.hostname._value).toBe('127.0.0.1')
     expect(state.$.$.port.value).toBe(80)
-    expect(state.$.$.port._value).toBe(80)
     expect(state.dirty).toBe(false)
 
     state.onChange('qiniu.com:443')
@@ -583,9 +568,7 @@ describe('ProxyState (for FormState)', () => {
 
     expect(state.value).toEqual('127.0.0.1:80')
     expect(state.$.$.hostname.value).toBe('127.0.0.1')
-    expect(state.$.$.hostname._value).toBe('127.0.0.1')
     expect(state.$.$.port.value).toBe(80)
-    expect(state.$.$.port._value).toBe(80)
     expect(state.dirty).toBe(false)
 
     state.dispose()
