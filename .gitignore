@@ -2,6 +2,5 @@ node_modules
 /lib
 /esm
 /coverage
-/dumi/src
 .umi
 .vscode
