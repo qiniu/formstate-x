@@ -1,10 +1,10 @@
 import { when, observable, runInAction } from 'mobx'
-import DebouncedState from './debouncedFieldState'
+import { DebouncedFieldState } from './debouncedState'
 import { ValidateResultWithError, ValidateResultWithValue, ValidateStatus } from './types'
 import { defaultDelay, delay, delayValue } from './testUtils'
 
 export function createFieldState<T>(initialValue: T, delay = defaultDelay) {
-  return new DebouncedState(initialValue, delay)
+  return new DebouncedFieldState(initialValue, delay)
 }
 
 describe('DebouncedFieldState', () => {

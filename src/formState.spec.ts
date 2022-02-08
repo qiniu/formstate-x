@@ -1,5 +1,5 @@
 import { observable, isObservable } from 'mobx'
-import FieldState from './fieldState'
+import { FieldState } from './fieldState'
 import { FormState, ArrayFormState, isFormState } from './formState'
 import { Error, IState, ValidateResultWithError, ValidateResultWithValue } from './types'
 import { delay, delayValue, assertType } from './testUtils'

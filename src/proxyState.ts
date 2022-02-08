@@ -2,7 +2,7 @@ import { computed } from 'mobx'
 import { HasErrorAndValidateStatus } from './state'
 import { IState, Validator } from './types'
 
-export default class ProxyState<
+export class ProxyState<
   Value = any,
   TargetValue = any,
   TargetState extends IState<TargetValue> = IState<TargetValue>

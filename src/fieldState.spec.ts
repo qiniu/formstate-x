@@ -1,5 +1,5 @@
 import { when, observable, runInAction } from 'mobx'
-import FieldState from './fieldState'
+import { FieldState } from './fieldState'
 import { ValidateResultWithError, ValidateResultWithValue } from './types'
 import { delay, delayValue, assertType } from './testUtils'
 

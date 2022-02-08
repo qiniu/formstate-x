@@ -1,7 +1,7 @@
 import { observable, runInAction, when } from 'mobx'
 import { ValidateResultWithError, ValidateResultWithValue } from './types'
-import ProxyState from './proxyState'
-import FieldState from './fieldState'
+import { ProxyState } from './proxyState'
+import { FieldState } from './fieldState'
 import { FormState } from './formState'
 import { delay, delayValue, assertType } from './testUtils'
 

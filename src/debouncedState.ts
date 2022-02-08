@@ -1,12 +1,12 @@
 import { action, computed, makeObservable, observable, reaction } from 'mobx'
-import FieldState from './fieldState'
+import { FieldState } from './fieldState'
 import { HasErrorAndValidateStatus } from './state'
 import { IState, ValidateStatus, Validator } from './types'
 import { debounce, is } from './utils'
 
 const defaultDelay = 200 // ms
 
-class DebouncedState<
+export default class DebouncedState<
   V = any,
   S extends IState<V> = IState<V>
 > extends HasErrorAndValidateStatus implements IState<V> {
@@ -101,7 +101,7 @@ class DebouncedState<
 
 }
 
-export default class DebouncedFieldState<V> extends DebouncedState<V, FieldState<V>> {
+export class DebouncedFieldState<V> extends DebouncedState<V, FieldState<V>> {
   constructor(initialValue: V, delay = defaultDelay) {
     super(new FieldState(initialValue), delay)
   }

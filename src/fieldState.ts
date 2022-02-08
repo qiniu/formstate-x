@@ -6,7 +6,7 @@ import HasValueAndValidators from './state'
 /**
  * The state for a field.
  */
-export default class FieldState<V> extends HasValueAndValidators<V> implements IState<V> {
+export class FieldState<V> extends HasValueAndValidators<V> implements IState<V> {
 
   @observable.ref value!: V
 

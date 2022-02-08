@@ -1,4 +1,4 @@
-import FieldState from './fieldState'
+import { FieldState } from './fieldState'
 
 /** A truthy string or falsy values. */
 export type ValidationResponse =
