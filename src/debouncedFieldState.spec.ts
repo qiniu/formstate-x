@@ -296,7 +296,10 @@ describe('DebouncedFieldState validation', () => {
       () => options.disabled
     )
 
+    expect(state.validationDisabled).toBe(false)
+
     runInAction(() => options.disabled = true)
+    expect(state.validationDisabled).toBe(true)
 
     const validated = state.validate()
     expect(state.validating).toBe(false)
@@ -321,6 +324,7 @@ describe('DebouncedFieldState validation', () => {
     expect(state.error).toBeUndefined()
 
     runInAction(() => options.disabled = false)
+    expect(state.validationDisabled).toBe(false)
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
