@@ -6,6 +6,10 @@ import { debounce, is } from './utils'
 
 const defaultDelay = 200 // ms
 
+/**
+ * The state for debounce purpose.
+ * Changes from the original state (`$`) will be debounced.
+ */
 export default class DebouncedState<
   V = any,
   S extends IState<V> = IState<V>

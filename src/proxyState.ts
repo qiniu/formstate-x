@@ -8,7 +8,7 @@ export class ProxyState<
   TargetState extends IState<TargetValue> = IState<TargetValue>
 > extends HasErrorAndValidateStatus implements IState<Value> {
 
-  /** The proxy-target state */
+  /** The original state, whose value will be transformed. */
   public $: TargetState
 
   constructor(
