@@ -36,18 +36,17 @@ export abstract class HasErrorAndValidateStatus extends Disposable {
   }
 }
 
-export default abstract class HasValueAndValidators<V> extends HasErrorAndValidateStatus implements IState<V> {
+export default abstract class HasValue<V> extends HasErrorAndValidateStatus implements IState<V> {
 
   abstract value: V
-  abstract set(value: V): void
-  abstract onChange(value: V): void
-  abstract reset(): void
   abstract dirty: boolean
+  abstract onChange(value: V): void
+  abstract set(value: V): void
+  abstract reset(): void
 
   /** The raw validate status (regardless of `validationDisabled`) */
   @observable protected rawValidateStatus: ValidateStatus = ValidateStatus.NotValidated
 
-  /** Current validate status. */
   @computed get validateStatus() {
     return this.validationDisabled ? ValidateStatus.WontValidate : this.rawValidateStatus
   }
