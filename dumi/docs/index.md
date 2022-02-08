@@ -31,9 +31,10 @@ yarn add formstate-x
 ```javascript
 import { FieldState, FormState, bindInput } from 'formstate-x'
 
-const foo = new FieldState('')
-const bar = new FieldState(0)
-const form = new FormState({ foo, bar })
+const form = new FormState({
+  foo: new FieldState(''),
+  bar: new FieldState(0)
+})
 
 // handle submit
 async function handleSubmit(e) {
