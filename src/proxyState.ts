@@ -27,16 +27,8 @@ export default class ProxyState<
     return this.parseTargetValue(this.$.value)
   }
 
-  @computed get initialValue() {
-    return this.parseTargetValue(this.$.value)
-  }
-
   @computed get error() {
     return this.$.error
-  }
-
-  @computed get validationDisabled() {
-    return this.$.validationDisabled
   }
 
   @computed get dirty() {
@@ -47,8 +39,9 @@ export default class ProxyState<
     return this.$.activated
   }
 
-  /** Current validate status */
-  @computed get validateStatus() { return this.$.validateStatus }
+  @computed get validateStatus() {
+    return this.$.validateStatus
+  }
 
   async validate() {
     const result = await this.$.validate()
@@ -66,14 +59,6 @@ export default class ProxyState<
 
   reset() {
     this.$.reset()
-  }
-
-  resetWith(initialValue: Value) {
-    this.$.resetWith(this.getTargetValue(initialValue))
-  }
-
-  dirtyWith(initialValue: Value) {
-    return this.$.dirtyWith(this.getTargetValue(initialValue))
   }
 
   validators(...validators: Array<Validator<Value>>) {

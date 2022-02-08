@@ -32,7 +32,6 @@ describe('DebouncedFieldState', () => {
     expect(state.activated).toBe(false)
     expect(state.validateStatus).toBe(ValidateStatus.NotValidated)
     expect(state.dirty).toBe(false)
-    expect(state.dirtyWith(initialValue)).toBe(false)
 
     await delay()
     expect(state.$.value).toBe(value)
@@ -40,7 +39,6 @@ describe('DebouncedFieldState', () => {
     expect(state.activated).toBe(true)
     expect(state.validateStatus).toBe(ValidateStatus.Validated)
     expect(state.dirty).toBe(true)
-    expect(state.dirtyWith(initialValue)).toBe(true)
 
     const newValue = '789'
     state.$.onChange('456')
@@ -296,10 +294,7 @@ describe('DebouncedFieldState validation', () => {
       () => options.disabled
     )
 
-    expect(state.validationDisabled).toBe(false)
-
     runInAction(() => options.disabled = true)
-    expect(state.validationDisabled).toBe(true)
 
     const validated = state.validate()
     expect(state.validating).toBe(false)
@@ -324,7 +319,6 @@ describe('DebouncedFieldState validation', () => {
     expect(state.error).toBeUndefined()
 
     runInAction(() => options.disabled = false)
-    expect(state.validationDisabled).toBe(false)
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')

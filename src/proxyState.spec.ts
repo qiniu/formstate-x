@@ -66,7 +66,6 @@ describe('ProxyState (for FieldState)', () => {
     const initialValue = 123
     const state = createNumState(initialValue)
 
-    expect(state.initialValue).toBe(initialValue)
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
 
@@ -142,44 +141,6 @@ describe('ProxyState (for FieldState)', () => {
 
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
-  })
-
-  it('should resetWith well', async () => {
-    const state = createNumState(0)
-
-    state.onChange(10)
-    await delay()
-    state.resetWith(1)
-
-    expect(state.value).toBe(1)
-    expect(state.dirty).toBe(false)
-
-    state.onChange(50)
-    state.reset()
-
-    expect(state.value).toBe(1)
-    expect(state.dirty).toBe(false)
-
-    state.onChange(100)
-    state.resetWith(2)
-
-    expect(state.value).toBe(2)
-    expect(state.dirty).toBe(false)
-
-    state.dispose()
-  })
-
-  it('should dirtyWith well', async () => {
-    const state = createNumState(0)
-
-    expect(state.dirtyWith(1)).toBe(true)
-
-    state.onChange(1)
-    await delay()
-    expect(state.dirtyWith(1)).toBe(false)
-    expect(state.dirtyWith(0)).toBe(true)
 
     state.dispose()
   })
@@ -412,12 +373,9 @@ describe('ProxyState (for FieldState) validation', () => {
       () => options.disabled
     )
 
-    expect(state.validationDisabled).toBe(false)
-
     runInAction(() => options.disabled = true)
 
     const validated = state.validate()
-    expect(state.validationDisabled).toBe(true)
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(false)
 
@@ -441,7 +399,6 @@ describe('ProxyState (for FieldState) validation', () => {
 
     runInAction(() => options.disabled = false)
     await delay()
-    expect(state.validationDisabled).toBe(false)
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('non positive')
 

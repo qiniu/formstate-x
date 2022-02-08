@@ -23,19 +23,19 @@ export default class FieldState<V> extends HasValueAndValidators<V> implements I
     this.value = value
   }
 
-  @action resetWith(initialValue: V) {
-    this.value = this.initialValue = initialValue
+  @action reset() {
+    this.value = this.initialValue
     this.activated = false
     this.rawValidateStatus = ValidateStatus.NotValidated
     this._error = undefined
     this.validation = undefined
   }
 
-  dirtyWith(initialValue: V) {
-    return !is(this.value, initialValue)
+  @computed get dirty() {
+    return !is(this.value, this.initialValue)
   }
 
-  constructor(public initialValue: V) {
+  constructor(private initialValue: V) {
     super()
     makeObservable(this)
     this.reset()

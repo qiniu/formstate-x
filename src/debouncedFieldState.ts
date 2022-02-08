@@ -8,10 +8,13 @@ const defaultDelay = 200 // ms
 
 class DebouncedState<
   V = any,
-  S extends FieldState<V> = FieldState<V>
+  S extends IState<V> = IState<V>
 > extends HasErrorAndValidateStatus implements IState<V> {
 
-  /** The original state */
+  /**
+   * The original state.
+   * Use the original state (`$`) for UI binding instead of the debounced state.
+   */
   public $: S
 
   @observable.ref value!: V
@@ -20,37 +23,30 @@ class DebouncedState<
     return is(this.value, this.$.value)
   }
 
+  @observable.ref private _dirty!: boolean
   @observable.ref private _activated!: boolean
   @observable.ref private _validateStatus!: ValidateStatus
 
   @action private sync() {
     if (this.upToDate) return
     this.value = this.$.value
+    this._dirty = this.$.dirty
     this._activated = this.$.activated
     this._validateStatus = this.$.validateStatus
-  }
-
-  @computed get initialValue() {
-    return this.$.initialValue
   }
 
   @computed get error() {
     return this.$.error
   }
 
-  @computed get validationDisabled() {
-    return this.$.validationDisabled
-  }
-
   @computed get dirty() {
-    return this.dirtyWith(this.initialValue)
+    return this.upToDate ? this.$.dirty : this._dirty
   }
 
   @computed get activated() {
     return this.upToDate ? this.$.activated : this._activated
   }
 
-  /** Current validate status */
   @computed get validateStatus() {
     return this.upToDate ? this.$.validateStatus : this._validateStatus
   }
@@ -72,16 +68,6 @@ class DebouncedState<
   reset() {
     this.$.reset()
     this.sync()
-  }
-
-  resetWith(initialValue: V) {
-    this.$.resetWith(initialValue)
-    this.sync()
-  }
-
-  dirtyWith(initialValue: V) {
-    // TODO: This only suits FieldState
-    return !is(this.value, initialValue)
   }
 
   validators(...validators: Array<Validator<V>>) {
@@ -115,7 +101,7 @@ class DebouncedState<
 
 }
 
-export default class DebouncedFieldState<V> extends DebouncedState<V> {
+export default class DebouncedFieldState<V> extends DebouncedState<V, FieldState<V>> {
   constructor(initialValue: V, delay = defaultDelay) {
     super(new FieldState(initialValue), delay)
   }

@@ -12,9 +12,11 @@ export abstract class AbstractFormState<T, V> extends HasValueAndValidators<V> i
 
   @override override get validateStatus() {
     if (this.validationDisabled) {
-      return ValidateStatus.NotValidated
+      return ValidateStatus.WontValidate
     }
-    const fieldList = this.fieldList.filter(field => !field.validationDisabled)
+    const fieldList = this.fieldList.filter(
+      field => field.validateStatus != ValidateStatus.WontValidate
+    )
     if (
       this.rawValidateStatus === ValidateStatus.Validating
       || fieldList.some(field => field.validateStatus === ValidateStatus.Validating)
@@ -58,17 +60,27 @@ export abstract class AbstractFormState<T, V> extends HasValueAndValidators<V> i
     }
   }
 
-  /** Reset fields */
-  protected abstract resetFields(initialValue: V): void
+  /** If field list has been touched */
+  @observable protected _dirty = false
 
-  @action resetWith(initialValue: V) {
+  @computed get dirty() {
+    return (
+      this._dirty
+      || this.fieldList.some(field => field.dirty)
+    )
+  }
+
+  /** Reset fields */
+  protected abstract resetFields(): void
+
+  @action reset() {
     this.activated = false
     this.rawValidateStatus = ValidateStatus.NotValidated
     this._error = undefined
     this.validation = undefined
-    this.initialValue = initialValue
+    this._dirty = false
 
-    this.resetFields(initialValue)
+    this.resetFields()
   }
 
   override async validate(): Promise<ValidateResult<V>> {
@@ -117,14 +129,6 @@ export class FormState<
 
   @observable.ref readonly $: Readonly<TFields>
 
-  initialValue: ValueOfObjectFields<TFields>
-
-  dirtyWith(initialValue: ValueOfObjectFields<TFields>) {
-    return Object.keys(this.$).some(
-      key => this.$[key].dirtyWith(initialValue[key])
-    )
-  }
-
   @computed protected get fieldList(): IState[] {
     const fields = this.$
     return Object.keys(fields).map(
@@ -133,11 +137,7 @@ export class FormState<
   }
 
   protected resetFields() {
-    const fields = this.$
-    const initialValue = this.initialValue
-    Object.keys(fields).forEach(key => {
-      fields[key].resetWith(initialValue[key])
-    })
+    this.fieldList.forEach(field => field.reset())
   }
 
   @computed get value(): ValueOfObjectFields<TFields> {
@@ -169,12 +169,10 @@ export class FormState<
     super()
     makeObservable(this)
 
-    this.$ = initialFields
-    this.initialValue = this.value
-
-    if (!isObservable(this.$)) {
-      this.$ = observable(this.$, undefined, { deep: false })
+    if (!isObservable(initialFields)) {
+      initialFields = observable(initialFields, undefined, { deep: false })
     }
+    this.$ = initialFields
 
     this.init()
   }
@@ -193,13 +191,6 @@ export class ArrayFormState<
 
   @computed get $(): readonly T[] {
     return this.fieldList
-  }
-
-  dirtyWith(initialValue: V[]) {
-    return (
-      this.$.length !== initialValue.length
-      || this.$.some((field, i) => field.dirtyWith(initialValue[i]))
-    )
   }
 
   private createFields(value: V[]): T[] {
@@ -228,11 +219,13 @@ export class ArrayFormState<
     this.fieldList.splice(fromIndex, num).forEach(field => {
       field.dispose()
     })
+    this._dirty = true
   }
 
   private _insert(fromIndex: number, ...fieldValues: V[]) {
     const fields = fieldValues.map(this.createFieldState)
     this.fieldList.splice(fromIndex, 0, ...fields)
+    this._dirty = true
   }
 
   private _set(value: V[], withOnChange = false) {
@@ -303,10 +296,11 @@ export class ArrayFormState<
 
     const [item] = this.fieldList.splice(fromIndex, 1)
     this.fieldList.splice(toIndex, 0, item)
+    this._dirty = true
     this.activated = true
   }
 
-  constructor(public initialValue: V[], private createFieldState: (v: V) => T) {
+  constructor(private initialValue: V[], private createFieldState: (v: V) => T) {
     super()
     makeObservable(this)
 
