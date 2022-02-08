@@ -6,6 +6,11 @@ import { FieldState } from './fieldState'
 import { ArrayFormState, FormState } from './formState'
 
 describe('DebouncedState', () => {
+  it('should initialize well', async () => {
+    const state = new DebouncedState(new FieldState(''))
+    expect(state.value).toBe('')
+  })
+
   it('should initialize well with FieldState', async () => {
     const initialValue = '123'
     const state = new DebouncedState(new FieldState(initialValue), defaultDelay)
