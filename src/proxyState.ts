@@ -1,20 +1,16 @@
 import { computed } from 'mobx'
 import { HasErrorAndValidateStatus } from './state'
-import { IState, Validator } from './types'
+import { IState, Validator, ValueOf } from './types'
 
-export class ProxyState<
-  Value = any,
-  TargetValue = any,
-  TargetState extends IState<TargetValue> = IState<TargetValue>
-> extends HasErrorAndValidateStatus implements IState<Value> {
+export class ProxyState<TargetState extends IState, Value> extends HasErrorAndValidateStatus implements IState<Value> {
 
   /** The original state, whose value will be transformed. */
   public $: TargetState
 
   constructor(
     targetState: TargetState,
-    private parseTargetValue: (v: TargetValue) => Value,
-    private getTargetValue: (v: Value) => TargetValue
+    private parseTargetValue: (v: ValueOf<TargetState>) => Value,
+    private getTargetValue: (v: Value) => ValueOf<TargetState>
   ) {
     super()
     this.$ = targetState
@@ -63,7 +59,7 @@ export class ProxyState<
 
   validators(...validators: Array<Validator<Value>>) {
     const rawValidators = validators.map(validator => (
-      (rawValue: TargetValue) => validator(this.parseTargetValue(rawValue))
+      (rawValue: ValueOf<TargetState>) => validator(this.parseTargetValue(rawValue))
     ))
     this.$.validators(...rawValidators)
     return this

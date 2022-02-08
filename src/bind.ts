@@ -1,5 +1,5 @@
 import { FieldState } from './fieldState'
-import DebouncedFieldState from './debouncedState'
+import { DebouncedFieldState } from './debouncedState'
 
 /**
  * Bindings for input component.

@@ -1,16 +1,89 @@
 import { when, observable, runInAction } from 'mobx'
-import { DebouncedFieldState } from './debouncedState'
+import { DebouncedState, DebouncedFieldState } from './debouncedState'
 import { ValidateResultWithError, ValidateResultWithValue, ValidateStatus } from './types'
 import { defaultDelay, delay, delayValue } from './testUtils'
+import { FieldState } from './fieldState'
+import { ArrayFormState, FormState } from './formState'
 
-export function createFieldState<T>(initialValue: T, delay = defaultDelay) {
+describe('DebouncedState', () => {
+  it('should initialize well with FieldState', async () => {
+    const initialValue = '123'
+    const state = new DebouncedState(new FieldState(initialValue), defaultDelay)
+
+    expect(state.$.value).toBe(initialValue)
+    expect(state.value).toBe(initialValue)
+
+    const newValue = ''
+    state.onChange(newValue)
+    expect(state.value).toBe(initialValue)
+    expect(state.$.value).toBe(newValue)
+
+    await delay()
+    expect(state.value).toBe(newValue)
+    expect(state.$.value).toBe(newValue)
+
+    state.dispose()
+  })
+
+  it('should initialize well with FormState', async () => {
+    const initialValue = {
+      foo: 123,
+      bar: 456
+    }
+    const state = new DebouncedState(new FormState({
+      foo: new FieldState(initialValue.foo),
+      bar: new FieldState(initialValue.bar)
+    }), defaultDelay)
+
+    expect(state.$.value).toEqual(initialValue)
+    expect(state.value).toEqual(initialValue)
+
+    const newValue = {
+      foo: 456,
+      bar: 789
+    }
+    state.onChange(newValue)
+    expect(state.value).toEqual(initialValue)
+    expect(state.$.value).toEqual(newValue)
+
+    await delay()
+    expect(state.value).toEqual(newValue)
+    expect(state.$.value).toEqual(newValue)
+
+    state.dispose()
+  })
+
+  it('should initialize well with ArrayFormState', async () => {
+    const initialValue = ['a', 'b']
+    const state = new DebouncedState(new ArrayFormState(
+      initialValue,
+      v => new FieldState(v)
+    ), defaultDelay)
+
+    expect(state.$.value).toEqual(initialValue)
+    expect(state.value).toEqual(initialValue)
+
+    const newValue = ['c', 'd', 'e']
+    state.onChange(newValue)
+    expect(state.value).toEqual(initialValue)
+    expect(state.$.value).toEqual(newValue)
+
+    await delay()
+    expect(state.value).toEqual(newValue)
+    expect(state.$.value).toEqual(newValue)
+
+    state.dispose()
+  })
+})
+
+function createFieldState<T>(initialValue: T, delay = defaultDelay) {
   return new DebouncedFieldState(initialValue, delay)
 }
 
 describe('DebouncedFieldState', () => {
   it('should initialize well', () => {
     const initialValue = '123'
-    const state = createFieldState(initialValue)
+    const state = new DebouncedFieldState(initialValue, defaultDelay)
 
     expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
@@ -129,6 +202,9 @@ describe('DebouncedFieldState validation', () => {
   it('should work well with onChange()', async () => {
     const state = createFieldState('xxx').validators(val => !val && 'empty')
     state.$.onChange('')
+
+    expect(state.validateStatus).toBe(ValidateStatus.NotValidated)
+    expect(state.hasError).toBe(false)
 
     await delay()
     expect(state.validated).toBe(true)

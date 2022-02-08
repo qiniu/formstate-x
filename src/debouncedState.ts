@@ -1,7 +1,7 @@
 import { action, computed, makeObservable, observable, reaction } from 'mobx'
 import { FieldState } from './fieldState'
 import { HasErrorAndValidateStatus } from './state'
-import { IState, ValidateStatus, Validator } from './types'
+import { Error, IState, ValidateStatus, Validator, ValueOf } from './types'
 import { debounce, is } from './utils'
 
 const defaultDelay = 200 // ms
@@ -10,10 +10,7 @@ const defaultDelay = 200 // ms
  * The state for debounce purpose.
  * Changes from the original state (`$`) will be debounced.
  */
-export default class DebouncedState<
-  V = any,
-  S extends IState<V> = IState<V>
-> extends HasErrorAndValidateStatus implements IState<V> {
+export class DebouncedState<S extends IState> extends HasErrorAndValidateStatus implements IState<ValueOf<S>> {
 
   /**
    * The original state.
@@ -21,7 +18,7 @@ export default class DebouncedState<
    */
   public $: S
 
-  @observable.ref value!: V
+  @observable.ref value!: ValueOf<S>
 
   @computed private get upToDate() {
     return is(this.value, this.$.value)
@@ -29,6 +26,7 @@ export default class DebouncedState<
 
   @observable.ref private _dirty!: boolean
   @observable.ref private _activated!: boolean
+  @observable.ref private _error!: Error
   @observable.ref private _validateStatus!: ValidateStatus
 
   @action private sync() {
@@ -36,11 +34,12 @@ export default class DebouncedState<
     this.value = this.$.value
     this._dirty = this.$.dirty
     this._activated = this.$.activated
+    this._error = this.$.error
     this._validateStatus = this.$.validateStatus
   }
 
   @computed get error() {
-    return this.$.error
+    return this.upToDate ? this.$.error : this._error
   }
 
   @computed get dirty() {
@@ -60,12 +59,12 @@ export default class DebouncedState<
     return this.$.validate()
   }
 
-  set(value: V) {
+  set(value: ValueOf<S>) {
     this.$.set(value)
     this.sync()
   }
 
-  onChange(value: V) {
+  onChange(value: ValueOf<S>) {
     this.$.onChange(value)
   }
 
@@ -74,7 +73,7 @@ export default class DebouncedState<
     this.sync()
   }
 
-  validators(...validators: Array<Validator<V>>) {
+  validators(...validators: Array<Validator<ValueOf<S>>>) {
     this.$.validators(...validators)
     return this
   }
@@ -84,7 +83,7 @@ export default class DebouncedState<
     return this
   }
 
-  constructor(originalState: S, delay: number) {
+  constructor(originalState: S, delay = defaultDelay) {
     super()
     makeObservable(this)
 
@@ -105,7 +104,7 @@ export default class DebouncedState<
 
 }
 
-export class DebouncedFieldState<V> extends DebouncedState<V, FieldState<V>> {
+export class DebouncedFieldState<V> extends DebouncedState<FieldState<V>> {
   constructor(initialValue: V, delay = defaultDelay) {
     super(new FieldState(initialValue), delay)
   }
