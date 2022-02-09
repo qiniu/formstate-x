@@ -1,7 +1,7 @@
 import { observable, computed, action, makeObservable } from 'mobx'
 import { IState, ValidateStatus } from './types'
 import { is } from './utils'
-import HasValue from './state'
+import { HasValue } from './state'
 
 /**
  * The state for a field.
@@ -9,10 +9,6 @@ import HasValue from './state'
 export class FieldState<V> extends HasValue<V> implements IState<V> {
 
   @observable.ref value!: V
-
-  @computed get error() {
-    return this.validationDisabled ? undefined : this._error
-  }
 
   @action onChange(value: V) {
     this.value = value
@@ -26,7 +22,7 @@ export class FieldState<V> extends HasValue<V> implements IState<V> {
   @action reset() {
     this.value = this.initialValue
     this.activated = false
-    this.rawValidateStatus = ValidateStatus.NotValidated
+    this._validateStatus = ValidateStatus.NotValidated
     this._error = undefined
     this.validation = undefined
   }

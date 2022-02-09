@@ -36,7 +36,7 @@ export abstract class HasErrorAndValidateStatus extends Disposable {
   }
 }
 
-export default abstract class HasValue<V> extends HasErrorAndValidateStatus implements IState<V> {
+export abstract class HasValue<V> extends HasErrorAndValidateStatus implements IState<V> {
 
   abstract value: V
   abstract dirty: boolean
@@ -44,11 +44,11 @@ export default abstract class HasValue<V> extends HasErrorAndValidateStatus impl
   abstract set(value: V): void
   abstract reset(): void
 
-  /** The raw validate status (regardless of `validationDisabled`) */
-  @observable protected rawValidateStatus: ValidateStatus = ValidateStatus.NotValidated
+  /** The original validate status (regardless of `validationDisabled`) */
+  @observable protected _validateStatus: ValidateStatus = ValidateStatus.NotValidated
 
   @computed get validateStatus() {
-    return this.validationDisabled ? ValidateStatus.WontValidate : this.rawValidateStatus
+    return this.validationDisabled ? ValidateStatus.WontValidate : this._validateStatus
   }
 
   @observable activated = false
@@ -57,6 +57,10 @@ export default abstract class HasValue<V> extends HasErrorAndValidateStatus impl
    * The original error info of validation.
    */
   @observable protected _error: Error
+
+  @computed get error() {
+    return this.validationDisabled ? undefined : this._error
+  }
 
   /**
    * Set error info.
@@ -82,7 +86,7 @@ export default abstract class HasValue<V> extends HasErrorAndValidateStatus impl
     const value = this.value
 
     action('set-validateStatus-when-doValidation', () => {
-      this.rawValidateStatus = ValidateStatus.Validating
+      this._validateStatus = ValidateStatus.Validating
     })()
 
     const response = applyValidators(value, this.validatorList)
@@ -114,12 +118,20 @@ export default abstract class HasValue<V> extends HasErrorAndValidateStatus impl
 
     action('endValidation', () => {
       this.validation = undefined
-      this.rawValidateStatus = ValidateStatus.Validated
+      this._validateStatus = ValidateStatus.Validated
 
       if (error !== this.error) {
         this.setError(error)
       }
     })()
+  }
+
+  @computed protected get validateResult(): ValidateResult<V> {
+    return (
+      this.error
+      ? { hasError: true, error: this.error } as const
+      : { hasError: false, value: this.value } as const
+    )
   }
 
   async validate(): Promise<ValidateResult<V>> {
@@ -140,11 +152,7 @@ export default abstract class HasValue<V> extends HasErrorAndValidateStatus impl
       { name: 'return-validate-when-not-validating' }
     )
 
-    return (
-      this.error
-      ? { hasError: true, error: this.error } as const
-      : { hasError: false, value: this.value } as const
-    )
+    return this.validateResult
   }
 
   /**

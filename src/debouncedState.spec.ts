@@ -190,6 +190,31 @@ describe('DebouncedFieldState', () => {
 
     state.dispose()
   })
+
+  it('should work well with delay', async () => {
+    const state = createFieldState('0', 1000)
+
+    state.$.onChange('1')
+    expect(state.value).toBe('0')
+    await delay(250)
+    expect(state.value).toBe('0')
+
+    state.$.onChange('2')
+    expect(state.value).toBe('0')
+    await delay(500)
+    expect(state.value).toBe('0')
+
+    state.$.onChange('3')
+    expect(state.value).toBe('0')
+    await delay(750)
+    expect(state.value).toBe('0')
+
+    state.$.onChange('4')
+    expect(state.value).toBe('0')
+    await delay(1250)
+    expect(state.value).toBe('4')
+
+  })
 })
 
 describe('DebouncedFieldState validation', () => {
@@ -242,8 +267,13 @@ describe('DebouncedFieldState validation', () => {
   })
 
   it('should work well with validate()', async () => {
-    const state = createFieldState('').validators(val => !val && 'empty')
+    const validator = jest.fn(val => {
+      return !val && 'empty'
+    })
+    const state = createFieldState('').validators(validator)
     const validateRet1 = state.validate()
+
+    expect(validator).toBeCalled()
 
     await delay()
     expect(state.validating).toBe(false)
@@ -407,31 +437,6 @@ describe('DebouncedFieldState validation', () => {
     state.dispose()
   })
 
-  it('should work well with delay', async () => {
-    const state = createFieldState('0', 1000)
-
-    state.$.onChange('1')
-    expect(state.value).toBe('0')
-    await delay(250)
-    expect(state.value).toBe('0')
-
-    state.$.onChange('2')
-    expect(state.value).toBe('0')
-    await delay(500)
-    expect(state.value).toBe('0')
-
-    state.$.onChange('3')
-    expect(state.value).toBe('0')
-    await delay(750)
-    expect(state.value).toBe('0')
-
-    state.$.onChange('4')
-    expect(state.value).toBe('0')
-    await delay(1250)
-    expect(state.value).toBe('4')
-
-  })
-
   it('should work well with race condition caused by validate()', async () => {
     const validator = jest.fn()
     validator.mockReturnValueOnce(delayValue('foo', 200))
@@ -467,5 +472,29 @@ describe('DebouncedFieldState validation', () => {
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
     expect(state.error).toBe('error')
+  })
+
+  it('should validate with no delay', () => {
+    const validator = jest.fn(() => 'foo')
+    const state = createFieldState('0').validators(validator)
+    state.validate()
+    expect(validator).toBeCalled()
+  })
+
+  it('should auto validate with delay', async () => {
+    const validator = jest.fn(() => 'foo')
+    const state = createFieldState(0, 500).validators(validator)
+    state.onChange(1)
+
+    expect(validator).not.toBeCalled()
+    expect(state.validateStatus).toBe(ValidateStatus.NotValidated)
+
+    await delay(250)
+    expect(validator).not.toBeCalled()
+    expect(state.validateStatus).toBe(ValidateStatus.NotValidated)
+
+    await delay(500)
+    expect(validator).toBeCalled()
+    expect(state.validateStatus).toBe(ValidateStatus.Validated)
   })
 })

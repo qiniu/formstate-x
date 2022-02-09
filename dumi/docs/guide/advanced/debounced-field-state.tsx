@@ -2,7 +2,9 @@ import React from 'react'
 import { observer } from 'mobx-react'
 import { DebouncedFieldState } from 'formstate-x'
 
-const state = new DebouncedFieldState('')
+const state = new DebouncedFieldState('', 300).validators(
+  v => v.length > 5 && 'too long'
+)
 
 export default observer(function Demo() {
 
@@ -19,6 +21,7 @@ export default observer(function Demo() {
           onChange={e => stateForBinding.onChange(e.target.value)}
         />
       </label>
+      error: {state.error}
       {/* Use `state` in other parts of application */}
       {state.value && <p>Hello {state.value}!</p>}
     </>

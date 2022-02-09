@@ -1,6 +1,6 @@
 import { observable, computed, isObservable, action, reaction, makeObservable, override } from 'mobx'
 import { IState, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
-import HasValue from './state'
+import { HasValue } from './state'
 
 export abstract class AbstractFormState<T, V> extends HasValue<V> implements IState<V> {
 
@@ -18,13 +18,13 @@ export abstract class AbstractFormState<T, V> extends HasValue<V> implements ISt
       field => field.validateStatus != ValidateStatus.WontValidate
     )
     if (
-      this.rawValidateStatus === ValidateStatus.Validating
+      this._validateStatus === ValidateStatus.Validating
       || fieldList.some(field => field.validateStatus === ValidateStatus.Validating)
     ) {
       return ValidateStatus.Validating
     }
     if (
-      this.rawValidateStatus === ValidateStatus.Validated
+      this._validateStatus === ValidateStatus.Validated
       && fieldList.every(field => field.validateStatus === ValidateStatus.Validated)
     ) {
       return ValidateStatus.Validated
@@ -46,7 +46,7 @@ export abstract class AbstractFormState<T, V> extends HasValue<V> implements ISt
   }
 
   /** The error info of validation (including fields' error info). */
-  @computed get error() {
+  @override override get error() {
     if (this.validationDisabled) {
       return undefined
     }
@@ -75,7 +75,7 @@ export abstract class AbstractFormState<T, V> extends HasValue<V> implements ISt
 
   @action reset() {
     this.activated = false
-    this.rawValidateStatus = ValidateStatus.NotValidated
+    this._validateStatus = ValidateStatus.NotValidated
     this._error = undefined
     this.validation = undefined
     this._dirty = false
@@ -84,11 +84,13 @@ export abstract class AbstractFormState<T, V> extends HasValue<V> implements ISt
   }
 
   override async validate(): Promise<ValidateResult<V>> {
-    this.fieldList.forEach(
-      field => field.validate()
-    )
-
-    return super.validate()
+    await Promise.all([
+      ...this.fieldList.map(
+        field => field.validate()
+      ),
+      super.validate()
+    ])
+    return this.validateResult
   }
 
   protected override init() {

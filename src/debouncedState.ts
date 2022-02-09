@@ -1,7 +1,7 @@
-import { action, computed, makeObservable, observable, reaction } from 'mobx'
+import { action, computed, makeObservable, observable, override, reaction } from 'mobx'
 import { FieldState } from './fieldState'
-import { HasErrorAndValidateStatus } from './state'
-import { Error, IState, ValidateStatus, Validator, ValueOf } from './types'
+import { HasValue } from './state'
+import { IState, ValidateStatus, ValueOf } from './types'
 import { debounce, is } from './utils'
 
 const defaultDelay = 200 // ms
@@ -10,7 +10,7 @@ const defaultDelay = 200 // ms
  * The state for debounce purpose.
  * Changes from the original state (`$`) will be debounced.
  */
-export class DebouncedState<S extends IState> extends HasErrorAndValidateStatus implements IState<ValueOf<S>> {
+export class DebouncedState<S extends IState> extends HasValue<ValueOf<S>> implements IState<ValueOf<S>> {
 
   /**
    * The original state.
@@ -18,45 +18,70 @@ export class DebouncedState<S extends IState> extends HasErrorAndValidateStatus 
    */
   public $: S
 
-  @observable.ref value!: ValueOf<S>
+  @observable.ref private syncedValue!: ValueOf<S>
+  @observable.ref private syncedDirty!: boolean
+  @observable.ref private syncedActivated!: boolean
 
-  @computed private get upToDate() {
-    return is(this.value, this.$.value)
+  /** If synced with target state */
+  @computed private get synced() {
+    return is(this.syncedValue, this.$.value)
   }
-
-  @observable.ref private _dirty!: boolean
-  @observable.ref private _activated!: boolean
-  @observable.ref private _error!: Error
-  @observable.ref private _validateStatus!: ValidateStatus
 
   @action private sync() {
-    if (this.upToDate) return
-    this.value = this.$.value
-    this._dirty = this.$.dirty
-    this._activated = this.$.activated
-    this._error = this.$.error
-    this._validateStatus = this.$.validateStatus
+    if (this.synced) return
+    this.syncedValue = this.$.value
+    this.syncedDirty = this.$.dirty
+    this.syncedActivated = this.$.activated
   }
 
-  @computed get error() {
-    return this.upToDate ? this.$.error : this._error
+  @computed get value() {
+    return this.syncedValue
   }
 
   @computed get dirty() {
-    return this.upToDate ? this.$.dirty : this._dirty
+    return this.synced ? this.$.dirty : this.syncedDirty
   }
 
-  @computed get activated() {
-    return this.upToDate ? this.$.activated : this._activated
+  @override override get error() {
+    if (this.validationDisabled) {
+      return undefined
+    }
+    if (this._error) {
+      return this._error
+    }
+    return this.$.error
   }
 
-  @computed get validateStatus() {
-    return this.upToDate ? this.$.validateStatus : this._validateStatus
+  @override override get validateStatus() {
+    if (this.validationDisabled) {
+      return ValidateStatus.WontValidate
+    }
+    if (
+      this._validateStatus === ValidateStatus.Validating
+      || this.$.validateStatus === ValidateStatus.Validating
+    ) {
+      return ValidateStatus.Validating
+    }
+    if (
+      this._validateStatus === ValidateStatus.Validated
+      && this.$.validateStatus === ValidateStatus.Validated
+    ) {
+      return ValidateStatus.Validated
+    }
+    return ValidateStatus.NotValidated
   }
 
-  async validate() {
+  override async validate() {
     this.sync()
-    return this.$.validate()
+    await Promise.all([
+      this.$.validate(),
+      super.validate()
+    ])
+    return this.validateResult
+  }
+
+  onChange(value: ValueOf<S>) {
+    this.$.onChange(value)
   }
 
   set(value: ValueOf<S>) {
@@ -64,23 +89,14 @@ export class DebouncedState<S extends IState> extends HasErrorAndValidateStatus 
     this.sync()
   }
 
-  onChange(value: ValueOf<S>) {
-    this.$.onChange(value)
-  }
+  @action reset() {
+    this.activated = false
+    this._validateStatus = ValidateStatus.NotValidated
+    this._error = undefined
+    this.validation = undefined
 
-  reset() {
     this.$.reset()
     this.sync()
-  }
-
-  validators(...validators: Array<Validator<ValueOf<S>>>) {
-    this.$.validators(...validators)
-    return this
-  }
-
-  disableValidationWhen(predict: () => boolean) {
-    this.$.disableValidationWhen(predict)
-    return this
   }
 
   constructor(originalState: S, delay = defaultDelay) {
@@ -90,11 +106,19 @@ export class DebouncedState<S extends IState> extends HasErrorAndValidateStatus 
     this.$ = originalState
     this.sync()
 
+    this.init()
+
     this.addDisposer(reaction(
       () => this.$.value,
       debounce(() => {
         this.sync()
       }, delay)
+    ))
+
+    this.addDisposer(reaction(
+      () => this.syncedActivated,
+      syncedActivated => syncedActivated && !this.activated && (this.activated = syncedActivated),
+      { fireImmediately: true, name: 'activate-when-original-state-activated' }
     ))
 
     this.addDisposer(
