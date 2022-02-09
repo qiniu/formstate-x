@@ -2,7 +2,7 @@ import { action, computed, makeObservable, observable, override, reaction } from
 import { FieldState } from './fieldState'
 import { HasValue } from './state'
 import { IState, ValidateStatus, ValueOf } from './types'
-import { debounce, is } from './utils'
+import { debounce } from './utils'
 
 const defaultDelay = 200 // ms
 
@@ -22,13 +22,7 @@ export class DebouncedState<S extends IState> extends HasValue<ValueOf<S>> imple
   @observable.ref private syncedDirty!: boolean
   @observable.ref private syncedActivated!: boolean
 
-  /** If synced with target state */
-  @computed private get synced() {
-    return is(this.syncedValue, this.$.value)
-  }
-
   @action private sync() {
-    if (this.synced) return
     this.syncedValue = this.$.value
     this.syncedDirty = this.$.dirty
     this.syncedActivated = this.$.activated
@@ -39,7 +33,7 @@ export class DebouncedState<S extends IState> extends HasValue<ValueOf<S>> imple
   }
 
   @computed get dirty() {
-    return this.synced ? this.$.dirty : this.syncedDirty
+    return this.syncedDirty
   }
 
   @override override get error() {
