@@ -24,7 +24,19 @@ By default, `DebouncedFieldState` debounces value change with a delay of `200ms`
 new DebouncedFieldState(initialValue, 1000) // which indicates a delay of `1s`
 ```
 
-Apart from class `DebouncedFieldState`, formstate-x also provides class `DebouncedState`. `new DebouncedFieldState(initalValue, delay)` is a shortcut for `new DebouncedState(new FieldState(initalValue), delay)`. In most cases, you do not need to add debouncing for form state (`FormState` or `ArrayFormState`); if you need, just use `DebouncedState`:
+Apart from class `DebouncedFieldState`, formstate-x also provides class `DebouncedState`.
+
+```ts
+new DebouncedFieldState(initalValue, delay)
+```
+
+is a shortcut for
+
+```ts
+new DebouncedState(new FieldState(initalValue), delay)
+```
+
+In most cases, you do not need to add debouncing for form state (`FormState` or `ArrayFormState`); if you need, just use `DebouncedState` directly:
 
 ```ts
 const formState = new FormState({
