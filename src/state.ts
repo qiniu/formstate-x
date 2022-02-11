@@ -96,7 +96,7 @@ export default abstract class State<V> extends StateUtils implements IState<V> {
     )
 
     return (
-      this.hasError
+      this.error
       ? { hasError: true, error: this.error } as const
       : { hasError: false, value: this.value } as const
     )
