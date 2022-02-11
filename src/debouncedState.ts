@@ -122,6 +122,10 @@ export class DebouncedState<S extends IState> extends HasValue<ValueOf<S>> imple
 
 }
 
+/**
+ * The field state with debounce.
+ * Value changes from `onChange` will be debounced.
+ */
 export class DebouncedFieldState<V> extends DebouncedState<FieldState<V>> {
   constructor(initialValue: V, delay = defaultDelay) {
     super(new FieldState(initialValue), delay)
