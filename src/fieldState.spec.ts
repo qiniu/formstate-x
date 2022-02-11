@@ -1,7 +1,7 @@
 import { when, observable, runInAction } from 'mobx'
 import FieldState from './fieldState'
 import { ValidateResultWithError, ValidateResultWithValue } from './types'
-import { delay, delayValue, createFieldState } from './testUtils'
+import { delay, delayValue, createFieldState, assertType } from './testUtils'
 
 describe('FieldState', () => {
   it('should initialize well', () => {
@@ -422,5 +422,17 @@ describe('FieldState validation', () => {
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
     expect(state.error).toBe('error')
+  })
+
+  it('should provide type-safe result when validate()', async () => {
+    const state = new FieldState('')
+    const res = await state.validate()
+    if (res.hasError) {
+      assertType<true>(res.hasError)
+      assertType<string>(res.error)
+    } else {
+      assertType<false>(res.hasError)
+      assertType<string>(res.value)
+    }
   })
 })
