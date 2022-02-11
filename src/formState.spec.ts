@@ -633,6 +633,20 @@ describe('FormState (mode: object) validation', () => {
 
     state.dispose()
   })
+
+  it('should provide type-safe result when validate()', async () => {
+    const state = new FormState({
+      foo: new FieldState('')
+    })
+    const res = await state.validate()
+    if (res.hasError) {
+      assertType<true>(res.hasError)
+      assertType<string>(res.error)
+    } else {
+      assertType<false>(res.hasError)
+      assertType<{ foo: string }>(res.value)
+    }
+  })
 })
 
 describe('FormState (mode: array)', () => {
@@ -1451,6 +1465,18 @@ describe('FormState (mode: array) validation', () => {
 
     expect(state.$.disabled.validated).toBe(false)
     expect(state.validated).toBe(true)
+  })
+
+  it('should provide type-safe result when validate()', async () => {
+    const state = new ArrayFormState<string>([], v => new FieldState((v)))
+    const res = await state.validate()
+    if (res.hasError) {
+      assertType<true>(res.hasError)
+      assertType<string>(res.error)
+    } else {
+      assertType<false>(res.hasError)
+      assertType<string[]>(res.value)
+    }
   })
 })
 

@@ -27,7 +27,7 @@ export interface Validator<TValue> {
 
 export type Error = string | undefined
 
-export type ValidateResultWithError = { hasError: true, error: Error }
+export type ValidateResultWithError = { hasError: true, error: NonNullable<Error> }
 export type ValidateResultWithValue<T> = { hasError: false, value: T }
 export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
 
