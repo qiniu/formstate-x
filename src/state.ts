@@ -1,9 +1,10 @@
-import { action, computed, makeObservable, observable, when } from 'mobx'
-import { Error, IState, Validated, ValidateResult, ValidateStatus, Validator } from './types'
+import { action, autorun, computed, makeObservable, observable, reaction, when } from 'mobx'
+import { Error, IState, Validated, ValidateResult, ValidateStatus, ValidationResponse, Validator } from './types'
 import Disposable from './disposable'
-import { applyValidators } from './utils'
+import { applyValidators, isPromiseLike } from './utils'
 
-export abstract class StateUtils extends Disposable {
+/** 基础的 state 公共逻辑抽象 */
+export abstract class BaseState extends Disposable {
 
   /** The error info of validation */
   abstract error: Error
@@ -13,6 +14,7 @@ export abstract class StateUtils extends Disposable {
     return !!this.error
   }
 
+  /** Current validate status. */
   abstract validateStatus: ValidateStatus
 
   /** If the state is doing a validation. */
@@ -34,31 +36,38 @@ export abstract class StateUtils extends Disposable {
   }
 }
 
-export default abstract class State<V> extends StateUtils implements IState<V> {
+/** 自带校验逻辑的 state 公共逻辑抽象 */
+export abstract class ValidatableState<V> extends BaseState implements IState<V> {
 
   abstract value: V
-  abstract initialValue: V
-  abstract activated: boolean
-  abstract validate(): Promise<ValidateResult<V>>
-  abstract set(value: V): void
+  abstract dirty: boolean
   abstract onChange(value: V): void
-  abstract resetWith(initialValue: V): void
-  abstract dirtyWith(initialValue: V): boolean
+  abstract set(value: V): void
+  abstract reset(): void
 
-  @computed get dirty() {
-    return this.dirtyWith(this.initialValue)
-  }
+  /** The original validate status (regardless of `validationDisabled`) */
+  @observable protected _validateStatus: ValidateStatus = ValidateStatus.NotValidated
 
-  /** The raw validate status (regardless of `validationDisabled`) */
-  @observable protected rawValidateStatus: ValidateStatus = ValidateStatus.NotValidated
-
-  /** Current validate status. */
   @computed get validateStatus() {
-    return this.validationDisabled ? ValidateStatus.NotValidated : this.rawValidateStatus
+    return this.validationDisabled ? ValidateStatus.WontValidate : this._validateStatus
   }
 
-  reset() {
-    this.resetWith(this.initialValue)
+  @observable activated = false
+
+  /**
+   * The original error info of validation.
+   */
+  @observable protected _error: Error
+
+  @computed get error() {
+    return this.validationDisabled ? undefined : this._error
+  }
+
+  /**
+   * Set error info.
+   */
+  @action setError(error: ValidationResponse) {
+    this._error = error ? error : undefined
   }
 
   /** List of validator functions. */
@@ -78,7 +87,7 @@ export default abstract class State<V> extends StateUtils implements IState<V> {
     const value = this.value
 
     action('set-validateStatus-when-doValidation', () => {
-      this.rawValidateStatus = ValidateStatus.Validating
+      this._validateStatus = ValidateStatus.Validating
     })()
 
     const response = applyValidators(value, this.validatorList)
@@ -88,18 +97,63 @@ export default abstract class State<V> extends StateUtils implements IState<V> {
     })()
   }
 
-  protected async getValidateResult(): Promise<ValidateResult<V>> {
-    // Compatible with formstate
-    await when(
-      () => this.validationDisabled || this.validated,
-      { name: 'return-validate-when-not-validating' }
+  /**
+   * Apply validation.
+   */
+  protected async applyValidation() {
+    const validation = this.validation
+    if (!validation) {
+      return
+    }
+
+    const error = (
+      isPromiseLike(validation.response)
+      ? await validation.response
+      : validation.response
     )
 
+    // 如果 validation 已过期，则不生效
+    if (validation !== this.validation) {
+      return
+    }
+
+    action('endValidation', () => {
+      this.validation = undefined
+      this._validateStatus = ValidateStatus.Validated
+
+      if (error !== this.error) {
+        this.setError(error)
+      }
+    })()
+  }
+
+  @computed protected get validateResult(): ValidateResult<V> {
     return (
       this.error
       ? { hasError: true, error: this.error } as const
       : { hasError: false, value: this.value } as const
     )
+  }
+
+  async validate(): Promise<ValidateResult<V>> {
+    const validation = this.validation
+
+    action('activate-when-validate', () => {
+      this.activated = true
+    })()
+
+    // 若 `validation` 未发生变更，意味着未发生新的校验行为
+    // 若上边操作未触发自动的校验行为，强制调用之
+    if (this.validation === validation) {
+      this.doValidation()
+    }
+
+    await when(
+      () => this.validationDisabled || this.validated,
+      { name: 'return-validate-when-not-validating' }
+    )
+
+    return this.validateResult
   }
 
   /**
@@ -108,7 +162,7 @@ export default abstract class State<V> extends StateUtils implements IState<V> {
   @observable.ref private shouldDisableValidation = () => false
 
   /** If validation disabled. */
-  @computed get validationDisabled() {
+  @computed protected get validationDisabled() {
     return this.shouldDisableValidation()
   }
 
@@ -116,6 +170,24 @@ export default abstract class State<V> extends StateUtils implements IState<V> {
   @action disableValidationWhen(predict: () => boolean) {
     this.shouldDisableValidation = predict
     return this
+  }
+
+  protected init() {
+    // auto validate: this.value -> this.validation
+    this.addDisposer(autorun(
+      () => {
+        if (this.validationDisabled || !this.activated) return
+        this.doValidation()
+      },
+      { name: 'autorun-check-&-doValidation' }
+    ))
+
+    // auto apply validate result: this.validation -> this.error
+    this.addDisposer(reaction(
+      () => this.validation,
+      () => this.applyValidation(),
+      { name: 'applyValidation-when-validation-change' }
+    ))
   }
 
   constructor() {

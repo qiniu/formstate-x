@@ -1,13 +1,96 @@
 import { when, observable, runInAction } from 'mobx'
+import { DebouncedState, DebouncedFieldState } from './debouncedState'
+import { ValidateResultWithError, ValidateResultWithValue, ValidateStatus } from './types'
+import { defaultDelay, delay, delayValue } from './testUtils'
 import { FieldState } from './fieldState'
-import { ValidateResultWithError, ValidateResultWithValue } from './types'
-import { delay, delayValue, assertType } from './testUtils'
+import { ArrayFormState, FormState } from './formState'
 
-describe('FieldState', () => {
+describe('DebouncedState', () => {
+  it('should initialize well', async () => {
+    const state = new DebouncedState(new FieldState(''))
+    expect(state.value).toBe('')
+  })
+
+  it('should initialize well with FieldState', async () => {
+    const initialValue = '123'
+    const state = new DebouncedState(new FieldState(initialValue), defaultDelay)
+
+    expect(state.$.value).toBe(initialValue)
+    expect(state.value).toBe(initialValue)
+
+    const newValue = ''
+    state.onChange(newValue)
+    expect(state.value).toBe(initialValue)
+    expect(state.$.value).toBe(newValue)
+
+    await delay()
+    expect(state.value).toBe(newValue)
+    expect(state.$.value).toBe(newValue)
+
+    state.dispose()
+  })
+
+  it('should initialize well with FormState', async () => {
+    const initialValue = {
+      foo: 123,
+      bar: 456
+    }
+    const state = new DebouncedState(new FormState({
+      foo: new FieldState(initialValue.foo),
+      bar: new FieldState(initialValue.bar)
+    }), defaultDelay)
+
+    expect(state.$.value).toEqual(initialValue)
+    expect(state.value).toEqual(initialValue)
+
+    const newValue = {
+      foo: 456,
+      bar: 789
+    }
+    state.onChange(newValue)
+    expect(state.value).toEqual(initialValue)
+    expect(state.$.value).toEqual(newValue)
+
+    await delay()
+    expect(state.value).toEqual(newValue)
+    expect(state.$.value).toEqual(newValue)
+
+    state.dispose()
+  })
+
+  it('should initialize well with ArrayFormState', async () => {
+    const initialValue = ['a', 'b']
+    const state = new DebouncedState(new ArrayFormState(
+      initialValue,
+      v => new FieldState(v)
+    ), defaultDelay)
+
+    expect(state.$.value).toEqual(initialValue)
+    expect(state.value).toEqual(initialValue)
+
+    const newValue = ['c', 'd', 'e']
+    state.onChange(newValue)
+    expect(state.value).toEqual(initialValue)
+    expect(state.$.value).toEqual(newValue)
+
+    await delay()
+    expect(state.value).toEqual(newValue)
+    expect(state.$.value).toEqual(newValue)
+
+    state.dispose()
+  })
+})
+
+function createFieldState<T>(initialValue: T, delay = defaultDelay) {
+  return new DebouncedFieldState(initialValue, delay)
+}
+
+describe('DebouncedFieldState', () => {
   it('should initialize well', () => {
     const initialValue = '123'
-    const state = new FieldState(initialValue)
+    const state = new DebouncedFieldState(initialValue, defaultDelay)
 
+    expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
 
@@ -16,24 +99,43 @@ describe('FieldState', () => {
 
   it('should onChange well', async () => {
     const initialValue = ''
-    const state = new FieldState(initialValue).validators(
+    const state = createFieldState(initialValue).validators(
       value => value.length > 5 && 'too long'
     )
 
     const value = '123'
-    state.onChange(value)
+    state.$.onChange(value)
+    expect(state.$.value).toBe(value)
+    expect(state.value).toBe(initialValue)
+    expect(state.activated).toBe(false)
+    expect(state.validateStatus).toBe(ValidateStatus.NotValidated)
+    expect(state.dirty).toBe(false)
 
+    await delay()
+    expect(state.$.value).toBe(value)
     expect(state.value).toBe(value)
+    expect(state.activated).toBe(true)
+    expect(state.validateStatus).toBe(ValidateStatus.Validated)
     expect(state.dirty).toBe(true)
 
     const newValue = '789'
-    state.onChange('456')
-    state.onChange(newValue)
+    state.$.onChange('456')
+    state.$.onChange(newValue)
+    expect(state.$.value).toBe(newValue)
+    expect(state.value).toBe(value)
+
+    await delay()
+    expect(state.$.value).toBe(newValue)
     expect(state.value).toBe(newValue)
     expect(state.dirty).toBe(true)
 
     const invalidValue = '123456'
-    state.onChange(invalidValue)
+    state.$.onChange(invalidValue)
+    expect(state.$.value).toBe(invalidValue)
+    expect(state.value).toBe(newValue)
+
+    await delay()
+    expect(state.$.value).toBe(invalidValue)
     expect(state.value).toBe(invalidValue)
 
     state.dispose()
@@ -41,10 +143,11 @@ describe('FieldState', () => {
 
   it('should set well', async () => {
     const initialValue = ''
-    const state = new FieldState(initialValue)
+    const state = createFieldState(initialValue)
 
     const value = '123'
     state.set(value)
+    expect(state.$.value).toBe(value)
     expect(state.value).toBe(value)
     expect(state.dirty).toBe(true)
 
@@ -59,6 +162,7 @@ describe('FieldState', () => {
 
     state.validate()
     await delay()
+    expect(state.$.value).toBe(value)
     expect(state.value).toBe(value)
     expect(state.dirty).toBe(true)
 
@@ -67,28 +171,55 @@ describe('FieldState', () => {
 
   it('should reset well', async () => {
     const initialValue = ''
-    const state = new FieldState(initialValue)
+    const state = createFieldState(initialValue)
 
-    state.onChange('123')
+    state.$.onChange('123')
     await delay()
     state.reset()
 
+    expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
 
-    state.onChange('456')
+    state.$.onChange('456')
     state.reset()
 
+    expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
 
     state.dispose()
   })
+
+  it('should work well with delay', async () => {
+    const state = createFieldState('0', 1000)
+
+    state.$.onChange('1')
+    expect(state.value).toBe('0')
+    await delay(250)
+    expect(state.value).toBe('0')
+
+    state.$.onChange('2')
+    expect(state.value).toBe('0')
+    await delay(500)
+    expect(state.value).toBe('0')
+
+    state.$.onChange('3')
+    expect(state.value).toBe('0')
+    await delay(750)
+    expect(state.value).toBe('0')
+
+    state.$.onChange('4')
+    expect(state.value).toBe('0')
+    await delay(1250)
+    expect(state.value).toBe('4')
+
+  })
 })
 
-describe('FieldState validation', () => {
+describe('DebouncedFieldState validation', () => {
   it('should work well when initialized', async () => {
-    const state = new FieldState('').validators(val => !val && 'empty')
+    const state = createFieldState('').validators(val => !val && 'empty')
 
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(false)
@@ -99,16 +230,19 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with onChange()', async () => {
-    const state = new FieldState('xxx').validators(val => !val && 'empty')
-    state.onChange('')
+    const state = createFieldState('xxx').validators(val => !val && 'empty')
+    state.$.onChange('')
+
+    expect(state.validateStatus).toBe(ValidateStatus.NotValidated)
+    expect(state.hasError).toBe(false)
 
     await delay()
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
 
-    state.onChange('123')
-    state.onChange('123456')
-    state.onChange('')
+    state.$.onChange('123')
+    state.$.onChange('123456')
+    state.$.onChange('')
 
     await delay()
     expect(state.error).toBe('empty')
@@ -117,7 +251,7 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with onChange of same value', async () => {
-    const state = new FieldState(1).validators(
+    const state = createFieldState(1).validators(
       () => null
     )
     await state.validate()
@@ -125,7 +259,7 @@ describe('FieldState validation', () => {
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(false)
 
-    state.onChange(1)
+    state.$.onChange(1)
     await delay()
     expect(state.validated).toBe(true)
     expect(state.validating).toBe(false)
@@ -133,8 +267,13 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with validate()', async () => {
-    const state = new FieldState('').validators(val => !val && 'empty')
+    const validator = jest.fn(val => {
+      return !val && 'empty'
+    })
+    const state = createFieldState('').validators(validator)
     const validateRet1 = state.validate()
+
+    expect(validator).toBeCalled()
 
     await delay()
     expect(state.validating).toBe(false)
@@ -146,7 +285,7 @@ describe('FieldState validation', () => {
     expect(validateResult1.hasError).toBe(true)
     expect((validateResult1 as ValidateResultWithError).error).toBe('empty')
 
-    state.onChange('sth')
+    state.$.onChange('sth')
     const validateRet2 = state.validate()
     await delay()
     expect(state.validating).toBe(false)
@@ -163,11 +302,12 @@ describe('FieldState validation', () => {
 
   it('should work well with reset()', async () => {
     const initialValue = ''
-    const state = new FieldState(initialValue).validators(val => !val && 'empty')
+    const state = createFieldState(initialValue).validators(val => !val && 'empty')
     state.validate()
     await delay()
 
     state.reset()
+    expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
     expect(state.validating).toBe(false)
@@ -178,7 +318,7 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with multiple validators', async () => {
-    const state = new FieldState('').validators(
+    const state = createFieldState('').validators(
       val => !val && 'empty',
       val => val.length > 5 && 'too long'
     )
@@ -190,7 +330,7 @@ describe('FieldState validation', () => {
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
 
-    state.onChange('123456')
+    state.$.onChange('123456')
 
     await delay()
     expect(state.validating).toBe(false)
@@ -198,69 +338,24 @@ describe('FieldState validation', () => {
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
 
-    state.onChange('123')
+    state.$.onChange('123')
 
     await delay()
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
-  })
-
-  it('should work well with async validator', async () => {
-    const state = new FieldState('').validators(
-      val => delayValue(!val && 'empty')
-    )
-    state.validate()
-
-    await when(() => state.validating)
-    expect(state.validating).toBe(true)
-    expect(state.validated).toBe(false)
-
-    await delay()
-    expect(state.validating).toBe(false)
-    expect(state.validated).toBe(true)
-    expect(state.hasError).toBe(true)
-    expect(state.error).toBe('empty')
-
-    state.dispose()
-  })
-
-  it('should work well with mixed sync and async validator', async () => {
-    const state = new FieldState('').validators(
-      val => delayValue(!val && 'empty'),
-      val => val.length > 5 && 'too long'
-    )
-    state.validate()
-
-    await delay()
-    expect(state.hasError).toBe(true)
-    expect(state.error).toBe('empty')
-
-    state.onChange('123456')
-
-    await delay()
-    expect(state.hasError).toBe(true)
-    expect(state.error).toBe('too long')
-
-    state.onChange('123')
-
-    await delay()
-    expect(state.error).toBeUndefined()
-    expect(state.hasError).toBe(false)
 
     state.dispose()
   })
 
   it('should work well with dynamic validator', async () => {
     const target = observable({ value: '123' })
-    const state = new FieldState('').validators(
+    const state = createFieldState('').validators(
       val => val === target.value && 'same'
     )
 
-    state.onChange('123')
+    state.$.onChange('123')
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('same')
@@ -275,7 +370,7 @@ describe('FieldState validation', () => {
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('same')
 
-    state.onChange('123456')
+    state.$.onChange('123456')
     await delay()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
@@ -284,10 +379,10 @@ describe('FieldState validation', () => {
   })
 
   it('should work well when add validator dynamically', async () => {
-    const state = new FieldState('').validators(
+    const state = createFieldState('').validators(
       val => !val && 'empty'
     )
-    state.onChange('123456')
+    state.$.onChange('123456')
 
     await delay()
     expect(state.hasError).toBe(false)
@@ -304,7 +399,7 @@ describe('FieldState validation', () => {
   it('should work well with disableValidationWhen', async () => {
     const initialValue = ''
     const options = observable({ disabled: false })
-    const state = new FieldState(initialValue).validators(
+    const state = createFieldState(initialValue).validators(
       val => !val && 'empty'
     ).disableValidationWhen(
       () => options.disabled
@@ -322,9 +417,9 @@ describe('FieldState validation', () => {
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
-    state.onChange('123')
+    state.$.onChange('123')
     await delay()
-    state.onChange('')
+    state.$.onChange('')
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(false)
 
@@ -346,7 +441,7 @@ describe('FieldState validation', () => {
     const validator = jest.fn()
     validator.mockReturnValueOnce(delayValue('foo', 200))
     validator.mockReturnValueOnce(delayValue('bar', 100))
-    const field = new FieldState(1).validators(validator)
+    const field = createFieldState(1).validators(validator)
     field.validate()
     await delay(50)
     await field.validate()
@@ -359,17 +454,17 @@ describe('FieldState validation', () => {
     validator.mockReturnValue(null)
     validator.mockReturnValueOnce(delayValue('foo', 200))
     validator.mockReturnValueOnce(delayValue('bar', 100))
-    const field = new FieldState(1).validators(validator)
-    field.onChange(2)
+    const field = createFieldState(1).validators(validator)
+    field.$.onChange(2)
     await delay(50)
-    field.onChange(3)
+    field.$.onChange(3)
     await when(() => field.validated)
 
     expect(field.error).toBe('bar')
   })
 
   it('should work well with NaN', async () => {
-    const state = new FieldState(Number.NaN).validators(
+    const state = createFieldState(Number.NaN).validators(
       () => 'error'
     )
     state.validate()
@@ -379,15 +474,27 @@ describe('FieldState validation', () => {
     expect(state.error).toBe('error')
   })
 
-  it('should provide type-safe result when validate()', async () => {
-    const state = new FieldState('')
-    const res = await state.validate()
-    if (res.hasError) {
-      assertType<true>(res.hasError)
-      assertType<string>(res.error)
-    } else {
-      assertType<false>(res.hasError)
-      assertType<string>(res.value)
-    }
+  it('should validate with no delay', () => {
+    const validator = jest.fn(() => 'foo')
+    const state = createFieldState('0').validators(validator)
+    state.validate()
+    expect(validator).toBeCalled()
+  })
+
+  it('should auto validate with delay', async () => {
+    const validator = jest.fn(() => 'foo')
+    const state = createFieldState(0, 500).validators(validator)
+    state.onChange(1)
+
+    expect(validator).not.toBeCalled()
+    expect(state.validateStatus).toBe(ValidateStatus.NotValidated)
+
+    await delay(250)
+    expect(validator).not.toBeCalled()
+    expect(state.validateStatus).toBe(ValidateStatus.NotValidated)
+
+    await delay(500)
+    expect(validator).toBeCalled()
+    expect(state.validateStatus).toBe(ValidateStatus.Validated)
   })
 })

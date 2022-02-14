@@ -4,6 +4,47 @@ order: 6
 toc: menu
 ---
 
+### Debounced State
+
+For UI inputs like `<input type="text" />`, if the user operates (pressing key, etc.) quite quickly, the inputs' values may change frequently. Sometimes the value change may cause expensive reactions, such as:
+
+* HTTP request for a search input
+* Rerender of a huge form (certain input value may affect other inputs' behavior)
+* Some complex validating logic
+
+That's when we want to add debouncing for the value change. We can use `DebouncedFieldState` to do so:
+
+<code src="./debounced-field-state.tsx"></code>
+
+You may notice that there is a small difference between this demo and the basic one (with `FieldState`): when using `DebouncedFieldState`, we need use `state.$` instead of `state` itself for UI binding. So that the input keeps responsive, while other parts of the application react with a delay.
+
+By default, `DebouncedFieldState` debounces value change with a delay of `200ms`. You can specify that by passing a time length:
+
+```ts
+new DebouncedFieldState(initialValue, 1000) // which indicates a delay of `1s`
+```
+
+Apart from class `DebouncedFieldState`, formstate-x also provides class `DebouncedState`.
+
+```ts
+new DebouncedFieldState(initalValue, delay)
+```
+
+is a shortcut for
+
+```ts
+new DebouncedState(new FieldState(initalValue), delay)
+```
+
+In most cases, you do not need to add debouncing for form state (`FormState` or `ArrayFormState`); if you need, just use `DebouncedState` directly:
+
+```ts
+const formState = new FormState({
+  foo: new FieldState('')
+})
+const debouncedFormState = new DebouncedState(formState, delay)
+```
+
 ### Cross-State Validation
 
 formstate-x provides super powerful cross-state validation ability. As a classic case, we will show how to build a signup form. In this form, validation behavior for "confirm password" depends on value of "password": value of the two should be the same.
