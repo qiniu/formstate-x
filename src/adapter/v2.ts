@@ -48,6 +48,7 @@ class Upgrader<V> implements v3.IState<V> {
   dispose() { this.stateV2.dispose() }
 }
 
+/** Convets formstate-x@v2.x state to formstate-x@v3.x state */
 export function fromV2<T, V>(stateV2: v2.ComposibleValidatable<T, V>): v3.IState<V> {
   return new Upgrader(stateV2)
 }
@@ -98,6 +99,7 @@ class Downgrader<V> extends BaseState implements v2.ComposibleValidatable<V> {
   }
 }
 
+/** Convets formstate-x@v3.x state to formstate-x@v2.x state */
 export function toV2<V>(state: v3.IState<V>): v2.ComposibleValidatable<V> {
   return new Downgrader(state)
 }

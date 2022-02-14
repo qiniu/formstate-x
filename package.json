@@ -8,6 +8,17 @@
   },
   "main": "lib/index.js",
   "module": "esm/index.js",
+  "exports": {
+    ".": "./esm/index.js",
+    "./adapter": "./esm/adapter/index.js"
+  },
+  "typesVersions": {
+    "*": {
+      "adapter": [
+        "./esm/adapter/index.d.ts"
+      ]
+    }
+  },
   "scripts": {
     "clean": "rm -rf ./esm ./lib ./dumi/dist",
     "lint": "tsc --noEmit",
