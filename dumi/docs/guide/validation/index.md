@@ -34,6 +34,28 @@ Defining validate logic as such standalone functions will help us get benefits: 
 
 <code src="./async-validation.tsx"></code>
 
+If one validator returns a `Promise`, we call it async validator. We expect the promise to resolve with an error info, just the same as the return value of normal validators. And the value will be treated the same way as the return value of normal validators: `string` value means invalid and falsy value means valid.
+
+If the promise rejects, the rejected value will be thrown during validation. This validation will not be considered either valid or invalid. So if you do some HTTP API call in an async validator, it is recommended to deal with the potential failure. For example:
+
+```ts
+async function validateName(v: string) {
+  try {
+    // Assume the API (`/validate?name`) validates name
+    // and returns sth like `{ valid: false, message: '...' }`
+    const resp = await fetch(`/validate?name=${encodeURIComponent(v)}`)
+    const data = await resp.json()
+    return data.valid ? undefined : data.message
+} catch (e) {
+    // This catch prevents formstate-x to throw. The return value, instead,
+    // tells formstate-x to treat the value as invalid (with message "Validate failed")
+    return 'Validate failed'
+  }
+}
+```
+
+If your validator includes one or more HTTP API call, you may want to add debouncing for that,  consider using [`DebouncedState`](/guide/advanced#debounced-state).
+
 ### Reactive Validation
 
 Benefited from MobX, the validaiton process is totally reactive. If you access some observable state in the validator, its change will cause re-validaiton, too, which is just like magic. Let's check this demo:
@@ -52,7 +74,7 @@ You may find it almost the same as the demo for [Reactive Validation](#reactive-
 
 ### Multiple Validators
 
-We can append more than one validators to a state. They will be applied one by one (and lazily if possible). If any validator checking fails, the state is marked invalid (`hasError: true`).
+We can append more than one validators to a state. All validators' checking should pass before the state is marked valid. If any validator's checking fails, the state is marked invalid (`error: <error message>`).
 
 Here's example:
 

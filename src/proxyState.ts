@@ -1,16 +1,16 @@
 import { computed } from 'mobx'
-import { StateUtils } from './state'
-import { IState, Validator } from './types'
+import { BaseState } from './state'
+import { IState, Validator, ValueOf } from './types'
 
-export default class ProxyState<Value = any, TargetValue = any, TargetState extends IState<TargetValue> = IState<TargetValue>> extends StateUtils implements IState<Value> {
+export class ProxyState<TargetState extends IState, Value> extends BaseState implements IState<Value> {
 
-  /** The proxy-target state */
+  /** The original state, whose value will be transformed. */
   public $: TargetState
 
   constructor(
     targetState: TargetState,
-    private parseTargetValue: (v: TargetValue) => Value,
-    private getTargetValue: (v: Value) => TargetValue
+    private parseTargetValue: (v: ValueOf<TargetState>) => Value,
+    private getTargetValue: (v: Value) => ValueOf<TargetState>
   ) {
     super()
     this.$ = targetState
@@ -23,16 +23,8 @@ export default class ProxyState<Value = any, TargetValue = any, TargetState exte
     return this.parseTargetValue(this.$.value)
   }
 
-  @computed get initialValue() {
-    return this.parseTargetValue(this.$.value)
-  }
-
   @computed get error() {
     return this.$.error
-  }
-
-  @computed get validationDisabled() {
-    return this.$.validationDisabled
   }
 
   @computed get dirty() {
@@ -43,8 +35,9 @@ export default class ProxyState<Value = any, TargetValue = any, TargetState exte
     return this.$.activated
   }
 
-  /** Current validate status */
-  @computed get validateStatus() { return this.$.validateStatus }
+  @computed get validateStatus() {
+    return this.$.validateStatus
+  }
 
   async validate() {
     const result = await this.$.validate()
@@ -64,17 +57,9 @@ export default class ProxyState<Value = any, TargetValue = any, TargetState exte
     this.$.reset()
   }
 
-  resetWith(initialValue: Value) {
-    this.$.resetWith(this.getTargetValue(initialValue))
-  }
-
-  dirtyWith(initialValue: Value) {
-    return this.$.dirtyWith(this.getTargetValue(initialValue))
-  }
-
   validators(...validators: Array<Validator<Value>>) {
     const rawValidators = validators.map(validator => (
-      (rawValue: TargetValue) => validator(this.parseTargetValue(rawValue))
+      (rawValue: ValueOf<TargetState>) => validator(this.parseTargetValue(rawValue))
     ))
     this.$.validators(...rawValidators)
     return this

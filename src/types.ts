@@ -1,4 +1,4 @@
-import FieldState from './fieldState'
+import { FieldState } from './fieldState'
 
 /** A truthy string or falsy values. */
 export type ValidationResponse =
@@ -35,30 +35,22 @@ export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValu
 export interface IState<V = any> {
   /** Value in the state. */
   value: V
-  /** Initial value */
-  initialValue: V
+  /** If value has been touched */
+  dirty: boolean
   /** The error info of validation */
   error: Error
-  /** If validation disabled. TODO: disable or disable validation? */
-  validationDisabled: boolean
-  /** If value has been touched (different with `initialValue`) */
-  dirty: boolean
-  /** If activated (with auto validate). */
+  /** If activated (with auto-validation). */
   activated: boolean
   /** Current validate status. */
   validateStatus: ValidateStatus
   /** Fire a validation behavior. */
   validate(): Promise<ValidateResult<V>>
-  /** Set `value` synchronously. */
-  set(value: V): void
-  /** Handler for change event. */
+  /** Set `value` on change event. */
   onChange(value: V): void
+  /** Set `value` imperatively. */
+  set(value: V): void
   /** Reset to initial status. */
   reset(): void
-  /** Reset to specific status. */
-  resetWith(initialValue: V): void
-  /** Check if dirty with given initial value */
-  dirtyWith(initialValue: V): boolean
   /** Add validator function. */
   validators(...validators: Array<Validator<V>>): this
   /** Configure when to disable validation. */
@@ -94,5 +86,7 @@ export enum ValidateStatus {
   /** current validation ongoing */
   Validating, // 校验中
   /** current validation finished */
-  Validated // 校验完成
+  Validated, // 校验完成
+  /** do not need to validate */
+  WontValidate // 无须校验
 }

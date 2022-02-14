@@ -1,16 +1,18 @@
 import React, { ChangeEvent } from 'react'
 import { observer } from 'mobx-react'
 import { Form, Input } from 'antd'
-import { FieldState, bindInput as bindRawInput } from 'formstate-x'
+import { FieldState } from 'formstate-x'
 
 import 'antd/dist/antd.css'
 
 // `bindInput` bind field state to antd `Input` & `Input.Password` (for value change)
 function bindInput(state: FieldState<string>) {
-  function getValueFromEvent(e: ChangeEvent<HTMLInputElement>) {
-    return e.target.value
+  return {
+    value: state.value,
+    onChange(e: ChangeEvent<HTMLInputElement>) {
+      state.onChange(e.target.value)
+    }
   }
-  return bindRawInput(state, getValueFromEvent)
 }
 
 // `bindFormItem` bind field state to antd `Form.Item` (for validation result)

@@ -4,7 +4,7 @@
  */
 
 import { ChangeEvent } from 'react'
-import { FieldState, bindInput, IState, isFormState } from 'formstate-x'
+import { FieldState, IState, isFormState } from 'formstate-x'
 
 // `bindFormHelperText` bind state validate status to Materail-UI `FormHelperText`
 export function bindFormHelperText(state: IState) {
@@ -22,21 +22,21 @@ export function bindFormHelperText(state: IState) {
 
 // `bindOutlinedInput` bind field state to Materail-UI `OutlinedInput`
 export function bindOutlinedInput(state: FieldState<string>) {
-  function getValueFromEvent(e: ChangeEvent<HTMLInputElement>) {
-    return e.target.value
+  return {
+    value: state.value,
+    onChange(e: ChangeEvent<HTMLInputElement>) {
+      state.onChange(e.target.value)
+    }
   }
-  return bindInput(state, getValueFromEvent)
 }
 
 // `bindTextField` bind field state to Materail-UI `TextField`
 export function bindTextField(state: FieldState<string>) {
-
-  function getValueFromEvent(e: ChangeEvent<HTMLInputElement>) {
-    return e.target.value
-  }
-
   return {
-    ...bindInput(state, getValueFromEvent),
+    value: state.value,
+    onChange(e: ChangeEvent<HTMLInputElement>) {
+      state.onChange(e.target.value)
+    },
     error: state.hasError,
     helperText: state.error
   }
@@ -44,11 +44,12 @@ export function bindTextField(state: FieldState<string>) {
 
 // `bindTextField` bind field state to Materail-UI `Checkbox`
 export function bindCheckbox(state: FieldState<boolean>) {
-  function getValueFromEvent(e: ChangeEvent<HTMLInputElement>) {
-    return e.target.checked
+  return {
+    checked: state.value,
+    onChange(e: ChangeEvent<HTMLInputElement>) {
+      state.onChange(e.target.checked)
+    }
   }
-  const { value, onChange } = bindInput(state, getValueFromEvent)
-  return { checked: value, onChange }
 }
 
 // `bindTextField` bind field state to Materail-UI `Switch`

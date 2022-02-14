@@ -1,15 +1,8 @@
-import { observable, computed, isObservable, action, autorun, reaction, makeObservable, override } from 'mobx'
-import { IState, ValidationResponse, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
-import { isPromiseLike } from './utils'
-import State from './state'
+import { observable, computed, isObservable, action, reaction, makeObservable, override } from 'mobx'
+import { IState, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
+import { ValidatableState } from './state'
 
-export abstract class AbstractFormState<T, V> extends State<V> implements IState<V> {
-
-  /**
-   * If activated (with auto validate).
-   * Form will only be activated when `validate()` called or some field activated.
-   */
-  @observable activated = false
+export abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IState<V> {
 
   /** Fields. */
   abstract readonly $: T
@@ -19,28 +12,25 @@ export abstract class AbstractFormState<T, V> extends State<V> implements IState
 
   @override override get validateStatus() {
     if (this.validationDisabled) {
-      return ValidateStatus.NotValidated
+      return ValidateStatus.WontValidate
     }
-    const fieldList = this.fieldList.filter(field => !field.validationDisabled)
+    const fieldList = this.fieldList.filter(
+      field => field.validateStatus != ValidateStatus.WontValidate
+    )
     if (
-      this.rawValidateStatus === ValidateStatus.Validating
+      this._validateStatus === ValidateStatus.Validating
       || fieldList.some(field => field.validateStatus === ValidateStatus.Validating)
     ) {
       return ValidateStatus.Validating
     }
     if (
-      this.rawValidateStatus === ValidateStatus.Validated
+      this._validateStatus === ValidateStatus.Validated
       && fieldList.every(field => field.validateStatus === ValidateStatus.Validated)
     ) {
       return ValidateStatus.Validated
     }
     return ValidateStatus.NotValidated
   }
-
-  /**
-   * The error info of form validation (regardless of disableValidationWhen).
-   */
-  @observable private _error: Error
 
   /** The error info of form validation. */
   @computed get ownError(): Error {
@@ -55,10 +45,8 @@ export abstract class AbstractFormState<T, V> extends State<V> implements IState
     return !!this.ownError
   }
 
-  /**
-   * The error info of validation (including fields' error info).
-   */
-  @computed get error() {
+  /** The error info of validation (including fields' error info). */
+  @override override get error() {
     if (this.validationDisabled) {
       return undefined
     }
@@ -72,91 +60,47 @@ export abstract class AbstractFormState<T, V> extends State<V> implements IState
     }
   }
 
-  /** Set error info of form. */
-  @action setError(error: ValidationResponse) {
-    this._error = error ? error : undefined
+  /** If field list has been touched */
+  @observable protected _dirty = false
+
+  @computed get dirty() {
+    return (
+      this._dirty
+      || this.fieldList.some(field => field.dirty)
+    )
   }
 
   /** Reset fields */
-  protected abstract resetFields(initialValue: V): void
+  protected abstract resetFields(): void
 
-  @action resetWith(initialValue: V) {
+  @action reset() {
     this.activated = false
-    this.rawValidateStatus = ValidateStatus.NotValidated
+    this._validateStatus = ValidateStatus.NotValidated
     this._error = undefined
     this.validation = undefined
-    this.initialValue = initialValue
+    this._dirty = false
 
-    this.resetFields(initialValue)
+    this.resetFields()
   }
 
-  /**
-   * Fire a validation behavior.
-   */
-  async validate(): Promise<ValidateResult<V>> {
-    action('activate-when-validate', () => {
-      this.activated = true
-    })()
-
-    this.doValidation()
-    this.fieldList.forEach(
-      field => field.validate()
-    )
-
-    return this.getValidateResult()
+  override async validate(): Promise<ValidateResult<V>> {
+    await Promise.all([
+      ...this.fieldList.map(
+        field => field.validate()
+      ),
+      super.validate()
+    ])
+    return this.validateResult
   }
 
-  /**
-   * Apply validation.
-   */
-  private async applyValidation() {
-    const validation = this.validation
-    if (!validation) {
-      return
-    }
-
-    const error = (
-      isPromiseLike(validation.response)
-      ? await validation.response
-      : validation.response
-    )
-
-    // 如果 validation 已过期，则不生效
-    if (validation !== this.validation) {
-      return
-    }
-
-    action('endValidation', () => {
-      this.validation = undefined
-      this.rawValidateStatus = ValidateStatus.Validated
-
-      if (error !== this.error) {
-        this.setError(error)
-      }
-    })()
-  }
-
-  protected init() {
-    makeObservable(this)
+  protected override init() {
+    super.init()
 
     // auto activate: any field activated -> form activated
     this.addDisposer(reaction(
       () => this.fieldList.some(field => field.activated),
       someFieldActivated => someFieldActivated && !this.activated && (this.activated = true),
-      { fireImmediately: true }
-    ))
-
-    // auto validate: this.value -> this.validation
-    this.addDisposer(autorun(
-      () => !this.validationDisabled && this.activated && this.doValidation(),
-      { name: 'autorun-check-&-_validate' }
-    ))
-
-    // auto apply validate result: this.validation -> this.error
-    this.addDisposer(reaction(
-      () => this.validation,
-      () => this.applyValidation(),
-      { name: 'applyValidation-when-validation-change' }
+      { fireImmediately: true, name: 'activate-form-when-field-activated' }
     ))
 
     // dispose fields when dispose
@@ -165,6 +109,11 @@ export abstract class AbstractFormState<T, V> extends State<V> implements IState
         field => field.dispose()
       )
     })
+  }
+
+  constructor() {
+    super()
+    makeObservable(this)
   }
 }
 
@@ -182,14 +131,6 @@ export class FormState<
 
   @observable.ref readonly $: Readonly<TFields>
 
-  initialValue: ValueOfObjectFields<TFields>
-
-  dirtyWith(initialValue: ValueOfObjectFields<TFields>) {
-    return Object.keys(this.$).some(
-      key => this.$[key].dirtyWith(initialValue[key])
-    )
-  }
-
   @computed protected get fieldList(): IState[] {
     const fields = this.$
     return Object.keys(fields).map(
@@ -198,11 +139,7 @@ export class FormState<
   }
 
   protected resetFields() {
-    const fields = this.$
-    const initialValue = this.initialValue
-    Object.keys(fields).forEach(key => {
-      fields[key].resetWith(initialValue[key])
-    })
+    this.fieldList.forEach(field => field.reset())
   }
 
   @computed get value(): ValueOfObjectFields<TFields> {
@@ -232,13 +169,12 @@ export class FormState<
 
   constructor(initialFields: TFields) {
     super()
+    makeObservable(this)
 
-    this.$ = initialFields
-    this.initialValue = this.value
-
-    if (!isObservable(this.$)) {
-      this.$ = observable(this.$, undefined, { deep: false })
+    if (!isObservable(initialFields)) {
+      initialFields = observable(initialFields, undefined, { deep: false })
     }
+    this.$ = initialFields
 
     this.init()
   }
@@ -257,13 +193,6 @@ export class ArrayFormState<
 
   @computed get $(): readonly T[] {
     return this.fieldList
-  }
-
-  dirtyWith(initialValue: V[]) {
-    return (
-      this.$.length !== initialValue.length
-      || this.$.some((field, i) => field.dirtyWith(initialValue[i]))
-    )
   }
 
   private createFields(value: V[]): T[] {
@@ -292,11 +221,13 @@ export class ArrayFormState<
     this.fieldList.splice(fromIndex, num).forEach(field => {
       field.dispose()
     })
+    this._dirty = true
   }
 
   private _insert(fromIndex: number, ...fieldValues: V[]) {
     const fields = fieldValues.map(this.createFieldState)
     this.fieldList.splice(fromIndex, 0, ...fields)
+    this._dirty = true
   }
 
   private _set(value: V[], withOnChange = false) {
@@ -367,11 +298,13 @@ export class ArrayFormState<
 
     const [item] = this.fieldList.splice(fromIndex, 1)
     this.fieldList.splice(toIndex, 0, item)
+    this._dirty = true
     this.activated = true
   }
 
-  constructor(public initialValue: V[], private createFieldState: (v: V) => T) {
+  constructor(private initialValue: V[], private createFieldState: (v: V) => T) {
     super()
+    makeObservable(this)
 
     this.fieldList = this.createFields(this.initialValue)
     this.init()
