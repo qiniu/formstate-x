@@ -3,12 +3,12 @@ import { Error, IState, Validated, ValidateResult, ValidateStatus, ValidationRes
 import Disposable from './disposable'
 import { applyValidators, isPromiseLike } from './utils'
 
-export abstract class HasErrorAndValidateStatus extends Disposable {
+/** 基础的 state 公共逻辑抽象 */
+export abstract class BaseState extends Disposable {
 
   /** The error info of validation */
   abstract error: Error
 
-  
   /** If the state contains error. */
   @computed get hasError() {
     return !!this.error
@@ -36,7 +36,8 @@ export abstract class HasErrorAndValidateStatus extends Disposable {
   }
 }
 
-export abstract class HasValue<V> extends HasErrorAndValidateStatus implements IState<V> {
+/** 自带校验逻辑的 state 公共逻辑抽象 */
+export abstract class ValidatableState<V> extends BaseState implements IState<V> {
 
   abstract value: V
   abstract dirty: boolean

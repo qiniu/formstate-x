@@ -1,6 +1,6 @@
 import { action, computed, makeObservable, observable, override, reaction } from 'mobx'
 import { FieldState } from './fieldState'
-import { HasValue } from './state'
+import { ValidatableState } from './state'
 import { IState, ValidateStatus, ValueOf } from './types'
 import { debounce } from './utils'
 
@@ -10,7 +10,7 @@ const defaultDelay = 200 // ms
  * The state for debounce purpose.
  * Changes from the original state (`$`) will be debounced.
  */
-export class DebouncedState<S extends IState> extends HasValue<ValueOf<S>> implements IState<ValueOf<S>> {
+export class DebouncedState<S extends IState> extends ValidatableState<ValueOf<S>> implements IState<ValueOf<S>> {
 
   /**
    * The original state.

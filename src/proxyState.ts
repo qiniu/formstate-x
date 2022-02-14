@@ -1,8 +1,8 @@
 import { computed } from 'mobx'
-import { HasErrorAndValidateStatus } from './state'
+import { BaseState } from './state'
 import { IState, Validator, ValueOf } from './types'
 
-export class ProxyState<TargetState extends IState, Value> extends HasErrorAndValidateStatus implements IState<Value> {
+export class ProxyState<TargetState extends IState, Value> extends BaseState implements IState<Value> {
 
   /** The original state, whose value will be transformed. */
   public $: TargetState

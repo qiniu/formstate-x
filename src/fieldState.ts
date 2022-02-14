@@ -1,12 +1,12 @@
 import { observable, computed, action, makeObservable } from 'mobx'
 import { IState, ValidateStatus } from './types'
 import { is } from './utils'
-import { HasValue } from './state'
+import { ValidatableState } from './state'
 
 /**
  * The state for a field.
  */
-export class FieldState<V> extends HasValue<V> implements IState<V> {
+export class FieldState<V> extends ValidatableState<V> implements IState<V> {
 
   @observable.ref value!: V
 

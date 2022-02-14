@@ -1,8 +1,8 @@
 import { observable, computed, isObservable, action, reaction, makeObservable, override } from 'mobx'
 import { IState, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
-import { HasValue } from './state'
+import { ValidatableState } from './state'
 
-export abstract class AbstractFormState<T, V> extends HasValue<V> implements IState<V> {
+export abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IState<V> {
 
   /** Fields. */
   abstract readonly $: T
