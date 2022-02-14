@@ -10,7 +10,7 @@ For UI inputs like `<input type="text" />`, if the user operates (pressing key, 
 
 * HTTP request for a search input
 * Rerender of a huge form (certain input value may affect other inputs' behavior)
-* Some complex validate logic
+* Some complex validating logic
 
 That's when we want to add debouncing for the value change. We can use `DebouncedFieldState` to do so:
 

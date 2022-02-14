@@ -12,7 +12,7 @@ In this app, we create a field state (variable `state`) for name input. By bindi
 
 ### `FieldState`
 
-Field state (class `FieldState`) is an essential concept in formstate-x. A field state holds value (and related validation info) for one **UI input**. The **UI input** can be a HTML `<input>` element, or a custom component such as `DatePicker`.
+Field state (class `FieldState`) is an essential concept in formstate-x. A field state holds value (and related validation info) for one **UI input**. The **UI input** can be an HTML `<input>` element, or a custom component such as `DatePicker`.
 
 ### Input Binding
 

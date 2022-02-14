@@ -74,7 +74,7 @@ You may find it almost the same as the demo for [Reactive Validation](#reactive-
 
 ### Multiple Validators
 
-We can append more than one validators to a state. They will be applied one by one (and lazily if possible). If any validator checking fails, the state is marked invalid (`hasError: true`).
+We can append more than one validators to a state. All validators' checking should pass before the state is marked valid. If any validator's checking fails, the state is marked invalid (`error: <error message>`).
 
 Here's example:
 
