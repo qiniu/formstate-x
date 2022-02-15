@@ -2,7 +2,7 @@ import { observable, computed, isObservable, action, reaction, makeObservable, o
 import { IState, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
 import { ValidatableState } from './state'
 
-export abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IState<V> {
+abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IState<V> {
 
   /** Fields. */
   abstract readonly $: T

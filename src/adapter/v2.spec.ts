@@ -14,6 +14,7 @@ describe('fromV2', () => {
       expect(state.value).toBe('')
       expect(state.dirty).toBe(false)
       expect(state.activated).toBe(false)
+      expect<typeof stateV2>(state.$).toBe(stateV2)
     })
 
     it('should onChange well', async () => {
@@ -234,6 +235,7 @@ describe('fromV2', () => {
       expect(state.value).toEqual({ foo: '' })
       expect(state.dirty).toBe(false)
       expect(state.activated).toBe(false)
+      expect<typeof stateV2>(state.$).toBe(stateV2)
     })
 
     it('should onChange well', async () => {
@@ -509,8 +511,8 @@ describe('toV2', () => {
       const stateV3 = new v3.FieldState('')
       const state = toV2(stateV3)
       expect(state.value).toBe('')
-      expect(state.$).toBe('')
       expect(state.dirty).toBe(false)
+      expect<typeof stateV3>(state.$).toBe(stateV3)
     })
     it('should reset well', async () => {
       const stateV3 = new v3.FieldState('')

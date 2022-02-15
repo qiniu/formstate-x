@@ -1,12 +1,20 @@
-import { computed, makeObservable, observable, reaction } from 'mobx'
+import { computed, makeObservable } from 'mobx'
 import * as v2 from 'formstate-x-v2'
 import { BaseState } from '../state'
 import * as v3 from '..'
 
-class Upgrader<V> implements v3.IState<V> {
-  constructor(private stateV2: v2.ComposibleValidatable<unknown, V>) {
+interface IV3StateFromV2<T extends v2.ComposibleValidatable<unknown, V>, V> extends v3.IState<V> {
+  /** The original (formstate-x@v2.x) state */
+  $: T
+}
+
+class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> implements IV3StateFromV2<T, V> {
+  constructor(private stateV2: T) {
     makeObservable(this)
   }
+
+  /** The original (formstate-x@v2.x) state */
+  @computed get $() { return this.stateV2 }
 
   @computed get value() { return this.stateV2.value }
   @computed get dirty() { return this.stateV2.dirty }
@@ -49,25 +57,23 @@ class Upgrader<V> implements v3.IState<V> {
 }
 
 /** Convets formstate-x@v2.x state to formstate-x@v3.x state */
-export function fromV2<T, V>(stateV2: v2.ComposibleValidatable<T, V>): v3.IState<V> {
+export function fromV2<T extends v2.ComposibleValidatable<unknown, unknown>>(stateV2: T): IV3StateFromV2<T, T['value']> {
   return new Upgrader(stateV2)
 }
 
-class Downgrader<V> extends BaseState implements v2.ComposibleValidatable<V> {
-  constructor(private stateV3: v3.IState<V>) {
+interface IV2StateFromV3<T extends v3.IState<V>, V> extends v2.ComposibleValidatable<T, V> {
+  /** The original (formstate-x@v2.x) state */
+  $: T
+}
+
+class Downgrader<T extends v3.IState<V>, V> extends BaseState implements IV2StateFromV3<T, V> {
+  constructor(private stateV3: T) {
     super()
     makeObservable(this)
-
-    this.$ = this.value
-
-    this.addDisposer(reaction(
-      () => this.validated && !this.hasError,
-      validateOk => validateOk && (this.$ = this.value),
-      { name: 'sync-$-when-validatedOk' }
-    ))
   }
 
-  @observable.ref $!: V
+  /** The original (formstate-x@v3.x) state */
+  @computed get $() { return this.stateV3 }
 
   @computed get value() { return this.stateV3.value }
   @computed get error() { return this.stateV3.error }
@@ -77,10 +83,7 @@ class Downgrader<V> extends BaseState implements v2.ComposibleValidatable<V> {
   }
 
   validate() { return this.stateV3.validate() }
-  reset() {
-    this.stateV3.reset()
-    this.$ = this.value
-  }
+  reset() { this.stateV3.reset() }
 
   override dispose() {
     super.dispose()
@@ -100,7 +103,7 @@ class Downgrader<V> extends BaseState implements v2.ComposibleValidatable<V> {
 }
 
 /** Convets formstate-x@v3.x state to formstate-x@v2.x state */
-export function toV2<V>(state: v3.IState<V>): v2.ComposibleValidatable<V> {
+export function toV2<T extends v3.IState<unknown>>(state: T): IV2StateFromV3<T, T['value']> {
   return new Downgrader(state)
 }
 
