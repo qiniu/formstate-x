@@ -1,0 +1,179 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>formstate-x</title>
+	<meta name="description" content="Documentation for formstate-x">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+	<script async src="assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">formstate-x</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<h1>formstate-x</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#formstate-x" id="formstate-x" style="color: inherit; text-decoration: none;">
+					<h1>formstate-x</h1>
+				</a>
+				<p><a href="https://github.com/qiniu/formstate-x/actions?query=workflow%3ACI+branch%3Amaster"><img src="https://github.com/qiniu/formstate-x/workflows/CI/badge.svg" alt=""></a>
+					<a href="https://coveralls.io/github/qiniu/formstate-x?branch=master"><img src="https://coveralls.io/repos/github/qiniu/formstate-x/badge.svg?branch=master" alt="Coverage Status"></a>
+					<a href="https://github.com/qiniu/formstate-x/actions?query=workflow%3ADoc+branch%3Amaster"><img src="https://github.com/qiniu/formstate-x/workflows/Doc/badge.svg" alt=""></a>
+				<a href="https://github.com/qiniu/formstate-x/actions?query=workflow%3APublish+branch%3Amaster"><img src="https://github.com/qiniu/formstate-x/workflows/Publish/badge.svg" alt=""></a></p>
+				<p>Manage the state of your form with ease, inspired by awesome <a href="https://github.com/formstate/formstate">formstate</a>. formstate-x maintains and validates form state for you, totally automatically.</p>
+				<p>What we offer:</p>
+				<ul>
+					<li><p><strong>Type safety</strong>: written in <a href="https://typescriptlang.org">Typescript</a>, you can compose complex form state without loss of type information</p>
+						<p>  <img src="./assets/demo.gif" alt="Demo"></p>
+					</li>
+					<li><p><strong>Reactive</strong>: based on <a href="https://mobx.js.org">MobX</a>, every dependency&#39;s change causes reaction automatically and you can easily react to state&#39;s change</p>
+					</li>
+					<li><p><strong>UI-independent</strong>: formstate-x only deals with state / data, you can easily use it with any UI library you like</p>
+					</li>
+				</ul>
+				<a href="#documents" id="documents" style="color: inherit; text-decoration: none;">
+					<h3>Documents</h3>
+				</a>
+				<p>Full documents <a href="https://qiniu.github.io/formstate-x">here</a>.</p>
+				<a href="#install" id="install" style="color: inherit; text-decoration: none;">
+					<h3>Install</h3>
+				</a>
+				<pre><code class="language-shell"><span style="color: #000000">npm i formstate-x</span>
+<span style="color: #000000">// or</span>
+<span style="color: #000000">yarn add formstate-x</span>
+</code></pre>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h3>Usage</h3>
+				</a>
+				<pre><code class="language-javascript"><span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">FieldState</span><span style="color: #000000">, </span><span style="color: #001080">FormState</span><span style="color: #000000">, </span><span style="color: #001080">bindInput</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;formstate-x&#039;</span>
+
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">foo</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">FieldState</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;&#039;</span><span style="color: #000000">)</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">bar</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">FieldState</span><span style="color: #000000">(</span><span style="color: #098658">0</span><span style="color: #000000">)</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">form</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">FormState</span><span style="color: #000000">({ </span><span style="color: #001080">foo</span><span style="color: #000000">, </span><span style="color: #001080">bar</span><span style="color: #000000"> })</span>
+
+<span style="color: #008000">// handle submit</span>
+<span style="color: #0000FF">async</span><span style="color: #000000"> </span><span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">handleSubmit</span><span style="color: #000000">(</span><span style="color: #001080">e</span><span style="color: #000000">) {</span>
+<span style="color: #000000">  </span><span style="color: #001080">e</span><span style="color: #000000">.</span><span style="color: #795E26">preventDefault</span><span style="color: #000000">()</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">result</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">form</span><span style="color: #000000">.</span><span style="color: #795E26">validate</span><span style="color: #000000">()</span>
+<span style="color: #000000">  </span><span style="color: #AF00DB">if</span><span style="color: #000000"> (</span><span style="color: #001080">result</span><span style="color: #000000">.</span><span style="color: #001080">hasError</span><span style="color: #000000">) {</span>
+<span style="color: #000000">    </span><span style="color: #795E26">alert</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;Invalid input!&#039;</span><span style="color: #000000">)</span>
+<span style="color: #000000">    </span><span style="color: #AF00DB">return</span>
+<span style="color: #000000">  }</span>
+<span style="color: #000000">  </span><span style="color: #008000">// use the validated value</span>
+<span style="color: #000000">  </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">submitted</span><span style="color: #000000"> = </span><span style="color: #795E26">submit</span><span style="color: #000000">(</span><span style="color: #001080">result</span><span style="color: #000000">.</span><span style="color: #001080">value</span><span style="color: #000000">)</span>
+<span style="color: #000000">}</span>
+
+<span style="color: #008000">// when render (with react)</span>
+<span style="color: #800000">&lt;form</span><span style="color: #000000"> </span><span style="color: #FF0000">onSubmit</span><span style="color: #000000">=</span><span style="color: #0000FF">{</span><span style="color: #001080">handleSubmit</span><span style="color: #0000FF">}</span><span style="color: #800000">&gt;</span>
+<span style="color: #000000">  </span><span style="color: #800000">&lt;</span><span style="color: #267F99">FooInput</span><span style="color: #000000"> </span><span style="color: #0000FF">{</span><span style="color: #000000">...</span><span style="color: #795E26">bindInput</span><span style="color: #000000FF">(</span><span style="color: #001080">form</span><span style="color: #000000FF">.</span><span style="color: #001080">$</span><span style="color: #000000FF">.</span><span style="color: #001080">foo</span><span style="color: #000000FF">)</span><span style="color: #0000FF">}</span><span style="color: #800000">&gt;</span>
+<span style="color: #000000">  </span><span style="color: #800000">&lt;</span><span style="color: #267F99">BarInput</span><span style="color: #000000"> </span><span style="color: #0000FF">{</span><span style="color: #000000">...</span><span style="color: #795E26">bindInput</span><span style="color: #000000FF">(</span><span style="color: #001080">form</span><span style="color: #000000FF">.</span><span style="color: #001080">$</span><span style="color: #000000FF">.</span><span style="color: #001080">bar</span><span style="color: #000000FF">)</span><span style="color: #0000FF">}</span><span style="color: #800000">&gt;</span>
+<span style="color: #800000">&lt;/form&gt;</span>
+</code></pre>
+				<a href="#comparison-with-formstate" id="comparison-with-formstate" style="color: inherit; text-decoration: none;">
+					<h3>Comparison with <a href="https://github.com/formstate/formstate">formstate</a></h3>
+				</a>
+				<p>formstate-x provides similar APIs with <a href="https://github.com/formstate/formstate">formstate</a> because we like their simplicity. formstate has a very helpful document which we will recommend you to read. But there are some points of formstate that brought inconvenience to our development, and we got disagreement with formstate in related problems. That&#39;s why we build formstate-x:</p>
+				<ol>
+					<li>formstate uses MobX but not embracing it, which constrained its ability (related issue: <a href="https://github.com/formstate/formstate/issues/11">#11</a>). formstate-x leverages MobX&#39;s power substantially, so we can easily track all dependencies when do validation, including dynamic values or dynamic valdiators. That&#39;s also why realizing cross-field validation is extremly easy with formstat-x.</li>
+					<li>formstate mixes validated, safe value with readable value (<code>$</code>), in some cases it&#39;s not suitable to use either <code>$</code> or <code>value</code>. formstate-x provides <code>value</code> as readable value, <code>$</code> as validated and safe value and <code>_value</code> for UI binding only.</li>
+					<li>formstate doesn&#39;t provide a good way to extract value from <code>FormState</code> ( related issues: <a href="https://github.com/formstate/formstate/issues/25">#25</a> <a href="https://github.com/formstate/formstate/issues/28">#28</a>). formstate-x provides <code>value</code> as <code>FormState</code>&#39;s serialized value, with full type info.</li>
+					<li>formstate dosen&#39;t provide a good way to disable part of a <code>FormState</code>. <code>FormStateLazy</code> is like a hack and very different concept from <code>FieldState</code> &amp; <code>FormState</code>. formstate-x provides <code>disableValidationWhen</code> to let you realize conditional validation with a single method call.</li>
+				</ol>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="modules.html">Modules</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/adapter.html">adapter</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/index.html">index</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
