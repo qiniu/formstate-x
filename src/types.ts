@@ -92,7 +92,15 @@ export type ValueOfFields<Fields> = (
 export type ValueOf<State> = (
   State extends FormState<infer Fields>
   ? ValueOfFields<Fields>
-  : ValueOfFieldState<State>
+  : (
+    State extends FieldState<infer V>
+    ? V
+    : (
+      State extends Validatable<unknown, infer V>
+      ? V
+      : never
+    )
+  )
 )
 
 /** Validate status. */
