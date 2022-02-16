@@ -62,7 +62,7 @@ export function fromV2<T extends v2.ComposibleValidatable<unknown, unknown>>(sta
 }
 
 interface IV2StateFromV3<T extends v3.IState<V>, V> extends v2.ComposibleValidatable<T, V> {
-  /** The original (formstate-x@v2.x) state */
+  /** The original (formstate-x@v3.x) state */
   $: T
 }
 
