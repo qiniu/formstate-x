@@ -1,4 +1,4 @@
-import { FieldState, FormState, ArrayFormState, ProxyState, DebouncedState, DebouncedFieldState, bindInput } from '.'
+import { FieldState, FormState, ArrayFormState, TransformedState, DebouncedState, DebouncedFieldState, bindInput } from '.'
 import { defaultDelay, delay } from './testUtils'
 
 describe('FieldState', () => {
@@ -53,7 +53,7 @@ describe('Composition', () => {
       ),
       port: new FieldState(host.port)
     })
-    return new ProxyState(rawState, stringifyHost, parseHost).validators(
+    return new TransformedState(rawState, stringifyHost, parseHost).validators(
       v => !v && 'empty'
     )
   }
@@ -67,7 +67,7 @@ describe('Composition', () => {
       port: new FieldState(host.port)
     })
     return new DebouncedState(
-      new ProxyState(rawState, stringifyHost, parseHost),
+      new TransformedState(rawState, stringifyHost, parseHost),
       defaultDelay
     ).validators(
       v => !v && 'empty'
@@ -103,7 +103,7 @@ describe('Composition', () => {
     expect(hostState.error).toBe('empty hostname')
   })
 
-  it('should work well with debounced ProxyState', async () => {
+  it('should work well with debounced TransformedState', async () => {
     const initialValue = '127.0.0.1:80'
     const hostState = createDebouncedHostState(initialValue)
 

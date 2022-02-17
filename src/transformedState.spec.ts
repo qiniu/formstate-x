@@ -1,6 +1,6 @@
 import { observable, runInAction, when } from 'mobx'
 import { ValidateResultWithError, ValidateResultWithValue } from './types'
-import { ProxyState } from './proxyState'
+import { TransformedState } from './transformedState'
 import { FieldState } from './fieldState'
 import { FormState } from './formState'
 import { delay, delayValue, assertType } from './testUtils'
@@ -13,14 +13,14 @@ function createNumState(initialValue: number = 0) {
   function stringifyNum(num: number) {
     return Number.isNaN(num) ? '' : (num + '')
   }
-  return new ProxyState(
+  return new TransformedState(
     new FieldState(stringifyNum(initialValue)),
     parseNum,
     stringifyNum
   )
 }
 
-describe('ProxyState (for FieldState)', () => {
+describe('TransformedState (for FieldState)', () => {
 
   it('should be type-safe', () => {
 
@@ -41,7 +41,7 @@ describe('ProxyState (for FieldState)', () => {
 
     function createHostState() {
       const rawState = new FieldState('')
-      return new ProxyState(rawState, parseHost, stringifyHost)
+      return new TransformedState(rawState, parseHost, stringifyHost)
     }
 
     interface SourceItem {
@@ -146,7 +146,7 @@ describe('ProxyState (for FieldState)', () => {
   })
 })
 
-describe('ProxyState (for FieldState) validation', () => {
+describe('TransformedState (for FieldState) validation', () => {
 
   function createPositiveNumState(initialValue: number) {
     return createNumState(initialValue).validators(
@@ -429,10 +429,10 @@ function createHostState(hostStr: string = '127.0.0.1:80') {
     hostname: new FieldState(host.hostname),
     port: new FieldState(host.port)
   })
-  return new ProxyState(rawState, stringifyHost, parseHost)
+  return new TransformedState(rawState, stringifyHost, parseHost)
 }
 
-describe('ProxyState (for FormState)', () => {
+describe('TransformedState (for FormState)', () => {
 
   it('should be type-safe', () => {
 
@@ -532,7 +532,7 @@ describe('ProxyState (for FormState)', () => {
   })
 })
 
-describe('ProxyState (for FormState) validation', () => {
+describe('TransformedState (for FormState) validation', () => {
   it('should work well when initialized', async () => {
     const state = createHostState('127.0.0.1:80').validators(
       v => !v && 'empty'
