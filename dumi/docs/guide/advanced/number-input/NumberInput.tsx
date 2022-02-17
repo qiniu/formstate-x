@@ -13,14 +13,14 @@ function getNumberText(num: number) {
 }
 
 export function createState() {
-  const textState = new FieldState('').validators(
+  const textState = new FieldState('').addValidator(
     v => !v && 'Please input a number!'
   )
   const numState = new TransformedState(
     textState,
     parseNumberText,
     getNumberText
-  ).validators(
+  ).addValidator(
     v => Number.isNaN(v) && 'Please input a valid number!'
   )
   return numState

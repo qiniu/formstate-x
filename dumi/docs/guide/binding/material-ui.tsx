@@ -27,7 +27,7 @@ function bindTextField(state: FieldState<string>) {
 }
 
 const disabledState = new FieldState(false)
-const usernameState = new FieldState('').validators(validateUsername)
+const usernameState = new FieldState('').addValidator(validateUsername)
 
 export default observer(function Demo() {
   return (

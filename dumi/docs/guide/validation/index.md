@@ -12,10 +12,10 @@ First we will check a simple example: a name input with value of 5 characters at
 
 <code src="./validation.tsx"></code>
 
-In the example above we defined function `validateName` (we call it a "validator"), and append it to the state by calling method `validators`:
+In the example above we defined function `validateName` (we call it a "validator"), and append it to the state by calling method `addValidator`:
 
 ```ts
-const state = new FieldState('').validators(validateName)
+const state = new FieldState('').addValidator(validateName)
 ```
 
 All we need to do next is consuming the validation result by access `state.hasError` or `state.error`. The validation will be applied automatically. Everytime user inputs, the value changes, and the validator will be called to check if the input correct.
@@ -24,11 +24,11 @@ All we need to do next is consuming the validation result by access `state.hasEr
 
 Validator is another essential concept in formstate-x. A validator is a function, who takes the input value as argument and returns error info.
 
-The returned value (error info) can be a `string` value, which means the input value is invalid and the invalid message (such as `''Too long''` in the example above) is returned. Error info can also be a falsy value (such as `null` / `undefined` / `false` / `''`), which means the input value is valid and no message need to be returned.
+The returned value (error info) can be a `string` value, which means the input value is invalid and the invalid message (such as `"Too long"` in the example above) is returned. Error info can also be a falsy value (such as `null` / `undefined` / `false` / `''`), which means the input value is valid and no message need to be returned.
 
-If the validation process is async, a validator (which we call "async validator") can return a `Promise`. You can check details in [Async Validator](#async-validator)
+If the validation process is async, a validator can return a `Promise` —— we call it "async validator". You can check details in [Async Validator](#async-validator)
 
-Defining validate logic as such standalone functions will help us get benefits: it's easy to reuse and easy to test.
+Defining validate logic as multiple standalone functions has benefits: they are easy to reuse and easy to test.
 
 ### Async Validator
 

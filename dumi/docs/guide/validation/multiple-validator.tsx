@@ -6,7 +6,7 @@ import { bindInputWithChangeEvent } from '../../react-bindings'
 const validateNotEmpty = (v: string) => v.trim() === '' && 'Empty'
 const validateLength = (v: string) => v.length > 5 && 'Too long'
 
-const state = new FieldState('').validators(
+const state = new FieldState('').addValidator(
   validateNotEmpty,
   validateLength
 )

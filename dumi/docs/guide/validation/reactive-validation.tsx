@@ -20,7 +20,7 @@ const validateName = (v: string) => {
   }
 }
 
-const state = new FieldState('').validators(validateName)
+const state = new FieldState('').addValidator(validateName)
 
 export default observer(function Demo() {
   return (

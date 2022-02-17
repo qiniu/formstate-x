@@ -60,7 +60,7 @@ In addition of component `FullNameInput`, the module exported functionn `createS
 ```ts
 const form = new FormState({
   name: createFullNameState(),
-  email: new FieldState('').validators(validateEmail)
+  email: new FieldState('').addValidator(validateEmail)
 })
 ```
 

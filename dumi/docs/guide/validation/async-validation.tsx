@@ -10,7 +10,7 @@ const validateName = (v: string) => new Promise<string | false>(resolve => {
   }, 1000)
 })
 
-const state = new FieldState('').validators(validateName)
+const state = new FieldState('').addValidator(validateName)
 
 export default observer(function Demo() {
   return (

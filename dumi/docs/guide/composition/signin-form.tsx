@@ -6,8 +6,8 @@ import { Button, TextField, FormControlLabel, Checkbox, Container } from '@mui/m
 import { bindTextField, bindCheckbox } from '../../mui-binding'
 
 const form = new FormState({
-  username: new FieldState('').validators(validateUsername),
-  password: new FieldState('').validators(validatePassword),
+  username: new FieldState('').addValidator(validateUsername),
+  password: new FieldState('').addValidator(validatePassword),
   remember: new FieldState(false)
 })
 

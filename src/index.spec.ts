@@ -48,12 +48,12 @@ describe('Composition', () => {
   function createHostState(hostStr: string) {
     const host = parseHost(hostStr)
     const rawState = new FormState({
-      hostname: new DebouncedFieldState(host.hostname, defaultDelay).validators(
+      hostname: new DebouncedFieldState(host.hostname, defaultDelay).addValidator(
         v => !v && 'empty hostname'
       ),
       port: new FieldState(host.port)
     })
-    return new TransformedState(rawState, stringifyHost, parseHost).validators(
+    return new TransformedState(rawState, stringifyHost, parseHost).addValidator(
       v => !v && 'empty'
     )
   }
@@ -61,7 +61,7 @@ describe('Composition', () => {
   function createDebouncedHostState(hostStr: string) {
     const host = parseHost(hostStr)
     const rawState = new FormState({
-      hostname: new FieldState(host.hostname).validators(
+      hostname: new FieldState(host.hostname).addValidator(
         v => !v && 'empty hostname'
       ),
       port: new FieldState(host.port)
@@ -69,7 +69,7 @@ describe('Composition', () => {
     return new DebouncedState(
       new TransformedState(rawState, stringifyHost, parseHost),
       defaultDelay
-    ).validators(
+    ).addValidator(
       v => !v && 'empty'
     )
   }

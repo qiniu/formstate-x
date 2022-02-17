@@ -22,7 +22,7 @@ function bindFormItem(state: FieldState<unknown>) {
   if (state.validated && state.hasError) return { validateStatus: 'error', help: state.error } as const
 }
 
-const usernameState = new FieldState('').validators(validateUsername)
+const usernameState = new FieldState('').addValidator(validateUsername)
 
 export default observer(function Demo() {
   return (

@@ -52,7 +52,7 @@ export interface IState<V = any> {
   /** Reset to initial status. */
   reset(): void
   /** Add validator function. */
-  validators(...validators: Array<Validator<V>>): this
+  addValidator(...validators: Array<Validator<V>>): this
   /** Configure when to disable validation. */
   disableValidationWhen(predict: () => boolean): this
   /** Do dispose */
