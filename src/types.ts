@@ -35,14 +35,23 @@ export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValu
 export interface IState<V = any> {
   /** Value in the state. */
   value: V
-  /** If value has been touched */
+  /** If value has been touched. */
   dirty: boolean
-  /** The error info of validation */
+  /** The error info of validation. */
   error: Error
+  /** If the state contains error. */
+  hasError: boolean
   /** If activated (with auto-validation). */
   activated: boolean
   /** Current validate status. */
   validateStatus: ValidateStatus
+  /** If the state is doing a validation. */
+  validating: boolean
+  /**
+   * If the validation has been done.
+   * It does not mean validation passed.
+   */
+  validated: boolean
   /** Fire a validation behavior. */
   validate(): Promise<ValidateResult<V>>
   /** Set `value` on change event. */

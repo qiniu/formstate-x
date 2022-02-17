@@ -3,29 +3,23 @@ import { Error, IState, Validated, ValidateResult, ValidateStatus, ValidationRes
 import Disposable from './disposable'
 import { applyValidators, isPromiseLike } from './utils'
 
-/** 基础的 state 公共逻辑抽象 */
-export abstract class BaseState extends Disposable {
+/** Extraction for some basic features of State */
+export abstract class BaseState extends Disposable implements Pick<
+  IState, 'error' | 'hasError' | 'validateStatus' | 'validating' | 'validated'
+> {
 
-  /** The error info of validation */
   abstract error: Error
 
-  /** If the state contains error. */
   @computed get hasError() {
     return !!this.error
   }
 
-  /** Current validate status. */
   abstract validateStatus: ValidateStatus
 
-  /** If the state is doing a validation. */
   @computed get validating() {
     return this.validateStatus === ValidateStatus.Validating
   }
 
-  /**
-   * If the validation has been done.
-   * It does not mean validation passed.
-   */
   @computed get validated() {
     return this.validateStatus === ValidateStatus.Validated
   }
@@ -36,7 +30,7 @@ export abstract class BaseState extends Disposable {
   }
 }
 
-/** 自带校验逻辑的 state 公共逻辑抽象 */
+/** Extraction for State's validating logic */
 export abstract class ValidatableState<V> extends BaseState implements IState<V> {
 
   abstract value: V
@@ -166,7 +160,6 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
     return this.shouldDisableValidation()
   }
 
-  /** Configure when to disable validation. */
   @action disableValidationWhen(predict: () => boolean) {
     this.shouldDisableValidation = predict
     return this
