@@ -500,7 +500,7 @@ describe('fromV2', () => {
       const stateV2 = new V2DumbState('')
       stateV2._validateStatus = -1
       const state = fromV2(stateV2)
-      expect(() => state.validateStatus).toThrowError('Operation not supported.')
+      expect(() => state.validateStatus).toThrowError('Invalid value occurred: -1.')
     })
   })
 })
@@ -695,7 +695,7 @@ describe('toV2', () => {
       const stateV3 = new V3DumbState('')
       stateV3.validateStatus = -1
       const state = toV2(stateV3)
-      expect(() => state._validateStatus).toThrowError('Operation not supported.')
+      expect(() => state._validateStatus).toThrowError('Invalid value occurred: -1.')
     })
   })
 })

@@ -1,4 +1,4 @@
-import { computed, makeObservable } from 'mobx'
+import { action, computed, makeObservable } from 'mobx'
 import * as v2 from 'formstate-x-v2'
 import { BaseState } from '../state'
 import * as v3 from '..'
@@ -26,10 +26,10 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> implements IV3
   validate() {
     return this.stateV2.validate() as Promise<v3.ValidateResult<V>>
   }
-  onChange(value: V) {
+  @action onChange(value: V) {
     onChangeForV2(this.stateV2, value)
   }
-  set(value: V) {
+  @action set(value: V) {
     setForV2(this.stateV2, value)
   }
   reset() { this.stateV2.reset() }
@@ -117,7 +117,7 @@ function getV3ValidateStatus(stateV2: v2.ComposibleValidatable<unknown>): v3.Val
     case v2.ValidateStatus.Validated:
       return v3.ValidateStatus.Validated
     default:
-      notSupported()
+      invalidValue(stateV2._validateStatus)
   }
 }
 
@@ -132,7 +132,7 @@ function getV2ValidateStatus(stateV3: v3.IState): v2.ValidateStatus {
     case v3.ValidateStatus.WontValidate:
       return v2.ValidateStatus.NotValidated
     default:
-      notSupported()
+      invalidValue(stateV3.validateStatus)
   }
 }
 
@@ -146,6 +146,10 @@ function isV2FormState<V>(state: v2.ComposibleValidatable<unknown, V>): state is
 
 function notSupported(): never {
   throw new Error('Operation not supported.')
+}
+
+function invalidValue(value: never): never {
+  throw new Error(`Invalid value occurred: ${value}.`)
 }
 
 function onChangeForV2ObjectFormState<V>(state: v2.FormState<v2.FieldsObject, V>, value: V) {
