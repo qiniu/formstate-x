@@ -62,8 +62,14 @@ export interface IState<V = any> {
   reset(): void
   /** Add validator function. */
   addValidator(...validators: Array<Validator<V>>): this
-  /** Configure when to disable validation. */
-  disableValidationWhen(predict: () => boolean): this
+  /**
+   * Configure when state will be disabled, which means:
+   * - corresponding UI is invisible or disabled
+   * - state value do not need to (and will not) be validated
+   * - state `onChange` will not be called
+   * - no error info will be provided
+   */
+  disableWhen(predictFn: () => boolean): this
   /** Do dispose */
   dispose(): void
 }

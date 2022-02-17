@@ -43,7 +43,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   @observable protected _validateStatus: ValidateStatus = ValidateStatus.NotValidated
 
   @computed get validateStatus() {
-    return this.validationDisabled ? ValidateStatus.WontValidate : this._validateStatus
+    return this.disabled ? ValidateStatus.WontValidate : this._validateStatus
   }
 
   @observable activated = false
@@ -54,7 +54,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   @observable protected _error: Error
 
   @computed get error() {
-    return this.validationDisabled ? undefined : this._error
+    return this.disabled ? undefined : this._error
   }
 
   /**
@@ -143,25 +143,29 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
     }
 
     await when(
-      () => this.validationDisabled || this.validated,
+      () => this.disabled || this.validated,
       { name: 'return-validate-when-not-validating' }
     )
 
     return this.validateResult
   }
 
-  /**
-   * Method to check if we should disable validation.
-   */
-  @observable.ref private shouldDisableValidation = () => false
+  /** Fn predicts if state should be disabled. */
+  @observable.ref private shouldDisable = () => false
 
-  /** If validation disabled. */
-  @computed protected get validationDisabled() {
-    return this.shouldDisableValidation()
+  /**
+   * If state is disabled, which means:
+   * - corresponding UI is invisible or disabled
+   * - state value do not need to (and will not) be validated
+   * - state `onChange` will not be called
+   * - no error info will be provided
+   */
+  @computed protected get disabled() {
+    return this.shouldDisable()
   }
 
-  @action disableValidationWhen(predict: () => boolean) {
-    this.shouldDisableValidation = predict
+  @action disableWhen(predictFn: () => boolean) {
+    this.shouldDisable = predictFn
     return this
   }
 
@@ -169,7 +173,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
     // auto validate: this.value -> this.validation
     this.addDisposer(autorun(
       () => {
-        if (this.validationDisabled || !this.activated) return
+        if (this.disabled || !this.activated) return
         this.doValidation()
       },
       { name: 'autorun-check-&-doValidation' }

@@ -301,12 +301,12 @@ describe('FieldState validation', () => {
     state.dispose()
   })
 
-  it('should work well with disableValidationWhen()', async () => {
+  it('should work well with disableWhen()', async () => {
     const initialValue = ''
     const options = observable({ disabled: false })
     const state = new FieldState(initialValue).addValidator(
       val => !val && 'empty'
-    ).disableValidationWhen(
+    ).disableWhen(
       () => options.disabled
     )
 

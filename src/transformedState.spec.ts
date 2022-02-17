@@ -366,10 +366,10 @@ describe('TransformedState (for FieldState) validation', () => {
     state.dispose()
   })
 
-  it('should work well with disableValidationWhen', async () => {
+  it('should work well with disableWhen', async () => {
     const initialValue = 0
     const options = observable({ disabled: false })
-    const state = createPositiveNumState(initialValue).disableValidationWhen(
+    const state = createPositiveNumState(initialValue).disableWhen(
       () => options.disabled
     )
 
@@ -641,7 +641,7 @@ describe('TransformedState (for FormState) validation', () => {
     state.dispose()
   })
 
-  it('should work well with disableValidationWhen', async () => {
+  it('should work well with disableWhen', async () => {
     const options = observable({
       disabled: false,
       updateDisabled(value: boolean) {
@@ -650,7 +650,7 @@ describe('TransformedState (for FormState) validation', () => {
     })
     const state = createHostState('127.0.0.1').addValidator(
       v => !v && 'empty'
-    ).disableValidationWhen(
+    ).disableWhen(
       () => options.disabled
     )
 

@@ -72,6 +72,8 @@ Based on reactivity, it's deadly easy to implement conditional validation with f
 
 You may find it almost the same as the demo for [Reactive Validation](#reactive-validation). Actually conditional validation is just a special case of reactive validation.
 
+For complex states, it may not be convenient to do checking in each validator. You can use `disableWhen` for such cases. See details in [Disable State](/guide/advanced#disable-state).
+
 ### Multiple Validators
 
 We can append more than one validators to a state. All validators' checking should pass before the state is marked valid. If any validator's checking fails, the state is marked invalid (`error: <error message>`).

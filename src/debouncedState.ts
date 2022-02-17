@@ -37,7 +37,7 @@ export class DebouncedState<S extends IState> extends ValidatableState<ValueOf<S
   }
 
   @override override get error() {
-    if (this.validationDisabled) {
+    if (this.disabled) {
       return undefined
     }
     if (this._error) {
@@ -47,7 +47,7 @@ export class DebouncedState<S extends IState> extends ValidatableState<ValueOf<S
   }
 
   @override override get validateStatus() {
-    if (this.validationDisabled) {
+    if (this.disabled) {
       return ValidateStatus.WontValidate
     }
     if (

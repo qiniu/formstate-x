@@ -65,8 +65,8 @@ export class TransformedState<S extends IState, V> extends BaseState implements 
     return this
   }
 
-  disableValidationWhen(predict: () => boolean) {
-    this.$.disableValidationWhen(predict)
+  disableWhen(predict: () => boolean) {
+    this.$.disableWhen(predict)
     return this
   }
 

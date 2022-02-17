@@ -562,7 +562,7 @@ describe('FormState (mode: object) validation', () => {
     state.dispose()
   })
 
-  it('should work well with disableValidationWhen', async () => {
+  it('should work well with disableWhen', async () => {
     const options = observable({
       disabled: false,
       updateDisabled(value: boolean) {
@@ -576,7 +576,7 @@ describe('FormState (mode: object) validation', () => {
       bar: new FieldState(initialValue.bar).addValidator(notEmpty)
     }).addValidator(
       ({ foo, bar }) => foo === bar && 'same',
-    ).disableValidationWhen(
+    ).disableWhen(
       () => options.disabled
     )
 
@@ -1372,7 +1372,7 @@ describe('FormState (mode: array) validation', () => {
     state.dispose()
   })
 
-  it('should work well with disableValidationWhen', async () => {
+  it('should work well with disableWhen', async () => {
     const options = observable({
       disabled: false,
       updateDisabled(value: boolean) {
@@ -1386,7 +1386,7 @@ describe('FormState (mode: array) validation', () => {
       value => new FieldState(value).addValidator(notEmpty),
     ).addValidator(
       list => list.join('').length > 5 && 'too long'
-    ).disableValidationWhen(
+    ).disableWhen(
       () => options.disabled
     )
 
@@ -1430,7 +1430,7 @@ describe('FormState (mode: array) validation', () => {
       value => new FieldState(value).addValidator(notEmpty),
     ).addValidator(
       list => list.join('').length > 5 && 'too long'
-    ).disableValidationWhen(
+    ).disableWhen(
       () => options.disabled
     )
     const state = new FormState({
@@ -1480,7 +1480,7 @@ describe('nested FormState', () => {
 
     const inputsState = new ArrayFormState([], createInputState).addValidator(
       list => list.join('').length > 5 && 'too long'
-    ).disableValidationWhen(() => !enabledState.value)
+    ).disableWhen(() => !enabledState.value)
 
     const state = new FormState({
       inputs: inputsState,

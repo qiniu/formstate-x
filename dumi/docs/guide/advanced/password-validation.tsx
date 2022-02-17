@@ -30,7 +30,7 @@ export default observer(function Demo() {
     e.preventDefault()
     const result = await form.validate()
     if (result.hasError) return
-    console.log('Submit with:', result.value)
+    alert(`Submit with: ${JSON.stringify(result.value, null, 2)}`)
   }
 
   return (
