@@ -4,9 +4,9 @@ order: 5
 toc: menu
 ---
 
-In real applications, a form usually consists of plenty of inputs. A complex input component (such as date-picker, searchable-select, etc) usually consists of more than one basic input components. Composition, is the key problem for form-related libraries.
+In real applications, a form usually consists of plenty of inputs. A complex input component (such as date-picker, searchable-select, etc) usually consists of more than one basic input components. Composition, is the key problem need to be solved by form tools.
 
-With composition ability provided by formstate-x, you can build arbitrary complex forms or input components.
+With composition ability provided by formstate-x, you can build arbitrary complex forms or input components with maximal code reuse.
 
 ### Simple Form
 
@@ -33,7 +33,7 @@ const result = await form.validate()
 if (result.hasError) return
 ```
 
-This will ensure that every input's value valid, whether it is activated or not. Then it's ok to do anything you need with the input data, such as sending HTTP request.
+This will ensure that every input's value valid, whether it is activated or not. If the check (for `result.hasError`) passes, the form data (`result.value`) is guaranteed to be valid. You can now do anything you need with the form data, such as sending an HTTP request.
 
 That's almost all you need to know to build a simple form with formstate-x. Next, we will show how to build complex input with formstate-x.
 
@@ -62,7 +62,7 @@ interface Props {
 }
 ```
 
-In addition of component `FullNameInput`, the module exported functionn `createState` as well, which is used to create the state for component `FullNameInput`.
+In addition of component `FullNameInput`, the module exported function `createState` as well, which is used to create the state for component `FullNameInput`.
 
 It is easy to embed the `FullNameInput` in a form, we can find it in file `index.ts`, which consists of two parts:
 

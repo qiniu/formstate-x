@@ -14,7 +14,7 @@ const someObservableStore = observable({
   }
 })
 
-const validateName = (v: string) => {
+function validateName(v: string) {
   if (v.length > someObservableStore.lengthLimit) {
     return 'Too long'
   }

@@ -27,3 +27,5 @@ As formstate-x is based on MobX, components who read state from formstate-x need
 ### Hold State
 
 For convenience, we defined the field state (variable `state`) outside the component body. Actually, like any other MobX observable state, it's ok to be hold anywhere you like.
+
+Now let's try some really cool thing. We will see how formstate-x provides powerful validating ability in section [Validation](/guide/validation).

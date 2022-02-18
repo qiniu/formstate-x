@@ -3,12 +3,14 @@ import { observer } from 'mobx-react'
 import { FieldState } from 'formstate-x'
 import { bindInputWithChangeEvent } from '../../react-bindings'
 
-const validateName = (v: string) => new Promise<string | false>(resolve => {
-  // you can call HTTP API, or do other async stuff here
-  setTimeout(() => {
-    resolve(v.length > 5 && 'Too long')
-  }, 1000)
-})
+function validateName(v: string) {
+  return new Promise<string | false>(resolve => {
+    // you can call HTTP API, or do other async stuff here
+    setTimeout(() => {
+      resolve(v.length > 5 && 'Too long')
+    }, 1000)
+  })
+}
 
 const state = new FieldState('').addValidator(validateName)
 

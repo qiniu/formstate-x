@@ -59,7 +59,7 @@ const rePasswordState = new FieldState('').addValidator(
 )
 ```
 
-As we know from section [Reactive Validation](#TODO), if you access observable data inside validator, the validator will be triggered automatically when the observable data changes. In this case, which means, you don't even need to know that "rePassword" should be revalidated when "password" changes, also you don't need to tell formstate-x so, it just works, as long as you read its value correctly.
+As we learnt from section [Reactive Validation](/guide/validation#reactive-validation), if you access observable data inside validator, the validator will be triggered automatically when the observable data changes. In this case, which means, you don't even need to know that "rePassword" should be revalidated when "password" changes, also you don't need to tell formstate-x so, it just works, as long as you read its value correctly.
 
 ### Transformed State
 
@@ -77,7 +77,7 @@ A typical number input is made with a normal text input to collect user input. S
 const state = new FieldState('')
 ```
 
-However, as implementation details, the `string`-type value, is not the value we would like the user of `NumberInput` to access. The component should behave as its name (`NumberInput`) suggests, collecting `number`-type value from user.
+However, as implementation details, the `string`-type value, is not the value we would like the consumer of `NumberInput` to access. The component should behave as its name (`NumberInput`) suggests, collecting `number`-type value from user.
 
 We need to transform the `string`-type value to number before we export it out. That's when `TransformedState` rescues:
 
@@ -85,7 +85,7 @@ We need to transform the `string`-type value to number before we export it out. 
 
 In component `NumberInput`, we created a transformed state `numState` as the return value of function `createState`. It wraps the original state `textState` and deals with the value transforming.
 
-We can access the original state with `numState.$` - as you can see in `NumberInput` we bind it to `TextField`. The transformed state `numState` is for the user of `NumberInput` (in this case, the form), which makes the form unaware of the inside `string`-type value.
+We can access the original state with `numState.$` - as you can see in `NumberInput` we bind it to `TextField`. The transformed state `numState` is for the consumer of `NumberInput` (in this case, the form), which makes the form unaware of the inside `string`-type value.
 
 We can transform any state which implements interface [`IState`](#TODO). Here is another example in which we do transforming in `FullNameInput`:
 
