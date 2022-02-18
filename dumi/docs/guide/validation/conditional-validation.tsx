@@ -16,7 +16,7 @@ function validateName(v: string) {
   return v.length > 5 && 'Too long'
 }
 
-const state = new FieldState('').addValidator(validateName)
+const state = new FieldState('').withValidator(validateName)
 
 export default observer(function Demo() {
   return (

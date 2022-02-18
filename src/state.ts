@@ -67,8 +67,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   /** List of validator functions. */
   @observable.shallow private validatorList: Validator<V>[] = []
 
-  /** Add validator function. */
-  @action addValidator(...validators: Validator<V>[]) {
+  @action withValidator(...validators: Validator<V>[]) {
     this.validatorList.push(...validators)
     return this
   }

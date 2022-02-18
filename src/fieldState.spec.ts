@@ -16,7 +16,7 @@ describe('FieldState', () => {
 
   it('should onChange well', async () => {
     const initialValue = ''
-    const state = new FieldState(initialValue).addValidator(
+    const state = new FieldState(initialValue).withValidator(
       value => value.length > 5 && 'too long'
     )
 
@@ -88,7 +88,7 @@ describe('FieldState', () => {
 
 describe('FieldState validation', () => {
   it('should work well when initialized', async () => {
-    const state = new FieldState('').addValidator(val => !val && 'empty')
+    const state = new FieldState('').withValidator(val => !val && 'empty')
 
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(false)
@@ -99,7 +99,7 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with onChange()', async () => {
-    const state = new FieldState('xxx').addValidator(val => !val && 'empty')
+    const state = new FieldState('xxx').withValidator(val => !val && 'empty')
     state.onChange('')
 
     await delay()
@@ -117,7 +117,7 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with onChange of same value', async () => {
-    const state = new FieldState(1).addValidator(
+    const state = new FieldState(1).withValidator(
       () => null
     )
     await state.validate()
@@ -133,7 +133,7 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with validate()', async () => {
-    const state = new FieldState('').addValidator(val => !val && 'empty')
+    const state = new FieldState('').withValidator(val => !val && 'empty')
     const validateRet1 = state.validate()
 
     await delay()
@@ -163,7 +163,7 @@ describe('FieldState validation', () => {
 
   it('should work well with reset()', async () => {
     const initialValue = ''
-    const state = new FieldState(initialValue).addValidator(val => !val && 'empty')
+    const state = new FieldState(initialValue).withValidator(val => !val && 'empty')
     state.validate()
     await delay()
 
@@ -178,7 +178,7 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with multiple validators', async () => {
-    const state = new FieldState('').addValidator(
+    const state = new FieldState('').withValidator(
       val => !val && 'empty',
       val => val.length > 5 && 'too long'
     )
@@ -210,7 +210,7 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with async validator', async () => {
-    const state = new FieldState('').addValidator(
+    const state = new FieldState('').withValidator(
       val => delayValue(!val && 'empty')
     )
     state.validate()
@@ -229,7 +229,7 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with mixed sync and async validator', async () => {
-    const state = new FieldState('').addValidator(
+    const state = new FieldState('').withValidator(
       val => delayValue(!val && 'empty'),
       val => val.length > 5 && 'too long'
     )
@@ -256,7 +256,7 @@ describe('FieldState validation', () => {
 
   it('should work well with dynamic validator', async () => {
     const target = observable({ value: '123' })
-    const state = new FieldState('').addValidator(
+    const state = new FieldState('').withValidator(
       val => val === target.value && 'same'
     )
 
@@ -284,7 +284,7 @@ describe('FieldState validation', () => {
   })
 
   it('should work well when add validator dynamically', async () => {
-    const state = new FieldState('').addValidator(
+    const state = new FieldState('').withValidator(
       val => !val && 'empty'
     )
     state.onChange('123456')
@@ -293,7 +293,7 @@ describe('FieldState validation', () => {
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
-    state.addValidator(val => val.length > 5 && 'too long')
+    state.withValidator(val => val.length > 5 && 'too long')
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
@@ -304,7 +304,7 @@ describe('FieldState validation', () => {
   it('should work well with disableWhen()', async () => {
     const initialValue = ''
     const options = observable({ disabled: false })
-    const state = new FieldState(initialValue).addValidator(
+    const state = new FieldState(initialValue).withValidator(
       val => !val && 'empty'
     ).disableWhen(
       () => options.disabled
@@ -346,7 +346,7 @@ describe('FieldState validation', () => {
     const validator = jest.fn()
     validator.mockReturnValueOnce(delayValue('foo', 200))
     validator.mockReturnValueOnce(delayValue('bar', 100))
-    const field = new FieldState(1).addValidator(validator)
+    const field = new FieldState(1).withValidator(validator)
     field.validate()
     await delay(50)
     await field.validate()
@@ -359,7 +359,7 @@ describe('FieldState validation', () => {
     validator.mockReturnValue(null)
     validator.mockReturnValueOnce(delayValue('foo', 200))
     validator.mockReturnValueOnce(delayValue('bar', 100))
-    const field = new FieldState(1).addValidator(validator)
+    const field = new FieldState(1).withValidator(validator)
     field.onChange(2)
     await delay(50)
     field.onChange(3)
@@ -369,7 +369,7 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with NaN', async () => {
-    const state = new FieldState(Number.NaN).addValidator(
+    const state = new FieldState(Number.NaN).withValidator(
       () => 'error'
     )
     state.validate()

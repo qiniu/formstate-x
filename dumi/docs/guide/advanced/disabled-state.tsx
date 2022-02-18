@@ -13,13 +13,13 @@ enum SignInBy {
 const by = new FieldState(SignInBy.Password)
 
 const formByPassword = new FormState({
-  username: new FieldState('').addValidator(required),
-  password: new FieldState('').addValidator(required)
+  username: new FieldState('').withValidator(required),
+  password: new FieldState('').withValidator(required)
 })
 
 const formByPhone = new FormState({
-  phone: new FieldState('').addValidator(required),
-  code: new FieldState('').addValidator(required)
+  phone: new FieldState('').withValidator(required),
+  code: new FieldState('').withValidator(required)
 })
 
 const form = new FormState({

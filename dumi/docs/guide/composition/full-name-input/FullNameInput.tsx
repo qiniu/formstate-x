@@ -6,8 +6,8 @@ import { bindTextField } from '../../../mui-binding'
 
 export function createState() {
   return new FormState({
-    first: new FieldState('').addValidator(required),
-    last: new FieldState('').addValidator(required)
+    first: new FieldState('').withValidator(required),
+    last: new FieldState('').withValidator(required)
   })
 }
 

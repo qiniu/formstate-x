@@ -7,10 +7,10 @@ import RemoveIcon from '@mui/icons-material/RemoveCircleOutline'
 import { bindFormHelperText, bindOutlinedInput } from '../../mui-binding'
 
 function createNumberState(initialValue: string) {
-  return new FieldState(initialValue).addValidator(validatePhoneNumber)
+  return new FieldState(initialValue).withValidator(validatePhoneNumber)
 }
 
-const form = new ArrayFormState([], createNumberState).addValidator(validateNumbers)
+const form = new ArrayFormState([], createNumberState).withValidator(validateNumbers)
 
 export default observer(function Demo() {
 

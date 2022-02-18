@@ -2,7 +2,7 @@ import React from 'react'
 import { observer } from 'mobx-react'
 import { DebouncedFieldState } from 'formstate-x'
 
-const state = new DebouncedFieldState('', 300).addValidator(
+const state = new DebouncedFieldState('', 300).withValidator(
   v => v.length > 5 && 'too long'
 )
 

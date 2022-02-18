@@ -54,7 +54,7 @@ formstate-x provides super powerful cross-state validation ability. As a classic
 You will find it super simple, the magic happens here:
 
 ```ts
-const rePasswordState = new FieldState('').addValidator(
+const rePasswordState = new FieldState('').withValidator(
   v => v !== passwordState.value && 'Not the same!'
 )
 ```

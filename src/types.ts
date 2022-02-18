@@ -60,8 +60,8 @@ export interface IState<V = any> {
   set(value: V): void
   /** Reset to initial status. */
   reset(): void
-  /** Add validator function. */
-  addValidator(...validators: Array<Validator<V>>): this
+  /** Append validator(s). */
+  withValidator(...validators: Array<Validator<V>>): this
   /**
    * Configure when state will be disabled, which means:
    * - corresponding UI is invisible or disabled

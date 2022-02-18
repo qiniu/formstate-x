@@ -57,11 +57,11 @@ export class TransformedState<S extends IState, V> extends BaseState implements 
     this.$.reset()
   }
 
-  addValidator(...validators: Array<Validator<V>>) {
+  withValidator(...validators: Array<Validator<V>>) {
     const rawValidators = validators.map(validator => (
       (rawValue: ValueOf<S>) => validator(this.parseTargetValue(rawValue))
     ))
-    this.$.addValidator(...rawValidators)
+    this.$.withValidator(...rawValidators)
     return this
   }
 

@@ -12,10 +12,10 @@ First we will check a simple example: a name input with value of 5 characters at
 
 <code src="./validation.tsx"></code>
 
-In the example above we defined function `validateName` (we call it a "validator"), and append it to the state by calling method `addValidator`:
+In the example above we defined function `validateName` (we call it a "validator"), and append it to the state by calling method `withValidator`:
 
 ```ts
-const state = new FieldState('').addValidator(validateName)
+const state = new FieldState('').withValidator(validateName)
 ```
 
 All we need to do next is consuming the validation result by access `state.hasError` or `state.error`. The validation will be applied automatically. Everytime user inputs, the value changes, and the validator will be called to check if the input valid.

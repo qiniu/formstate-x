@@ -12,7 +12,7 @@ function validateName(v: string) {
   })
 }
 
-const state = new FieldState('').addValidator(validateName)
+const state = new FieldState('').withValidator(validateName)
 
 export default observer(function Demo() {
   return (

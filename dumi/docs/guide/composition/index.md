@@ -49,8 +49,8 @@ In this demo we created a custom component called `FullNameInput` in file `FullN
 
 ```ts
 new FormState({
-  first: new FieldState('').addValidator(required),
-  last: new FieldState('').addValidator(required)
+  first: new FieldState('').withValidator(required),
+  last: new FieldState('').withValidator(required)
 })
 ```
 
@@ -71,7 +71,7 @@ It is easy to embed the `FullNameInput` in a form, we can find it in file `index
 ```ts
 const form = new FormState({
   name: createFullNameState(),
-  email: new FieldState('').addValidator(validateEmail)
+  email: new FieldState('').withValidator(validateEmail)
 })
 ```
 

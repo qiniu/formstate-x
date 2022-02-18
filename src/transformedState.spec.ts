@@ -74,7 +74,7 @@ describe('TransformedState (for FieldState)', () => {
 
   it('should onChange well', async () => {
     const initialValue = 0
-    const state = createNumState(initialValue).addValidator(
+    const state = createNumState(initialValue).withValidator(
       value => value > 100 && 'too big'
     )
 
@@ -149,7 +149,7 @@ describe('TransformedState (for FieldState)', () => {
 describe('TransformedState (for FieldState) validation', () => {
 
   function createPositiveNumState(initialValue: number) {
-    return createNumState(initialValue).addValidator(
+    return createNumState(initialValue).withValidator(
       v => v > 0 ? null : 'non positive'
     )
   }
@@ -243,7 +243,7 @@ describe('TransformedState (for FieldState) validation', () => {
   })
 
   it('should work well with multiple validators', async () => {
-    const state = createNumState(0).addValidator(
+    const state = createNumState(0).withValidator(
       v => v > 0 ? null : 'non positive',
       v => v > 10 && 'too big'
     )
@@ -275,7 +275,7 @@ describe('TransformedState (for FieldState) validation', () => {
   })
 
   it('should work well with async validator', async () => {
-    const state = createNumState(0).addValidator(
+    const state = createNumState(0).withValidator(
       v => delayValue(v > 0 ? null : 'non positive')
     )
     state.validate()
@@ -294,7 +294,7 @@ describe('TransformedState (for FieldState) validation', () => {
   })
 
   it('should work well with mixed sync and async validator', async () => {
-    const state = createNumState(0).addValidator(
+    const state = createNumState(0).withValidator(
       v => delayValue(v > 0 ? null : 'non positive'),
       v => v > 10 && 'too big'
     )
@@ -321,7 +321,7 @@ describe('TransformedState (for FieldState) validation', () => {
 
   it('should work well with dynamic validator', async () => {
     const target = observable({ value: 5 })
-    const state = createNumState(0).addValidator(
+    const state = createNumState(0).withValidator(
       v => v === target.value && 'same'
     )
 
@@ -349,7 +349,7 @@ describe('TransformedState (for FieldState) validation', () => {
   })
 
   it('should work well when add validator dynamically', async () => {
-    const state = createNumState(0).addValidator(
+    const state = createNumState(0).withValidator(
       v => delayValue(v > 0 ? null : 'non positive')
     )
     state.onChange(100)
@@ -358,7 +358,7 @@ describe('TransformedState (for FieldState) validation', () => {
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
-    state.addValidator(v => v > 10 && 'too big')
+    state.withValidator(v => v > 10 && 'too big')
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too big')
@@ -534,7 +534,7 @@ describe('TransformedState (for FormState)', () => {
 
 describe('TransformedState (for FormState) validation', () => {
   it('should work well when initialized', async () => {
-    const state = createHostState('127.0.0.1:80').addValidator(
+    const state = createHostState('127.0.0.1:80').withValidator(
       v => !v && 'empty'
     )
 
@@ -549,7 +549,7 @@ describe('TransformedState (for FormState) validation', () => {
   describe('should work well with onChange()', () => {
 
     it('and form validator', async () => {
-      const state = createHostState('127.0.0.1:80').addValidator(
+      const state = createHostState('127.0.0.1:80').withValidator(
         v => !v && 'empty'
       )
   
@@ -564,7 +564,7 @@ describe('TransformedState (for FormState) validation', () => {
 
     it('and field validator', async () => {
       const state = createHostState('127.0.0.1:80')
-      state.$.$.hostname.addValidator(v => !v && 'empty')
+      state.$.$.hostname.withValidator(v => !v && 'empty')
 
       state.onChange(':443')
       await delay()
@@ -577,7 +577,7 @@ describe('TransformedState (for FormState) validation', () => {
   })
 
   it('should work well with fields onChange()', async () => {
-    const state = createHostState('127.0.0.1').addValidator(
+    const state = createHostState('127.0.0.1').withValidator(
       v => !v && 'empty'
     )
 
@@ -592,7 +592,7 @@ describe('TransformedState (for FormState) validation', () => {
   })
 
   it('should work well with validate()', async () => {
-    const state = createHostState('').addValidator(
+    const state = createHostState('').withValidator(
       v => !v && 'empty'
     )
 
@@ -625,7 +625,7 @@ describe('TransformedState (for FormState) validation', () => {
   })
 
   it('should work well with reset()', async () => {
-    const state = createHostState('').addValidator(
+    const state = createHostState('').withValidator(
       v => !v && 'empty'
     )
     state.validate()
@@ -648,7 +648,7 @@ describe('TransformedState (for FormState) validation', () => {
         this.disabled = value
       }
     })
-    const state = createHostState('127.0.0.1').addValidator(
+    const state = createHostState('127.0.0.1').withValidator(
       v => !v && 'empty'
     ).disableWhen(
       () => options.disabled

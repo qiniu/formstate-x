@@ -6,13 +6,13 @@ import { Button, TextField, Container } from '@mui/material'
 import { bindTextField } from '../../mui-binding'
 
 function createFormState() {
-  const usernameState = new FieldState('').addValidator(
+  const usernameState = new FieldState('').withValidator(
     v => !v && 'Please input your username!'
   )
-  const passwordState = new FieldState('').addValidator(
+  const passwordState = new FieldState('').withValidator(
     v => !v && 'Please input your password!'
   )
-  const rePasswordState = new FieldState('').addValidator(
+  const rePasswordState = new FieldState('').withValidator(
     v => v !== passwordState.value && 'Not the same!'
   )
   return new FormState({

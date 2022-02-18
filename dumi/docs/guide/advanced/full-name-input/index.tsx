@@ -8,7 +8,7 @@ import FullNameInput, { createState as createFullNameState } from './FullNameInp
 
 const form = new FormState({
   name: createFullNameState(),
-  email: new FieldState('').addValidator(validateEmail)
+  email: new FieldState('').withValidator(validateEmail)
 })
 
 export default observer(function Demo() {
