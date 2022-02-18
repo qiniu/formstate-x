@@ -310,7 +310,3 @@ export class ArrayFormState<
     this.init()
   }
 }
-
-export function isFormState<T = unknown, V = any>(state: IState<V>): state is AbstractFormState<T, V> {
-  return state instanceof AbstractFormState
-}

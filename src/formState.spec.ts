@@ -1,7 +1,7 @@
 import { observable, isObservable } from 'mobx'
 import { FieldState } from './fieldState'
-import { FormState, ArrayFormState, isFormState } from './formState'
-import { Error, IState, ValidateResultWithError, ValidateResultWithValue } from './types'
+import { FormState, ArrayFormState } from './formState'
+import { ValidateResultWithError, ValidateResultWithValue } from './types'
 import { delay, delayValue, assertType } from './testUtils'
 
 describe('FormState (mode: object)', () => {
@@ -1661,39 +1661,5 @@ describe('nested FormState', () => {
       expect(sourceConfigState.dirty).toBe(false)
       sourceConfigState.dispose()
     })
-  })
-})
-
-describe('isFormState', () => {
-  it('should work well', () => {
-    const fieldFoo = new FieldState('foo')
-    const fieldBar = new FieldState(123)
-    const objectFormState = new FormState({
-      foo: fieldFoo,
-      bar: fieldBar
-    })
-    const arrayFormState1 = new ArrayFormState([1, 2, 3], v => new FieldState(v))
-    const arrayFormState2 = new ArrayFormState([{ foo: 'foo', bar: 123 }], v => new FormState({
-      foo: new FieldState(v.foo),
-      bar: new FieldState(v.bar)
-    }))
-
-    expect(isFormState(fieldFoo)).toBe(false)
-    expect(isFormState(fieldBar)).toBe(false)
-    expect(isFormState(objectFormState)).toBe(true)
-    expect(isFormState(arrayFormState1)).toBe(true)
-    expect(isFormState(arrayFormState2)).toBe(true)
-  })
-
-  it('should work with correct typing info', () => {
-    let state: IState<string[]> = new ArrayFormState(
-      ['123'],
-      v => new FieldState(v)
-    )
-    if (isFormState(state)) {
-      assertType<string>((state.$ as Array<IState<string>>)[0].value)
-      assertType<string[]>(state.value)
-      assertType<Error>(state.ownError)
-    }
   })
 })
