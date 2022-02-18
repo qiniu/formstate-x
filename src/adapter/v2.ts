@@ -41,7 +41,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> implements IV3
       this.stateV2.validators(...validators)
       return this
     }
-    notSupported()
+    throwNotSupported()
   }
   disableValidationWhen(predict: () => boolean) {
     if (
@@ -51,7 +51,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> implements IV3
       this.stateV2.disableValidationWhen(predict)
       return this
     }
-    notSupported()
+    throwNotSupported()
   }
   dispose() { this.stateV2.dispose() }
 }
@@ -117,7 +117,7 @@ function getV3ValidateStatus(stateV2: v2.ComposibleValidatable<unknown>): v3.Val
     case v2.ValidateStatus.Validated:
       return v3.ValidateStatus.Validated
     default:
-      invalidValue(stateV2._validateStatus)
+      throwInvalidValue(stateV2._validateStatus)
   }
 }
 
@@ -132,7 +132,7 @@ function getV2ValidateStatus(stateV3: v3.IState): v2.ValidateStatus {
     case v3.ValidateStatus.WontValidate:
       return v2.ValidateStatus.NotValidated
     default:
-      invalidValue(stateV3.validateStatus)
+      throwInvalidValue(stateV3.validateStatus)
   }
 }
 
@@ -144,11 +144,11 @@ function isV2FormState<V>(state: v2.ComposibleValidatable<unknown, V>): state is
   return state instanceof v2.FormState
 }
 
-function notSupported(): never {
+function throwNotSupported(): never {
   throw new Error('Operation not supported.')
 }
 
-function invalidValue(value: never): never {
+function throwInvalidValue(value: never): never {
   throw new Error(`Invalid value occurred: ${value}.`)
 }
 
@@ -165,7 +165,7 @@ function onChangeForV2FormState<V>(state: v2.FormState<v2.ValidatableFields, V>,
       break
     case 'array':
     default:
-      notSupported()
+      throwNotSupported()
   }
 }
 
@@ -178,7 +178,7 @@ function onChangeForV2<V>(state: v2.ComposibleValidatable<unknown, V>, value: V)
     onChangeForV2FormState(state, value)
     return
   }
-  notSupported()
+  throwNotSupported()
 }
 
 function setForV2ObjectFormState<V>(state: v2.FormState<v2.FieldsObject, V>, value: V) {
@@ -194,7 +194,7 @@ function setForV2FormState<V>(state: v2.FormState<v2.ValidatableFields, V>, valu
       break
     case 'array':
     default:
-      notSupported()
+      throwNotSupported()
   }
 }
 
@@ -207,5 +207,5 @@ function setForV2<V>(state: v2.ComposibleValidatable<unknown, V>, value: V) {
     setForV2FormState(state, value)
     return
   }
-  notSupported()
+  throwNotSupported()
 }
