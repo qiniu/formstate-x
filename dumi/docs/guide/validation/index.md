@@ -48,7 +48,7 @@ async function validateName(v: string) {
     return data.valid ? undefined : data.message
 } catch (e) {
     // If some exception (such as network error) occurs, this `catch` prevents formstate-x to throw.
-    // The return value, instead, tells formstate-x to treat the value as invalid (with message "Validate failed")
+    // The return value, instead, tells formstate-x to treat the value invalid (with message "Validate failed")
     return 'Validate failed'
   }
 }
