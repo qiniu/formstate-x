@@ -4,6 +4,7 @@ import * as v3 from '..'
 
 import { defaultDelay, delay, delayValue } from '../testUtils'
 import { fromV2, toV2 } from './v2'
+import { BaseState } from '../state'
 
 describe('fromV2', () => {
   describe('with field state', () => {
@@ -95,14 +96,14 @@ describe('fromV2', () => {
   describe('with field state validation', () => {
     it('should work well when initialized', async () => {
       const stateV2 = new v2.FieldState('', defaultDelay)
-      const state = fromV2(stateV2).validators(val => !val && 'empty')
+      const state = fromV2(stateV2).withValidator(val => !val && 'empty')
 
       expect(state.validateStatus).toBe(v3.ValidateStatus.NotValidated)
       expect(state.error).toBe(undefined)
     })
     it('should work well with onChange', async () => {
       const stateV2 = new v2.FieldState('', defaultDelay)
-      const state = fromV2(stateV2).validators(val => !val && 'empty')
+      const state = fromV2(stateV2).withValidator(val => !val && 'empty')
 
       state.onChange('123')
       await delay()
@@ -116,7 +117,7 @@ describe('fromV2', () => {
     })
     it('should work well with v2-state onChange', async () => {
       const stateV2 = new v2.FieldState('', defaultDelay)
-      const state = fromV2(stateV2).validators(val => !val && 'empty')
+      const state = fromV2(stateV2).withValidator(val => !val && 'empty')
 
       stateV2.onChange('123')
       await delay()
@@ -130,7 +131,7 @@ describe('fromV2', () => {
     })
     it('should work well with validate()', async () => {
       const stateV2 = new v2.FieldState('', defaultDelay)
-      const state = fromV2(stateV2).validators(val => !val && 'empty')
+      const state = fromV2(stateV2).withValidator(val => !val && 'empty')
       const validateRet1 = state.validate()
 
       await delay()
@@ -157,7 +158,7 @@ describe('fromV2', () => {
     })
     it('should work well with async validator', async () => {
       const stateV2 = new v2.FieldState('', defaultDelay)
-      const state = fromV2(stateV2).validators(val => delayValue(!val && 'empty'))
+      const state = fromV2(stateV2).withValidator(val => delayValue(!val && 'empty'))
 
       const validateRet = state.validate()
       expect(state.validateStatus).toBe(v3.ValidateStatus.Validating)
@@ -168,7 +169,7 @@ describe('fromV2', () => {
     it('should work well with reset()', async () => {
       const initialValue = ''
       const stateV2 = new v2.FieldState(initialValue, defaultDelay)
-      const state = fromV2(stateV2).validators(val => !val && 'empty')
+      const state = fromV2(stateV2).withValidator(val => !val && 'empty')
       state.validate()
       await delay()
 
@@ -184,12 +185,12 @@ describe('fromV2', () => {
 
       state.dispose()
     })
-    it('should work well with disableValidationWhen()', async () => {
+    it('should work well with disableWhen()', async () => {
       const options = observable({ disabled: false })
       const stateV2 = new v2.FieldState('', defaultDelay)
-      const state = fromV2(stateV2).validators(
+      const state = fromV2(stateV2).withValidator(
         val => !val && 'empty'
-      ).disableValidationWhen(
+      ).disableWhen(
         () => options.disabled
       )
 
@@ -325,14 +326,14 @@ describe('fromV2', () => {
 
     it('should work well when initialized', async () => {
       const stateV2 = createV2FormState('')
-      const state = fromV2(stateV2).validators(val => !val.foo && 'empty')
+      const state = fromV2(stateV2).withValidator(val => !val.foo && 'empty')
 
       expect(state.validateStatus).toBe(v3.ValidateStatus.NotValidated)
       expect(state.error).toBe(undefined)
     })
     it('should work well with onChange', async () => {
       const stateV2 = createV2FormState('')
-      const state = fromV2(stateV2).validators(val => !val.foo && 'empty')
+      const state = fromV2(stateV2).withValidator(val => !val.foo && 'empty')
 
       state.onChange({ foo: '123' })
       await delay()
@@ -346,7 +347,7 @@ describe('fromV2', () => {
     })
     it('should work well with v2-state onChange', async () => {
       const stateV2 = createV2FormState('')
-      const state = fromV2(stateV2).validators(val => !val.foo && 'empty')
+      const state = fromV2(stateV2).withValidator(val => !val.foo && 'empty')
 
       stateV2.$.foo.onChange('123')
       await delay()
@@ -360,7 +361,7 @@ describe('fromV2', () => {
     })
     it('should work well with validate()', async () => {
       const stateV2 = createV2FormState('')
-      const state = fromV2(stateV2).validators(val => !val.foo && 'empty')
+      const state = fromV2(stateV2).withValidator(val => !val.foo && 'empty')
       const validateRet1 = state.validate()
 
       await delay()
@@ -406,12 +407,12 @@ describe('fromV2', () => {
       state.dispose()
     })
 
-    it('should work well with disableValidationWhen()', async () => {
+    it('should work well with disableWhen()', async () => {
       const options = observable({ disabled: false })
       const stateV2 = createV2FormState('')
-      const state = fromV2(stateV2).validators(
+      const state = fromV2(stateV2).withValidator(
         val => !val.foo && 'empty'
-      ).disableValidationWhen(
+      ).disableWhen(
         () => options.disabled
       )
 
@@ -490,11 +491,11 @@ describe('fromV2', () => {
       expect(() => state.onChange('')).toThrowError('Operation not supported.')
       expect(() => state.set('')).toThrowError('Operation not supported.')
     })
-    it('should throw with unknown state\'s validators() / disableValidationWhen()', () => {
+    it('should throw with unknown state\'s withValidator() / disableWhen()', () => {
       const stateV2 = new V2DumbState('')
       const state = fromV2(stateV2)
-      expect(() => state.validators(() => 'boom')).toThrowError('Operation not supported.')
-      expect(() => state.disableValidationWhen(() => true)).toThrowError('Operation not supported.')
+      expect(() => state.withValidator(() => 'boom')).toThrowError('Operation not supported.')
+      expect(() => state.disableWhen(() => true)).toThrowError('Operation not supported.')
     })
     it('should throw with unknown validate status', () => {
       const stateV2 = new V2DumbState('')
@@ -550,7 +551,7 @@ describe('toV2', () => {
   })
   describe('validation', () => {
     function createV3State() {
-      return new v3.FieldState('').validators(v => !v && 'empty')
+      return new v3.FieldState('').withValidator(v => !v && 'empty')
     }
     it('should work well when initialized', () => {
       const stateV3 = createV3State()
@@ -609,7 +610,7 @@ describe('toV2', () => {
     })
 
     it('should work well with async validator', async () => {
-      const stateV3 = new v3.FieldState('').validators(val => delayValue(!val && 'empty'))
+      const stateV3 = new v3.FieldState('').withValidator(val => delayValue(!val && 'empty'))
       const state = toV2(stateV3)
 
       const validateRet = state.validate()
@@ -633,9 +634,9 @@ describe('toV2', () => {
       expect(state.error).toBeUndefined()
     })
 
-    it('should work well with disableValidationWhen()', async () => {
+    it('should work well with disableWhen()', async () => {
       const options = observable({ disabled: false })
-      const stateV3 = createV3State().disableValidationWhen(
+      const stateV3 = createV3State().disableWhen(
         () => options.disabled
       )
       const state = toV2(stateV3)
@@ -672,8 +673,9 @@ describe('toV2', () => {
     })
   })
   describe('with unsupported behavior', () => {
-    class V3DumbState<V> implements v3.IState<V> {
+    class V3DumbState<V> extends BaseState implements v3.IState<V> {
       constructor(initialValue: V) {
+        super()
         this.value = initialValue
       }
       value: V
@@ -687,9 +689,8 @@ describe('toV2', () => {
       onChange(_value: V) {}
       set(_value: V) {}
       reset() {}
-      validators(..._validators: Array<v3.Validator<V>>) { return this }
-      disableValidationWhen(_predict: () => boolean) { return this }
-      dispose() {}
+      withValidator(..._validators: Array<v3.Validator<V>>) { return this }
+      disableWhen(_predict: () => boolean) { return this }
     }
     it('should throw with unknown validate status', () => {
       const stateV3 = new V3DumbState('')
