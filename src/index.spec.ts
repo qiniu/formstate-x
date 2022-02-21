@@ -1,4 +1,4 @@
-import { FieldState, FormState, ArrayFormState, TransformedState, DebouncedState, DebouncedFieldState, bindInput } from '.'
+import { FieldState, FormState, ArrayFormState, TransformedState, DebouncedState, DebouncedFieldState } from '.'
 import { defaultDelay, delay } from './testUtils'
 
 describe('FieldState', () => {
@@ -19,12 +19,6 @@ describe('ArrayFormState', () => {
   it('should be newable', () => {
     expect(typeof ArrayFormState).toBe('function')
     expect(ArrayFormState.prototype).toBeTruthy()
-  })
-})
-
-describe('bindInput', () => {
-  it('should be callable', () => {
-    expect(typeof bindInput).toBe('function')
   })
 })
 
