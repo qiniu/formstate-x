@@ -101,7 +101,7 @@ describe('Composition', () => {
     const initialValue = '127.0.0.1:80'
     const hostState = createDebouncedHostState(initialValue)
 
-    expect(hostState.value).toBe(initialValue)
+    expect<string>(hostState.value).toBe(initialValue)
     expect(hostState.hasError).toBe(false)
 
     hostState.set('')

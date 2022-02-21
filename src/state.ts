@@ -1,5 +1,5 @@
 import { action, autorun, computed, makeObservable, observable, when } from 'mobx'
-import { Error, IState, Validated, ValidateResult, ValidateStatus, ValidationResponse, Validator } from './types'
+import { Error, IState, Validation, ValidateResult, ValidateStatus, ValidationResponse, Validator } from './types'
 import Disposable from './disposable'
 import { applyValidators, isPromiseLike } from './utils'
 
@@ -73,7 +73,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   }
 
   /** Current validation info. */
-  protected validation?: Validated<V>
+  protected validation?: Validation<V>
 
   /** Do validation: run validators & apply result. */
   protected async doValidation() {
