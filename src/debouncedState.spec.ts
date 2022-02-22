@@ -26,8 +26,6 @@ describe('DebouncedState', () => {
     await delay()
     expect(state.value).toBe(newValue)
     expect(state.$.value).toBe(newValue)
-
-    state.dispose()
   })
 
   it('should initialize well with FormState', async () => {
@@ -54,8 +52,6 @@ describe('DebouncedState', () => {
     await delay()
     expect(state.value).toEqual(newValue)
     expect(state.$.value).toEqual(newValue)
-
-    state.dispose()
   })
 
   it('should initialize well with ArrayFormState', async () => {
@@ -76,8 +72,10 @@ describe('DebouncedState', () => {
     await delay()
     expect(state.value).toEqual(newValue)
     expect(state.$.value).toEqual(newValue)
+  })
 
-    state.dispose()
+  it('should dispose well', () => {
+    new DebouncedState(new FieldState('')).dispose()
   })
 })
 
@@ -93,8 +91,29 @@ describe('DebouncedFieldState', () => {
     expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
+  })
 
-    state.dispose()
+  it('should initialize well with default delay as 200ms', async () => {
+    const initialValue = '123'
+    const state = new DebouncedFieldState(initialValue)
+
+    expect(state.$.value).toBe(initialValue)
+    expect(state.value).toBe(initialValue)
+    expect(state.dirty).toBe(false)
+
+    const newValue = 'abc'
+    state.onChange(newValue)
+    await delay(100)
+
+    expect(state.$.value).toBe(newValue)
+    expect(state.value).toBe(initialValue)
+    expect(state.dirty).toBe(false)
+
+    await delay(100)
+
+    expect(state.$.value).toBe(newValue)
+    expect(state.value).toBe(newValue)
+    expect(state.dirty).toBe(true)
   })
 
   it('should onChange well', async () => {
@@ -137,8 +156,6 @@ describe('DebouncedFieldState', () => {
     await delay()
     expect(state.$.value).toBe(invalidValue)
     expect(state.value).toBe(invalidValue)
-
-    state.dispose()
   })
 
   it('should set well', async () => {
@@ -165,8 +182,6 @@ describe('DebouncedFieldState', () => {
     expect(state.$.value).toBe(value)
     expect(state.value).toBe(value)
     expect(state.dirty).toBe(true)
-
-    state.dispose()
   })
 
   it('should reset well', async () => {
@@ -187,8 +202,6 @@ describe('DebouncedFieldState', () => {
     expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 
   it('should work well with delay', async () => {
@@ -215,6 +228,10 @@ describe('DebouncedFieldState', () => {
     expect(state.value).toBe('4')
 
   })
+
+  it('should dispose well', () => {
+    new DebouncedFieldState('').dispose()
+  })
 })
 
 describe('DebouncedFieldState validation', () => {
@@ -225,8 +242,6 @@ describe('DebouncedFieldState validation', () => {
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with onChange()', async () => {
@@ -246,8 +261,6 @@ describe('DebouncedFieldState validation', () => {
 
     await delay()
     expect(state.error).toBe('empty')
-
-    state.dispose()
   })
 
   it('should work well with onChange of same value', async () => {
@@ -296,8 +309,6 @@ describe('DebouncedFieldState validation', () => {
     const validateResult2 = await validateRet2
     expect(validateResult2.hasError).toBe(false)
     expect((validateResult2 as ValidateResultWithValue<string>).value).toBe('sth')
-
-    state.dispose()
   })
 
   it('should work well with reset()', async () => {
@@ -313,8 +324,6 @@ describe('DebouncedFieldState validation', () => {
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with multiple validators', async () => {
@@ -345,8 +354,6 @@ describe('DebouncedFieldState validation', () => {
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with dynamic validator', async () => {
@@ -374,8 +381,6 @@ describe('DebouncedFieldState validation', () => {
     await delay()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well when add validator dynamically', async () => {
@@ -392,8 +397,6 @@ describe('DebouncedFieldState validation', () => {
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
-
-    state.dispose()
   })
 
   it('should work well with disableWhen', async () => {
@@ -433,8 +436,6 @@ describe('DebouncedFieldState validation', () => {
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
-
-    state.dispose()
   })
 
   it('should work well with race condition caused by validate()', async () => {

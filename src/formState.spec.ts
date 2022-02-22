@@ -2,7 +2,7 @@ import { observable, isObservable } from 'mobx'
 import { FieldState } from './fieldState'
 import { FormState, ArrayFormState } from './formState'
 import { ValidateResultWithError, ValidateResultWithValue } from './types'
-import { delay, delayValue, assertType } from './testUtils'
+import { delay, delayValue, assertType, assertTypeEqual } from './testUtils'
 
 describe('FormState (mode: object)', () => {
   it('should initialize well', () => {
@@ -17,8 +17,6 @@ describe('FormState (mode: object)', () => {
     expect(state.$.foo).toBeInstanceOf(FieldState)
     expect(state.$.bar).toBeInstanceOf(FieldState)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 
   it('should initialize well with observable fields', () => {
@@ -31,8 +29,6 @@ describe('FormState (mode: object)', () => {
 
     expect(state.value).toEqual(initialValue)
     expect(isObservable(state.$)).toBe(true)
-
-    state.dispose()
   })
 
   it('should compose fields well', async () => {
@@ -49,8 +45,6 @@ describe('FormState (mode: object)', () => {
 
     expect(state.value).toEqual(value)
     expect(state.dirty).toBe(true)
-
-    state.dispose()
   })
 
   it('should set well', async () => {
@@ -92,8 +86,6 @@ describe('FormState (mode: object)', () => {
     expect(state.$.foo.value).toBe(initialValue.foo)
     expect(state.$.bar.value).toBe(initialValue.bar)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 
   it('should onChange well', async () => {
@@ -139,8 +131,6 @@ describe('FormState (mode: object)', () => {
     expect(state.$.foo.value).toBe(initialValue.foo)
     expect(state.$.bar.value).toBe(initialValue.bar)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 
   it('should reset well', async () => {
@@ -157,8 +147,6 @@ describe('FormState (mode: object)', () => {
 
     expect(state.value).toEqual(initialValue)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 })
 
@@ -176,8 +164,6 @@ describe('FormState (mode: object) validation', () => {
     expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   describe('should work well with onChange()', () => {
@@ -236,8 +222,6 @@ describe('FormState (mode: object) validation', () => {
     expect(state.ownError).toBe('same')
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('same')
-
-    state.dispose()
   })
 
   it('should work well with validate()', async () => {
@@ -278,8 +262,6 @@ describe('FormState (mode: object) validation', () => {
       foo: '123',
       bar: '456'
     })
-
-    state.dispose()
   })
 
   it('should work well with reset()', async () => {
@@ -299,8 +281,6 @@ describe('FormState (mode: object) validation', () => {
     expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with multiple validators', async () => {
@@ -335,8 +315,6 @@ describe('FormState (mode: object) validation', () => {
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with async validator', async () => {
@@ -354,8 +332,6 @@ describe('FormState (mode: object) validation', () => {
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('same')
-
-    state.dispose()
   })
 
   it('should work well with mixed sync and async validator', async () => {
@@ -384,8 +360,6 @@ describe('FormState (mode: object) validation', () => {
     await delay()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with dynamic validator', async () => {
@@ -422,8 +396,6 @@ describe('FormState (mode: object) validation', () => {
     await delay()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well when add validator dynamically', async () => {
@@ -444,8 +416,6 @@ describe('FormState (mode: object) validation', () => {
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
-
-    state.dispose()
   })
 
   it('should work well with fields\' validating', async () => {
@@ -501,8 +471,6 @@ describe('FormState (mode: object) validation', () => {
     expect(state.$.bar.error).toBeUndefined()
     expect(state.ownError).toBe('same')
     expect(state.error).toBe('same')
-
-    state.dispose()
   })
 
   it('should work well with fields\' async validating', async () => {
@@ -558,8 +526,6 @@ describe('FormState (mode: object) validation', () => {
     expect(state.$.bar.error).toBeUndefined()
     expect(state.ownError).toBe('same')
     expect(state.error).toBe('same')
-
-    state.dispose()
   })
 
   it('should work well with disableWhen', async () => {
@@ -614,8 +580,6 @@ describe('FormState (mode: object) validation', () => {
     expect(state.ownError).toBe('same')
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('same')
-
-    state.dispose()
   })
 
   it('should provide type-safe result when validate()', async () => {
@@ -644,8 +608,20 @@ describe('FormState (mode: array)', () => {
       expect(field).toBeInstanceOf(FieldState)
     })
     expect(state.dirty).toBe(false)
+  })
 
-    state.dispose()
+  it('should initialize well with correct typing', () => {
+    function createFieldState(v: string) {
+      return new FieldState(v)
+    }
+    const state = new ArrayFormState([], createFieldState)
+    assertTypeEqual<typeof state.value, string[]>()
+
+    function createFieldState2(v = '') {
+      return new FieldState(v)
+    }
+    const state2 = new ArrayFormState([], createFieldState2)
+    assertTypeEqual<typeof state2.value, Array<string | undefined>>()
   })
 
   it('should compose fields well', async () => {
@@ -658,8 +634,6 @@ describe('FormState (mode: array)', () => {
 
     expect(state.value).toEqual(value)
     expect(state.dirty).toBe(true)
-
-    state.dispose()
   })
 
   it('should set well', async () => {
@@ -714,8 +688,6 @@ describe('FormState (mode: array)', () => {
     expect(state.dirty).toBe(true)
     expect(state.hasError).toBe(false)
     expect(field1Dispose).toBeCalled()
-
-    state.dispose()
   })
 
   it('should onChange well', async () => {
@@ -773,8 +745,6 @@ describe('FormState (mode: array)', () => {
     expect(state.$).toHaveLength(value4.length)
     expect(state.dirty).toBe(true)
     expect(field1Dispose).toBeCalled()
-
-    state.dispose()
   })
 
   describe('remove', () => {
@@ -978,8 +948,6 @@ describe('FormState (mode: array)', () => {
 
     expect(state.value).toEqual(initialValue)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 
   it('should reset well with fields changed', async () => {
@@ -1025,8 +993,6 @@ describe('FormState (mode: array)', () => {
     expect(state.value).toEqual(initialValue)
     expect(state.dirty).toBe(false)
     expect(disposeFn).toBeCalled()
-
-    state.dispose()
   })
 
   it('should applyValidation correctly', async () => {
@@ -1039,8 +1005,6 @@ describe('FormState (mode: array)', () => {
 
     await delay()
     expect(state.validated).toBe(true)
-
-    state.dispose()
   })
 })
 
@@ -1057,8 +1021,6 @@ describe('FormState (mode: array) validation', () => {
     expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with fields onChange()', async () => {
@@ -1075,8 +1037,6 @@ describe('FormState (mode: array) validation', () => {
     expect(state.ownError).toBe('too long')
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
-
-    state.dispose()
   })
 
   it('should work well with validate()', async () => {
@@ -1094,8 +1054,6 @@ describe('FormState (mode: array) validation', () => {
     expect(state.ownError).toBe('too long')
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
-
-    state.dispose()
   })
 
   it('should work well with fields change', async () => {
@@ -1115,8 +1073,6 @@ describe('FormState (mode: array) validation', () => {
     await delay()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with reset()', async () => {
@@ -1135,8 +1091,6 @@ describe('FormState (mode: array) validation', () => {
     expect(state.ownError).toBeUndefined()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with multiple validators', async () => {
@@ -1163,8 +1117,6 @@ describe('FormState (mode: array) validation', () => {
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too many')
-
-    state.dispose()
   })
 
   it('should work well with async validator', async () => {
@@ -1179,8 +1131,6 @@ describe('FormState (mode: array) validation', () => {
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
-
-    state.dispose()
   })
 
   it('should work well with mixed sync and async validator', async () => {
@@ -1208,8 +1158,6 @@ describe('FormState (mode: array) validation', () => {
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too many')
-
-    state.dispose()
   })
 
   it('should work well with dynamic validator', async () => {
@@ -1243,8 +1191,6 @@ describe('FormState (mode: array) validation', () => {
     await delay()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well when add validator dynamically', async () => {
@@ -1268,8 +1214,6 @@ describe('FormState (mode: array) validation', () => {
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
-
-    state.dispose()
   })
 
   it('should work well with fields\' validating', async () => {
@@ -1318,8 +1262,6 @@ describe('FormState (mode: array) validation', () => {
     expect(state.$[1].error).toBeUndefined()
     expect(state.ownError).toBe('too long')
     expect(state.error).toBe('too long')
-
-    state.dispose()
   })
 
   it('should work well with fields\' async validating', async () => {
@@ -1368,8 +1310,6 @@ describe('FormState (mode: array) validation', () => {
     expect(state.$[1].error).toBeUndefined()
     expect(state.ownError).toBe('too long')
     expect(state.error).toBe('too long')
-
-    state.dispose()
   })
 
   it('should work well with disableWhen', async () => {
@@ -1417,8 +1357,6 @@ describe('FormState (mode: array) validation', () => {
     expect(state.ownError).toBe('too long')
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
-
-    state.dispose()
   })
 
   it('should give correct `validated` value with validation-disabled field', async () => {
