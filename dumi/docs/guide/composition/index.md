@@ -85,8 +85,8 @@ The best part is that no matter how complex component `FullNameInput` (or its st
 
 ### Input List
 
-Sometimes we need to collect list of input from user and the size of list is uncertain - user can add or remove input item dynamically. Here we will show how to deal with such cases with formstate-x.
+Sometimes we need to collect list of input from user and the size of list is uncertain—user can add or remove input item dynamically. Here we will show how to deal with such cases with formstate-x.
 
 <code src="./input-list.tsx"></code>
 
-The above demo shows how to make a form in which user can submit more than one phone number with `ArrayFormState`. We can validate each phone number on the field state, also validate the number list on the array form state. Note that the array form state can also be child state of another form state - it's totally composable.
+The above demo shows how to make a form in which user can submit more than one phone number with `ArrayFormState`. We can validate each phone number on the field state, also validate the number list on the array form state. Note that the array form state can also be child state of another form state—it's totally composable.

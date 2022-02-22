@@ -85,7 +85,7 @@ We need to transform the `string`-type value to number before we export it out. 
 
 In component `NumberInput`, we created a transformed state `numState` as the return value of function `createState`. It wraps the original state `textState` and deals with the value transforming.
 
-We can access the original state with `numState.$` - as you can see in `NumberInput` we bind it to `TextField`. The transformed state `numState` is for the consumer of `NumberInput` (in this case, the form), which makes the form unaware of the inside `string`-type value.
+We can access the original state with `numState.$`—as you can see in `NumberInput` we bind it to `TextField`. The transformed state `numState` is for the consumer of `NumberInput` (in this case, the form), which makes the form unaware of the inside `string`-type value.
 
 We can transform any state which implements interface [`IState`](#TODO). Here is another example in which we do transforming in `FullNameInput`:
 

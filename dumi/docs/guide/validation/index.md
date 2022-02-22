@@ -26,7 +26,7 @@ Validator is another essential concept in formstate-x. A validator is a function
 
 The returned value (error info) can be a `string` value, which means the input value is invalid and the invalid message (such as `"Too long"` in the example above) is returned. Error info can also be a falsy value (such as `null` / `undefined` / `false` / `''`), which means the input value is valid and no message need to be returned.
 
-If the validation process is async, a validator — we call it "async validator" — can return a `Promise`. You can check details in [Async Validator](#async-validator)
+If the validation process is async, a validator—we call it "async validator"—can return a `Promise`. You can check details in [Async Validator](#async-validator)
 
 Defining validate logic as multiple standalone functions has benefits: they are easy to reuse and easy to test.
 
@@ -76,7 +76,7 @@ For complex states, it may not be convenient to check `enable` in each validator
 
 ### Multiple Validators
 
-We can append more than one validators to a state. All validators' checking should pass before the state is marked valid. If any validator's checking fails, the state is marked invalid.
+We can append more than one validators to a state. All validators' checking should pass before the state is marked as valid. If any validator's checking fails, the state is marked as invalid.
 
 Here's example:
 
