@@ -1,38 +1,38 @@
 import { observable, computed, isObservable, action, reaction, makeObservable, override } from 'mobx'
-import { IState, ValidateStatus, Error, ValidateResult, ValueOfObjectFields } from './types'
+import { IState, ValidateStatus, Error, ValidateResult, ValueOfStatesObject } from './types'
 import { ValidatableState } from './state'
 
 abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IState<V> {
 
-  /** Fields. */
+  /** Reference of child states. */
   abstract readonly $: T
 
-  /** List of fields. */
-  protected abstract fieldList: IState[]
+  /** List of child states. */
+  protected abstract childStates: IState[]
 
   @override override get validateStatus() {
     if (this.disabled) {
       return ValidateStatus.WontValidate
     }
-    const fieldList = this.fieldList.filter(
-      field => field.validateStatus != ValidateStatus.WontValidate
+    const childStates = this.childStates.filter(
+      state => state.validateStatus != ValidateStatus.WontValidate
     )
     if (
       this._validateStatus === ValidateStatus.Validating
-      || fieldList.some(field => field.validateStatus === ValidateStatus.Validating)
+      || childStates.some(state => state.validateStatus === ValidateStatus.Validating)
     ) {
       return ValidateStatus.Validating
     }
     if (
       this._validateStatus === ValidateStatus.Validated
-      && fieldList.every(field => field.validateStatus === ValidateStatus.Validated)
+      && childStates.every(state => state.validateStatus === ValidateStatus.Validated)
     ) {
       return ValidateStatus.Validated
     }
     return ValidateStatus.NotValidated
   }
 
-  /** The error info of form validation. */
+  /** The state's own error info, regardless of child states. */
   @computed get ownError(): Error {
     if (this.disabled) {
       return undefined
@@ -40,12 +40,12 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
     return this._error
   }
 
-  /** If the state contains form validation error. */
+  /** If the state contains own errir error. */
   @computed get hasOwnError() {
     return !!this.ownError
   }
 
-  /** The error info of validation (including fields' error info). */
+  /** The error info of validation (including child states' error info). */
   @override override get error() {
     if (this.disabled) {
       return undefined
@@ -53,25 +53,25 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
     if (this._error) {
       return this._error
     }
-    for (const field of this.fieldList) {
-      if (field.error) {
-        return field.error
+    for (const state of this.childStates) {
+      if (state.error) {
+        return state.error
       }
     }
   }
 
-  /** If field list has been touched */
+  /** If reference of child states has been touched. */
   @observable protected _dirty = false
 
   @computed get dirty() {
     return (
       this._dirty
-      || this.fieldList.some(field => field.dirty)
+      || this.childStates.some(state => state.dirty)
     )
   }
 
-  /** Reset fields */
-  protected abstract resetFields(): void
+  /** Reset child states. */
+  protected abstract resetChildStates(): void
 
   @action reset() {
     this.activated = false
@@ -80,13 +80,13 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
     this.validation = undefined
     this._dirty = false
 
-    this.resetFields()
+    this.resetChildStates()
   }
 
   override async validate(): Promise<ValidateResult<V>> {
     await Promise.all([
-      ...this.fieldList.map(
-        field => field.validate()
+      ...this.childStates.map(
+        state => state.validate()
       ),
       super.validate()
     ])
@@ -96,17 +96,17 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
   protected override init() {
     super.init()
 
-    // auto activate: any field activated -> form activated
+    // auto activate: any child activated -> form activated
     this.addDisposer(reaction(
-      () => this.fieldList.some(field => field.activated),
+      () => this.childStates.some(state => state.activated),
       someFieldActivated => someFieldActivated && !this.activated && (this.activated = true),
-      { fireImmediately: true, name: 'activate-form-when-field-activated' }
+      { fireImmediately: true, name: 'activate-form-when-child-activated' }
     ))
 
-    // dispose fields when dispose
+    // dispose child states when dispose
     this.addDisposer(() => {
-      this.fieldList.forEach(
-        field => field.dispose()
+      this.childStates.forEach(
+        state => state.dispose()
       )
     })
   }
@@ -117,71 +117,71 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
   }
 }
 
-/** Object with validatable fields */
-export type FieldsObject = { [key: string]: IState }
+/** Object, whose values are states */
+export type StatesObject = { [key: string]: IState }
 
 /**
- * The state for a form (composition of fields).
+ * The state for a form (object composition of child states).
  */
 export class FormState<
-  TFields extends FieldsObject
+  TStates extends StatesObject
 > extends AbstractFormState<
-  TFields, ValueOfObjectFields<TFields>
+  TStates, ValueOfStatesObject<TStates>
 > {
 
-  @observable.ref readonly $: Readonly<TFields>
+  @observable.ref readonly $: Readonly<TStates>
 
-  @computed protected get fieldList(): IState[] {
-    const fields = this.$
-    return Object.keys(fields).map(
-      key => fields[key]
+  @computed protected get childStates(): IState[] {
+    const states = this.$
+    return Object.keys(states).map(
+      key => states[key]
     )
   }
 
-  protected resetFields() {
-    this.fieldList.forEach(field => field.reset())
+  protected resetChildStates() {
+    this.childStates.forEach(state => state.reset())
   }
 
-  @computed get value(): ValueOfObjectFields<TFields> {
-    const fields = this.$
-    return Object.keys(fields).reduce(
+  @computed get value(): ValueOfStatesObject<TStates> {
+    const states = this.$
+    return Object.keys(states).reduce(
       (value, key) => ({
         ...value,
-        [key]: fields[key].value
+        [key]: states[key].value
       }),
       {}
     ) as any
   }
 
-  @action set(value: ValueOfObjectFields<TFields>) {
-    const fields = this.$
-    Object.keys(fields).forEach(key => {
-      fields[key].set(value[key])
+  @action set(value: ValueOfStatesObject<TStates>) {
+    const states = this.$
+    Object.keys(states).forEach(key => {
+      states[key].set(value[key])
     })
   }
 
-  @action onChange(value: ValueOfObjectFields<TFields>) {
-    const fields = this.$
-    Object.keys(fields).forEach(key => {
-      fields[key].onChange(value[key])
+  @action onChange(value: ValueOfStatesObject<TStates>) {
+    const states = this.$
+    Object.keys(states).forEach(key => {
+      states[key].onChange(value[key])
     })
   }
 
-  constructor(initialFields: TFields) {
+  constructor(states: TStates) {
     super()
     makeObservable(this)
 
-    if (!isObservable(initialFields)) {
-      initialFields = observable(initialFields, undefined, { deep: false })
+    if (!isObservable(states)) {
+      states = observable(states, undefined, { deep: false })
     }
-    this.$ = initialFields
+    this.$ = states
 
     this.init()
   }
 }
 
 /**
- * The state for a array form (list of fields).
+ * The state for a array form (list of child states).
  */
 export class ArrayFormState<
   V, T extends IState<V> = IState<V>
@@ -189,59 +189,59 @@ export class ArrayFormState<
   readonly T[], V[]
 > {
 
-  @observable.ref protected fieldList: T[]
+  @observable.ref protected childStates: T[]
 
   @computed get $(): readonly T[] {
-    return this.fieldList
+    return this.childStates
   }
 
-  private createFields(value: V[]): T[] {
+  private createChildStates(value: V[]): T[] {
     return observable(
-      value.map(this.createFieldState),
+      value.map(this.createChildState),
       undefined,
       { deep: false }
     )
   }
 
-  @action protected resetFields() {
-    const fields = this.fieldList
-    fields.splice(0).forEach(field => {
-      field.dispose()
+  @action protected resetChildStates() {
+    const states = this.childStates
+    states.splice(0).forEach(state => {
+      state.dispose()
     })
-    fields.push(...this.createFields(this.initialValue))
+    states.push(...this.createChildStates(this.initialValue))
   }
 
   @computed get value(): V[] {
-    return this.fieldList.map(
-      field => field.value
+    return this.childStates.map(
+      state => state.value
     )
   }
 
   private _remove(fromIndex: number, num: number) {
-    this.fieldList.splice(fromIndex, num).forEach(field => {
-      field.dispose()
+    this.childStates.splice(fromIndex, num).forEach(state => {
+      state.dispose()
     })
     this._dirty = true
   }
 
-  private _insert(fromIndex: number, ...fieldValues: V[]) {
-    const fields = fieldValues.map(this.createFieldState)
-    this.fieldList.splice(fromIndex, 0, ...fields)
+  private _insert(fromIndex: number, ...childValues: V[]) {
+    const states = childValues.map(this.createChildState)
+    this.childStates.splice(fromIndex, 0, ...states)
     this._dirty = true
   }
 
   private _set(value: V[], withOnChange = false) {
     let i = 0
-    // items exists in both value & fields => do field change 
-    for (; i < value.length && i < this.fieldList.length; i++) {
-      if (withOnChange) this.fieldList[i].onChange(value[i])
-      else this.fieldList[i].set(value[i])
+    // items exists in both value & child states => do state change 
+    for (; i < value.length && i < this.childStates.length; i++) {
+      if (withOnChange) this.childStates[i].onChange(value[i])
+      else this.childStates[i].set(value[i])
     }
-    // items only exists in fields => truncate
-    if (i < this.fieldList.length) {
-      this._remove(i, this.fieldList.length - i)
+    // items only exists in child states => truncate
+    if (i < this.childStates.length) {
+      this._remove(i, this.childStates.length - i)
     }
-    // items exists in value but not in fields => add
+    // items exists in value but not in child states => add
     if (i < value.length) {
       this._insert(i, ...value.slice(i))
     }
@@ -257,9 +257,9 @@ export class ArrayFormState<
   }
   
   /**
-   * remove fields
-   * @param fromIndex index of first field to remove
-   * @param num number of fields to remove
+   * remove child states
+   * @param fromIndex index of first child state to remove
+   * @param num number of child states to remove
    */
   @action remove(fromIndex: number, num = 1) {
     if (num <= 0) return
@@ -268,45 +268,45 @@ export class ArrayFormState<
   }
 
   /**
-   * insert fields
-   * @param fromIndex index of first field to insert
-   * @param ...fieldValues field values to insert
+   * insert child states
+   * @param fromIndex index of first child state to insert
+   * @param ...childStateValues child state values to insert
    */
-  @action insert(fromIndex: number, fieldValue: V, ...moreFieldValues: V[]) {
-    this._insert(fromIndex, fieldValue, ...moreFieldValues)
+  @action insert(fromIndex: number, childValue: V, ...moreChildValues: V[]) {
+    this._insert(fromIndex, childValue, ...moreChildValues)
     this.activated = true
   }
 
   /**
-   * append fields to the end of field list
-   * @param ...fieldValues field values to append
+   * append child states to the end of child state list
+   * @param ...childStateValues child state values to append
    */
-  @action append(fieldValue: V, ...moreFieldValues: V[]) {
-    this._insert(this.fieldList.length, fieldValue, ...moreFieldValues)
+  @action append(childValue: V, ...moreChildValues: V[]) {
+    this._insert(this.childStates.length, childValue, ...moreChildValues)
     this.activated = true
   }
 
   /**
-   * move field from one index to another
-   * @param fromIndex index of field to move
+   * move child state from one index to another
+   * @param fromIndex index of child state to move
    * @param toIndex index to move to
    */
   @action move(fromIndex: number, toIndex: number) {
-    if (fromIndex < 0) fromIndex = this.fieldList.length + fromIndex
-    if (toIndex < 0) toIndex = this.fieldList.length + toIndex
+    if (fromIndex < 0) fromIndex = this.childStates.length + fromIndex
+    if (toIndex < 0) toIndex = this.childStates.length + toIndex
     if (fromIndex === toIndex) return
 
-    const [item] = this.fieldList.splice(fromIndex, 1)
-    this.fieldList.splice(toIndex, 0, item)
+    const [state] = this.childStates.splice(fromIndex, 1)
+    this.childStates.splice(toIndex, 0, state)
     this._dirty = true
     this.activated = true
   }
 
-  constructor(private initialValue: V[], private createFieldState: (v: V) => T) {
+  constructor(private initialValue: V[], private createChildState: (v: V) => T) {
     super()
     makeObservable(this)
 
-    this.fieldList = this.createFields(this.initialValue)
+    this.childStates = this.createChildStates(this.initialValue)
     this.init()
   }
 }

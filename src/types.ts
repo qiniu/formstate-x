@@ -77,12 +77,12 @@ export interface Disposer {
   (): void
 }
 
-/** Value of object-fields. */
-export type ValueOfObjectFields<Fields> = {
-  [FieldKey in keyof Fields]: ValueOf<Fields[FieldKey]>
+/** Value of states object. */
+export type ValueOfStatesObject<StatesObject> = {
+  [K in keyof StatesObject]: ValueOf<StatesObject[K]>
 }
 
-/** Value of state (`FormState` or `FieldState`) */
+/** Value of `IState` */
 export type ValueOf<S> = S extends IState<infer V> ? V : never
 
 /** Validate status. */
