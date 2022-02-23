@@ -29,7 +29,7 @@ yarn add formstate-x
 ### Usage
 
 ```javascript
-import { FieldState, FormState, bindInput } from 'formstate-x'
+import { FieldState, FormState } from 'formstate-x'
 
 const form = new FormState({
   foo: new FieldState(''),
@@ -50,8 +50,8 @@ async function handleSubmit(e) {
 
 // when render (with react)
 <form onSubmit={handleSubmit}>
-  <FooInput {...bindInput(form.$.foo)}>
-  <BarInput {...bindInput(form.$.bar)}>
+  <FooInput value={form.$.foo.value} onChange={v => form.$.foo.onChange(v)}>
+  <BarInput value={form.$.bar.value} onChange={v => form.$.bar.onChange(v)}>
 </form>
 ```
 
