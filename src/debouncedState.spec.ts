@@ -99,7 +99,7 @@ describe('DebouncedFieldState', () => {
 
   it('should onChange well', async () => {
     const initialValue = ''
-    const state = createFieldState(initialValue).validators(
+    const state = createFieldState(initialValue).withValidator(
       value => value.length > 5 && 'too long'
     )
 
@@ -219,7 +219,7 @@ describe('DebouncedFieldState', () => {
 
 describe('DebouncedFieldState validation', () => {
   it('should work well when initialized', async () => {
-    const state = createFieldState('').validators(val => !val && 'empty')
+    const state = createFieldState('').withValidator(val => !val && 'empty')
 
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(false)
@@ -230,7 +230,7 @@ describe('DebouncedFieldState validation', () => {
   })
 
   it('should work well with onChange()', async () => {
-    const state = createFieldState('xxx').validators(val => !val && 'empty')
+    const state = createFieldState('xxx').withValidator(val => !val && 'empty')
     state.$.onChange('')
 
     expect(state.validateStatus).toBe(ValidateStatus.NotValidated)
@@ -251,7 +251,7 @@ describe('DebouncedFieldState validation', () => {
   })
 
   it('should work well with onChange of same value', async () => {
-    const state = createFieldState(1).validators(
+    const state = createFieldState(1).withValidator(
       () => null
     )
     await state.validate()
@@ -270,7 +270,7 @@ describe('DebouncedFieldState validation', () => {
     const validator = jest.fn(val => {
       return !val && 'empty'
     })
-    const state = createFieldState('').validators(validator)
+    const state = createFieldState('').withValidator(validator)
     const validateRet1 = state.validate()
 
     expect(validator).toBeCalled()
@@ -302,7 +302,7 @@ describe('DebouncedFieldState validation', () => {
 
   it('should work well with reset()', async () => {
     const initialValue = ''
-    const state = createFieldState(initialValue).validators(val => !val && 'empty')
+    const state = createFieldState(initialValue).withValidator(val => !val && 'empty')
     state.validate()
     await delay()
 
@@ -318,7 +318,7 @@ describe('DebouncedFieldState validation', () => {
   })
 
   it('should work well with multiple validators', async () => {
-    const state = createFieldState('').validators(
+    const state = createFieldState('').withValidator(
       val => !val && 'empty',
       val => val.length > 5 && 'too long'
     )
@@ -351,7 +351,7 @@ describe('DebouncedFieldState validation', () => {
 
   it('should work well with dynamic validator', async () => {
     const target = observable({ value: '123' })
-    const state = createFieldState('').validators(
+    const state = createFieldState('').withValidator(
       val => val === target.value && 'same'
     )
 
@@ -379,7 +379,7 @@ describe('DebouncedFieldState validation', () => {
   })
 
   it('should work well when add validator dynamically', async () => {
-    const state = createFieldState('').validators(
+    const state = createFieldState('').withValidator(
       val => !val && 'empty'
     )
     state.$.onChange('123456')
@@ -388,7 +388,7 @@ describe('DebouncedFieldState validation', () => {
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
-    state.validators(val => val.length > 5 && 'too long')
+    state.withValidator(val => val.length > 5 && 'too long')
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
@@ -396,12 +396,12 @@ describe('DebouncedFieldState validation', () => {
     state.dispose()
   })
 
-  it('should work well with disableValidationWhen', async () => {
+  it('should work well with disableWhen', async () => {
     const initialValue = ''
     const options = observable({ disabled: false })
-    const state = createFieldState(initialValue).validators(
+    const state = createFieldState(initialValue).withValidator(
       val => !val && 'empty'
-    ).disableValidationWhen(
+    ).disableWhen(
       () => options.disabled
     )
 
@@ -441,7 +441,7 @@ describe('DebouncedFieldState validation', () => {
     const validator = jest.fn()
     validator.mockReturnValueOnce(delayValue('foo', 200))
     validator.mockReturnValueOnce(delayValue('bar', 100))
-    const field = createFieldState(1).validators(validator)
+    const field = createFieldState(1).withValidator(validator)
     field.validate()
     await delay(50)
     await field.validate()
@@ -454,7 +454,7 @@ describe('DebouncedFieldState validation', () => {
     validator.mockReturnValue(null)
     validator.mockReturnValueOnce(delayValue('foo', 200))
     validator.mockReturnValueOnce(delayValue('bar', 100))
-    const field = createFieldState(1).validators(validator)
+    const field = createFieldState(1).withValidator(validator)
     field.$.onChange(2)
     await delay(50)
     field.$.onChange(3)
@@ -464,7 +464,7 @@ describe('DebouncedFieldState validation', () => {
   })
 
   it('should work well with NaN', async () => {
-    const state = createFieldState(Number.NaN).validators(
+    const state = createFieldState(Number.NaN).withValidator(
       () => 'error'
     )
     state.validate()
@@ -476,14 +476,14 @@ describe('DebouncedFieldState validation', () => {
 
   it('should validate with no delay', () => {
     const validator = jest.fn(() => 'foo')
-    const state = createFieldState('0').validators(validator)
+    const state = createFieldState('0').withValidator(validator)
     state.validate()
     expect(validator).toBeCalled()
   })
 
   it('should auto validate with delay', async () => {
     const validator = jest.fn(() => 'foo')
-    const state = createFieldState(0, 500).validators(validator)
+    const state = createFieldState(0, 500).withValidator(validator)
     state.onChange(1)
 
     expect(validator).not.toBeCalled()

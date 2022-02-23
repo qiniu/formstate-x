@@ -6,13 +6,13 @@ import { Button, TextField, Container } from '@mui/material'
 import { bindTextField } from '../../mui-binding'
 
 function createFormState() {
-  const usernameState = new FieldState('').validators(
+  const usernameState = new FieldState('').withValidator(
     v => !v && 'Please input your username!'
   )
-  const passwordState = new FieldState('').validators(
+  const passwordState = new FieldState('').withValidator(
     v => !v && 'Please input your password!'
   )
-  const rePasswordState = new FieldState('').validators(
+  const rePasswordState = new FieldState('').withValidator(
     v => v !== passwordState.value && 'Not the same!'
   )
   return new FormState({
@@ -30,7 +30,7 @@ export default observer(function Demo() {
     e.preventDefault()
     const result = await form.validate()
     if (result.hasError) return
-    console.log('Submit with:', result.value)
+    alert(`Submit with: ${JSON.stringify(result.value, null, 2)}`)
   }
 
   return (

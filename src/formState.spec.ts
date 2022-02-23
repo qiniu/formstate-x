@@ -168,7 +168,7 @@ describe('FormState (mode: object) validation', () => {
     const state = new FormState({
       foo: new FieldState(initialValue.foo),
       bar: new FieldState(initialValue.bar)
-    }).validators(({ foo, bar }) => foo === bar && 'same')
+    }).withValidator(({ foo, bar }) => foo === bar && 'same')
 
     expect(state.validating).toBe(false)
     expect(state.validated).toBe(false)
@@ -187,7 +187,7 @@ describe('FormState (mode: object) validation', () => {
       const state = new FormState({
         foo: new FieldState(initialValue.foo),
         bar: new FieldState(initialValue.bar)
-      }).validators(({ foo, bar }) => foo === bar && 'same')
+      }).withValidator(({ foo, bar }) => foo === bar && 'same')
   
       state.onChange({ foo: '123', bar: '123' })
   
@@ -205,7 +205,7 @@ describe('FormState (mode: object) validation', () => {
       const initialValue = { foo: '', bar: '123' }
       const state = new FormState({
         foo: new FieldState(initialValue.foo),
-        bar: new FieldState(initialValue.bar).validators(v => !v && 'empty')
+        bar: new FieldState(initialValue.bar).withValidator(v => !v && 'empty')
       })
   
       state.onChange({ foo: '123', bar: '' })
@@ -226,7 +226,7 @@ describe('FormState (mode: object) validation', () => {
     const state = new FormState({
       foo: new FieldState(initialValue.foo),
       bar: new FieldState(initialValue.bar)
-    }).validators(({ foo, bar }) => foo === bar && 'same')
+    }).withValidator(({ foo, bar }) => foo === bar && 'same')
 
     state.$.foo.onChange('123')
 
@@ -245,7 +245,7 @@ describe('FormState (mode: object) validation', () => {
     const state = new FormState({
       foo: new FieldState(initialValue.foo),
       bar: new FieldState(initialValue.bar)
-    }).validators(({ foo, bar }) => foo === bar && 'same')
+    }).withValidator(({ foo, bar }) => foo === bar && 'same')
 
     const validateRet1 = state.validate()
 
@@ -287,7 +287,7 @@ describe('FormState (mode: object) validation', () => {
     const state = new FormState({
       foo: new FieldState(initialValue.foo),
       bar: new FieldState(initialValue.bar)
-    }).validators(({ foo, bar }) => foo === bar && 'same')
+    }).withValidator(({ foo, bar }) => foo === bar && 'same')
     state.validate()
     await delay()
 
@@ -308,7 +308,7 @@ describe('FormState (mode: object) validation', () => {
     const state = new FormState({
       foo: new FieldState(initialValue.foo),
       bar: new FieldState(initialValue.bar)
-    }).validators(
+    }).withValidator(
       ({ foo, bar }) => foo === bar && 'same',
       ({ foo }) => foo === '' && 'empty'
     )
@@ -344,7 +344,7 @@ describe('FormState (mode: object) validation', () => {
     const state = new FormState({
       foo: new FieldState(initialValue.foo),
       bar: new FieldState(initialValue.bar)
-    }).validators(
+    }).withValidator(
       ({ foo, bar }) => delayValue(foo === bar && 'same')
     )
     state.validate()
@@ -363,7 +363,7 @@ describe('FormState (mode: object) validation', () => {
     const state = new FormState({
       foo: new FieldState(initialValue.foo),
       bar: new FieldState(initialValue.bar)
-    }).validators(
+    }).withValidator(
       ({ foo, bar }) => delayValue(foo === bar && 'same'),
       ({ foo }) => foo === '' && 'empty'
     )
@@ -399,7 +399,7 @@ describe('FormState (mode: object) validation', () => {
     const state = new FormState({
       foo: new FieldState(initialValue.foo),
       bar: new FieldState(initialValue.bar)
-    }).validators(
+    }).withValidator(
       ({ foo, bar }) => options.checkSame && foo === bar && 'same',
     )
 
@@ -431,7 +431,7 @@ describe('FormState (mode: object) validation', () => {
     const state = new FormState({
       foo: new FieldState(initialValue.foo),
       bar: new FieldState(initialValue.bar)
-    }).validators(
+    }).withValidator(
       ({ foo, bar }) => foo === bar && 'same',
     )
     state.$.foo.onChange('')
@@ -440,7 +440,7 @@ describe('FormState (mode: object) validation', () => {
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
-    state.validators(({ foo }) => foo === '' && 'empty')
+    state.withValidator(({ foo }) => foo === '' && 'empty')
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
@@ -452,9 +452,9 @@ describe('FormState (mode: object) validation', () => {
     const notEmpty = (value: string) => value === '' && 'empty'
     const initialValue = { foo: '', bar: '456' }
     const state = new FormState({
-      foo: new FieldState(initialValue.foo).validators(notEmpty),
-      bar: new FieldState(initialValue.bar).validators(notEmpty)
-    }).validators(
+      foo: new FieldState(initialValue.foo).withValidator(notEmpty),
+      bar: new FieldState(initialValue.bar).withValidator(notEmpty)
+    }).withValidator(
       ({ foo, bar }) => foo === bar && 'same',
     )
     state.validate()
@@ -509,9 +509,9 @@ describe('FormState (mode: object) validation', () => {
     const notEmpty = (value: string) => delayValue(value === '' && 'empty')
     const initialValue = { foo: '', bar: '456' }
     const state = new FormState({
-      foo: new FieldState(initialValue.foo).validators(notEmpty),
-      bar: new FieldState(initialValue.bar).validators(notEmpty)
-    }).validators(
+      foo: new FieldState(initialValue.foo).withValidator(notEmpty),
+      bar: new FieldState(initialValue.bar).withValidator(notEmpty)
+    }).withValidator(
       ({ foo, bar }) => delayValue(foo === bar && 'same'),
     )
     state.validate()
@@ -562,7 +562,7 @@ describe('FormState (mode: object) validation', () => {
     state.dispose()
   })
 
-  it('should work well with disableValidationWhen', async () => {
+  it('should work well with disableWhen', async () => {
     const options = observable({
       disabled: false,
       updateDisabled(value: boolean) {
@@ -572,11 +572,11 @@ describe('FormState (mode: object) validation', () => {
     const notEmpty = (value: string) => value === '' && 'empty'
     const initialValue = { foo: '123', bar: '123' }
     const state = new FormState({
-      foo: new FieldState(initialValue.foo).validators(notEmpty),
-      bar: new FieldState(initialValue.bar).validators(notEmpty)
-    }).validators(
+      foo: new FieldState(initialValue.foo).withValidator(notEmpty),
+      bar: new FieldState(initialValue.bar).withValidator(notEmpty)
+    }).withValidator(
       ({ foo, bar }) => foo === bar && 'same',
-    ).disableValidationWhen(
+    ).disableWhen(
       () => options.disabled
     )
 
@@ -664,7 +664,7 @@ describe('FormState (mode: array)', () => {
 
   it('should set well', async () => {
     const initialValue = ['123', '456']
-    const state = new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+    const state = new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
       v => v.length > 2 && 'too long'
     )
 
@@ -720,7 +720,7 @@ describe('FormState (mode: array)', () => {
 
   it('should onChange well', async () => {
     const initialValue = ['123', '456']
-    const state = new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+    const state = new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
       v => v.length > 2 && 'too long'
     )
 
@@ -780,7 +780,7 @@ describe('FormState (mode: array)', () => {
   describe('remove', () => {
 
     function createState(initialValue: string[]) {
-      return new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+      return new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
         v => v.length === 0 && 'empty'
       )
     }
@@ -840,7 +840,7 @@ describe('FormState (mode: array)', () => {
   describe('insert', () => {
 
     function createState(initialValue: string[]) {
-      return new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+      return new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
         v => v.length > 2 && 'too long'
       )
     }
@@ -888,7 +888,7 @@ describe('FormState (mode: array)', () => {
   describe('append', () => {
 
     function createState(initialValue: string[]) {
-      return new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+      return new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
         v => v.length > 2 && 'too long'
       )
     }
@@ -910,7 +910,7 @@ describe('FormState (mode: array)', () => {
   describe('move', () => {
 
     function createState(initialValue: string[]) {
-      return new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+      return new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
         v => v.length > 2 && 'too long'
       )
     }
@@ -1030,7 +1030,7 @@ describe('FormState (mode: array)', () => {
   })
 
   it('should applyValidation correctly', async () => {
-    const state = new ArrayFormState<string>([], v => new FieldState(v)).validators(
+    const state = new ArrayFormState<string>([], v => new FieldState(v)).withValidator(
       value => value.length <= 0 && 'empty'
     )
 
@@ -1047,7 +1047,7 @@ describe('FormState (mode: array)', () => {
 describe('FormState (mode: array) validation', () => {
   it('should work well when initialized', async () => {
     const initialValue = ['123', '456']
-    const state = new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+    const state = new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
       list => list.join('').length > 5 && 'too long'
     )
 
@@ -1063,7 +1063,7 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with fields onChange()', async () => {
     const initialValue = ['123', '']
-    const state = new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+    const state = new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
       list => list.join('').length > 5 && 'too long'
     )
 
@@ -1081,7 +1081,7 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with validate()', async () => {
     const initialValue = ['123', '456']
-    const state = new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+    const state = new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
       list => list.join('').length > 5 && 'too long'
     )
 
@@ -1100,7 +1100,7 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with fields change', async () => {
     const initialValue = ['123', '']
-    const state = new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+    const state = new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
       list => list.join('').length > 5 && 'too long'
     )
 
@@ -1121,7 +1121,7 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with reset()', async () => {
     const initialValue = ['123', '456']
-    const state = new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+    const state = new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
       list => list.join('').length > 5 && 'too long'
     )
     state.validate()
@@ -1141,7 +1141,7 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with multiple validators', async () => {
     const initialValue = ['123', '']
-    const state = new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+    const state = new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
       list => list.join('').length > 5 && 'too long',
       list => list.length >= 3 && 'too many'
     )
@@ -1169,7 +1169,7 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with async validator', async () => {
     const initialValue = ['123', '456']
-    const state = new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+    const state = new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
       list => delayValue(list.join('').length > 5 && 'too long')
     )
     state.validate()
@@ -1185,7 +1185,7 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well with mixed sync and async validator', async () => {
     const initialValue = ['123', '']
-    const state = new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+    const state = new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
       list => delayValue(list.join('').length > 5 && 'too long'),
       list => list.length >= 3 && 'too many'
     )
@@ -1220,7 +1220,7 @@ describe('FormState (mode: array) validation', () => {
       }
     })
     const initialValue = ['123', '456']
-    const state = new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+    const state = new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
       list => options.checkLength && list.join('').length > 5 && 'too long',
     )
 
@@ -1249,7 +1249,7 @@ describe('FormState (mode: array) validation', () => {
 
   it('should work well when add validator dynamically', async () => {
     const initialValue = ['123', '', '4']
-    const state = new ArrayFormState(initialValue, v => new FieldState(v)).validators(
+    const state = new ArrayFormState(initialValue, v => new FieldState(v)).withValidator(
       list => list.join('').length > 5 && 'too long'
     )
     state.validate()
@@ -1258,7 +1258,7 @@ describe('FormState (mode: array) validation', () => {
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
-    state.validators(list => list.length >= 3 && 'too many')
+    state.withValidator(list => list.length >= 3 && 'too many')
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too many')
@@ -1277,8 +1277,8 @@ describe('FormState (mode: array) validation', () => {
     const initialValue = ['123', '']
     const state = new ArrayFormState(
       initialValue,
-      value => new FieldState(value).validators(notEmpty),
-    ).validators(
+      value => new FieldState(value).withValidator(notEmpty),
+    ).withValidator(
       list => list.join('').length > 5 && 'too long'
     )
     state.validate()
@@ -1327,8 +1327,8 @@ describe('FormState (mode: array) validation', () => {
     const initialValue = ['123', '']
     const state = new ArrayFormState(
       initialValue,
-      value => new FieldState(value).validators(notEmpty),
-    ).validators(
+      value => new FieldState(value).withValidator(notEmpty),
+    ).withValidator(
       list => delayValue(list.join('').length > 5 && 'too long')
     )
     state.validate()
@@ -1372,7 +1372,7 @@ describe('FormState (mode: array) validation', () => {
     state.dispose()
   })
 
-  it('should work well with disableValidationWhen', async () => {
+  it('should work well with disableWhen', async () => {
     const options = observable({
       disabled: false,
       updateDisabled(value: boolean) {
@@ -1383,10 +1383,10 @@ describe('FormState (mode: array) validation', () => {
     const initialValue = ['123', '456']
     const state = new ArrayFormState(
       initialValue,
-      value => new FieldState(value).validators(notEmpty),
-    ).validators(
+      value => new FieldState(value).withValidator(notEmpty),
+    ).withValidator(
       list => list.join('').length > 5 && 'too long'
-    ).disableValidationWhen(
+    ).disableWhen(
       () => options.disabled
     )
 
@@ -1427,10 +1427,10 @@ describe('FormState (mode: array) validation', () => {
     const initialValue = ['123', '456']
     const disabledState = new ArrayFormState(
       initialValue,
-      value => new FieldState(value).validators(notEmpty),
-    ).validators(
+      value => new FieldState(value).withValidator(notEmpty),
+    ).withValidator(
       list => list.join('').length > 5 && 'too long'
-    ).disableValidationWhen(
+    ).disableWhen(
       () => options.disabled
     )
     const state = new FormState({
@@ -1473,14 +1473,14 @@ describe('nested FormState', () => {
     }
 
     const createInputState = (initialValue: string) => {
-      const inputState = new FieldState(initialValue).validators(notEmpty)
+      const inputState = new FieldState(initialValue).withValidator(notEmpty)
       const duplicateValidator = createInputDuplicateValidator(inputState)
-      return inputState.validators(duplicateValidator)
+      return inputState.withValidator(duplicateValidator)
     }
 
-    const inputsState = new ArrayFormState([], createInputState).validators(
+    const inputsState = new ArrayFormState([], createInputState).withValidator(
       list => list.join('').length > 5 && 'too long'
-    ).disableValidationWhen(() => !enabledState.value)
+    ).disableWhen(() => !enabledState.value)
 
     const state = new FormState({
       inputs: inputsState,

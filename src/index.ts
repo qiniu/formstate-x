@@ -1,6 +1,6 @@
 export * from './types'
 export * from './fieldState'
 export * from './formState'
-export * from './proxyState'
+export * from './transformedState'
 export * from './debouncedState'
 export * from './bind'

@@ -4,25 +4,25 @@ import { observer } from 'mobx-react'
 import { FieldState } from 'formstate-x'
 import { bindInputWithChangeEvent } from '../../react-bindings'
 
-const validationState = observable({
+const validationCtrl = observable({
   enabled: true,
   toggle() {
     this.enabled = !this.enabled
   }
 })
 
-const validateName = (v: string) => {
-  if (!validationState.enabled) return
+function validateName(v: string) {
+  if (!validationCtrl.enabled) return
   return v.length > 5 && 'Too long'
 }
 
-const state = new FieldState('').validators(validateName)
+const state = new FieldState('').withValidator(validateName)
 
 export default observer(function Demo() {
   return (
     <>
-      <button onClick={() => validationState.toggle()}>
-        {validationState.enabled ? 'Disable' : 'Enable'} Validation
+      <button onClick={() => validationCtrl.toggle()}>
+        {validationCtrl.enabled ? 'Disable' : 'Enable'} Validation
       </button>
       <p>
         <label>

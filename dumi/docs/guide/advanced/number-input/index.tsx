@@ -13,12 +13,9 @@ export default observer(function Demo() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    // trigger validation when user want to submit
     const result = await form.validate()
-    // if error, do nothing (or maybe show a toast?)
     if (result.hasError) return
-    // if no error, wo do next things, such as sending HTTP request
-    console.log('Submit with:', result.value)
+    alert(`Submit with: ${JSON.stringify(result.value, null, 2)}`)
   }
 
   return (

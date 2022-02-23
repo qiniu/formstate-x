@@ -8,9 +8,14 @@ interface IV3StateFromV2<T extends v2.ComposibleValidatable<unknown, V>, V> exte
   $: T
 }
 
-class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> implements IV3StateFromV2<T, V> {
+class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseState implements IV3StateFromV2<T, V> {
   constructor(private stateV2: T) {
+    super()
     makeObservable(this)
+
+    this.addDisposer(
+      () => stateV2.dispose()
+    )
   }
 
   /** The original (formstate-x@v2.x) state */
@@ -33,7 +38,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> implements IV3
     setForV2(this.stateV2, value)
   }
   reset() { this.stateV2.reset() }
-  validators(...validators: Array<v3.Validator<V>>) {
+  withValidator(...validators: Array<v3.Validator<V>>) {
     if (
       isV2FieldState(this.stateV2)
       || isV2FormState(this.stateV2)
@@ -43,7 +48,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> implements IV3
     }
     throwNotSupported()
   }
-  disableValidationWhen(predict: () => boolean) {
+  disableWhen(predict: () => boolean) {
     if (
       isV2FieldState(this.stateV2)
       || isV2FormState(this.stateV2)
@@ -53,7 +58,6 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> implements IV3
     }
     throwNotSupported()
   }
-  dispose() { this.stateV2.dispose() }
 }
 
 /** Convets formstate-x@v2.x state to formstate-x@v3.x state */
@@ -70,6 +74,10 @@ class Downgrader<T extends v3.IState<V>, V> extends BaseState implements IV2Stat
   constructor(private stateV3: T) {
     super()
     makeObservable(this)
+
+    this.addDisposer(
+      () => stateV3.dispose()
+    )
   }
 
   /** The original (formstate-x@v3.x) state */
@@ -84,11 +92,6 @@ class Downgrader<T extends v3.IState<V>, V> extends BaseState implements IV2Stat
 
   validate() { return this.stateV3.validate() }
   reset() { this.stateV3.reset() }
-
-  override dispose() {
-    super.dispose()
-    this.stateV3.dispose()
-  }
 
   @computed get dirty() { return this.stateV3.dirty }
   @computed get _activated() { return this.stateV3.activated }

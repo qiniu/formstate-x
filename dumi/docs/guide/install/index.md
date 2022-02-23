@@ -26,4 +26,4 @@ Now just import formstate-x in you code:
 import { FormState, FieldState } from 'formstate-x'
 ```
 
-For more usage guides, let's check section [Basic](#TODO)
+For more usage guides, let's check section [Basic](/guide/basic)
