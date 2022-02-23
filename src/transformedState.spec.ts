@@ -1,6 +1,6 @@
 import { observable, runInAction, when } from 'mobx'
 import { ValidateResultWithError, ValidateResultWithValue } from './types'
-import { ProxyState } from './proxyState'
+import { TransformedState } from './transformedState'
 import { FieldState } from './fieldState'
 import { FormState } from './formState'
 import { delay, delayValue, assertType } from './testUtils'
@@ -13,14 +13,14 @@ function createNumState(initialValue: number = 0) {
   function stringifyNum(num: number) {
     return Number.isNaN(num) ? '' : (num + '')
   }
-  return new ProxyState(
+  return new TransformedState(
     new FieldState(stringifyNum(initialValue)),
     parseNum,
     stringifyNum
   )
 }
 
-describe('ProxyState (for FieldState)', () => {
+describe('TransformedState (for FieldState)', () => {
 
   it('should be type-safe', () => {
 
@@ -41,7 +41,7 @@ describe('ProxyState (for FieldState)', () => {
 
     function createHostState() {
       const rawState = new FieldState('')
-      return new ProxyState(rawState, parseHost, stringifyHost)
+      return new TransformedState(rawState, parseHost, stringifyHost)
     }
 
     interface SourceItem {
@@ -74,7 +74,7 @@ describe('ProxyState (for FieldState)', () => {
 
   it('should onChange well', async () => {
     const initialValue = 0
-    const state = createNumState(initialValue).validators(
+    const state = createNumState(initialValue).withValidator(
       value => value > 100 && 'too big'
     )
 
@@ -146,10 +146,10 @@ describe('ProxyState (for FieldState)', () => {
   })
 })
 
-describe('ProxyState (for FieldState) validation', () => {
+describe('TransformedState (for FieldState) validation', () => {
 
   function createPositiveNumState(initialValue: number) {
-    return createNumState(initialValue).validators(
+    return createNumState(initialValue).withValidator(
       v => v > 0 ? null : 'non positive'
     )
   }
@@ -243,7 +243,7 @@ describe('ProxyState (for FieldState) validation', () => {
   })
 
   it('should work well with multiple validators', async () => {
-    const state = createNumState(0).validators(
+    const state = createNumState(0).withValidator(
       v => v > 0 ? null : 'non positive',
       v => v > 10 && 'too big'
     )
@@ -275,7 +275,7 @@ describe('ProxyState (for FieldState) validation', () => {
   })
 
   it('should work well with async validator', async () => {
-    const state = createNumState(0).validators(
+    const state = createNumState(0).withValidator(
       v => delayValue(v > 0 ? null : 'non positive')
     )
     state.validate()
@@ -294,7 +294,7 @@ describe('ProxyState (for FieldState) validation', () => {
   })
 
   it('should work well with mixed sync and async validator', async () => {
-    const state = createNumState(0).validators(
+    const state = createNumState(0).withValidator(
       v => delayValue(v > 0 ? null : 'non positive'),
       v => v > 10 && 'too big'
     )
@@ -321,7 +321,7 @@ describe('ProxyState (for FieldState) validation', () => {
 
   it('should work well with dynamic validator', async () => {
     const target = observable({ value: 5 })
-    const state = createNumState(0).validators(
+    const state = createNumState(0).withValidator(
       v => v === target.value && 'same'
     )
 
@@ -349,7 +349,7 @@ describe('ProxyState (for FieldState) validation', () => {
   })
 
   it('should work well when add validator dynamically', async () => {
-    const state = createNumState(0).validators(
+    const state = createNumState(0).withValidator(
       v => delayValue(v > 0 ? null : 'non positive')
     )
     state.onChange(100)
@@ -358,7 +358,7 @@ describe('ProxyState (for FieldState) validation', () => {
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
-    state.validators(v => v > 10 && 'too big')
+    state.withValidator(v => v > 10 && 'too big')
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too big')
@@ -366,10 +366,10 @@ describe('ProxyState (for FieldState) validation', () => {
     state.dispose()
   })
 
-  it('should work well with disableValidationWhen', async () => {
+  it('should work well with disableWhen', async () => {
     const initialValue = 0
     const options = observable({ disabled: false })
-    const state = createPositiveNumState(initialValue).disableValidationWhen(
+    const state = createPositiveNumState(initialValue).disableWhen(
       () => options.disabled
     )
 
@@ -429,10 +429,10 @@ function createHostState(hostStr: string = '127.0.0.1:80') {
     hostname: new FieldState(host.hostname),
     port: new FieldState(host.port)
   })
-  return new ProxyState(rawState, stringifyHost, parseHost)
+  return new TransformedState(rawState, stringifyHost, parseHost)
 }
 
-describe('ProxyState (for FormState)', () => {
+describe('TransformedState (for FormState)', () => {
 
   it('should be type-safe', () => {
 
@@ -532,9 +532,9 @@ describe('ProxyState (for FormState)', () => {
   })
 })
 
-describe('ProxyState (for FormState) validation', () => {
+describe('TransformedState (for FormState) validation', () => {
   it('should work well when initialized', async () => {
-    const state = createHostState('127.0.0.1:80').validators(
+    const state = createHostState('127.0.0.1:80').withValidator(
       v => !v && 'empty'
     )
 
@@ -549,7 +549,7 @@ describe('ProxyState (for FormState) validation', () => {
   describe('should work well with onChange()', () => {
 
     it('and form validator', async () => {
-      const state = createHostState('127.0.0.1:80').validators(
+      const state = createHostState('127.0.0.1:80').withValidator(
         v => !v && 'empty'
       )
   
@@ -564,7 +564,7 @@ describe('ProxyState (for FormState) validation', () => {
 
     it('and field validator', async () => {
       const state = createHostState('127.0.0.1:80')
-      state.$.$.hostname.validators(v => !v && 'empty')
+      state.$.$.hostname.withValidator(v => !v && 'empty')
 
       state.onChange(':443')
       await delay()
@@ -577,7 +577,7 @@ describe('ProxyState (for FormState) validation', () => {
   })
 
   it('should work well with fields onChange()', async () => {
-    const state = createHostState('127.0.0.1').validators(
+    const state = createHostState('127.0.0.1').withValidator(
       v => !v && 'empty'
     )
 
@@ -592,7 +592,7 @@ describe('ProxyState (for FormState) validation', () => {
   })
 
   it('should work well with validate()', async () => {
-    const state = createHostState('').validators(
+    const state = createHostState('').withValidator(
       v => !v && 'empty'
     )
 
@@ -625,7 +625,7 @@ describe('ProxyState (for FormState) validation', () => {
   })
 
   it('should work well with reset()', async () => {
-    const state = createHostState('').validators(
+    const state = createHostState('').withValidator(
       v => !v && 'empty'
     )
     state.validate()
@@ -641,16 +641,16 @@ describe('ProxyState (for FormState) validation', () => {
     state.dispose()
   })
 
-  it('should work well with disableValidationWhen', async () => {
+  it('should work well with disableWhen', async () => {
     const options = observable({
       disabled: false,
       updateDisabled(value: boolean) {
         this.disabled = value
       }
     })
-    const state = createHostState('127.0.0.1').validators(
+    const state = createHostState('127.0.0.1').withValidator(
       v => !v && 'empty'
-    ).disableValidationWhen(
+    ).disableWhen(
       () => options.disabled
     )
 

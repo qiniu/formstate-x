@@ -3,9 +3,11 @@ import { observer } from 'mobx-react'
 import { FieldState } from 'formstate-x'
 import { bindInputWithChangeEvent } from '../../react-bindings'
 
-const validateName = (v: string) => v.length > 5 && 'Too long'
+function validateName(v: string) {
+  return v.length > 5 && 'Too long'
+}
 
-const state = new FieldState('').validators(validateName)
+const state = new FieldState('').withValidator(validateName)
 
 export default observer(function Demo() {
   return (

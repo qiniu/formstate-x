@@ -6,8 +6,8 @@ import { Button, TextField, FormControlLabel, Checkbox, Container } from '@mui/m
 import { bindTextField, bindCheckbox } from '../../mui-binding'
 
 const form = new FormState({
-  username: new FieldState('').validators(validateUsername),
-  password: new FieldState('').validators(validatePassword),
+  username: new FieldState('').withValidator(validateUsername),
+  password: new FieldState('').withValidator(validatePassword),
   remember: new FieldState(false)
 })
 
@@ -20,7 +20,7 @@ export default observer(function Demo() {
     // if error, do nothing (or maybe show a toast?)
     if (result.hasError) return
     // if no error, wo do next things, such as sending HTTP request
-    console.log('Submit with:', result.value)
+    alert(`Submit with: ${JSON.stringify(result.value, null, 2)}`)
   }
 
   return (

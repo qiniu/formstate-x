@@ -4,9 +4,9 @@ order: 5
 toc: menu
 ---
 
-In real applications, a form usually consists of plenty of inputs. A complex input component (such as date-picker, searchable-select, etc) usually consists of more than one basic input components. Composition, is the key problem for form-related libraries.
+In real applications, a form usually consists of plenty of inputs. A complex input component (such as date-picker, searchable-select, etc) usually consists of more than one basic input components. Composition, is the key problem need to be solved by form tools.
 
-With composition ability provided by formstate-x, you can build arbitrary complex forms or input components.
+With composition ability provided by formstate-x, you can build arbitrary complex forms or input components with maximal code reuse.
 
 ### Simple Form
 
@@ -33,7 +33,7 @@ const result = await form.validate()
 if (result.hasError) return
 ```
 
-This will ensure that every input's value valid, whether it is activated or not. Then it's ok to do anything you need with the input data, such as sending HTTP request.
+This will ensure that every input's value valid, whether it is activated or not. If the check (for `result.hasError`) passes, the form data (`result.value`) is guaranteed to be valid. You can now do anything you need with the form data, such as sending an HTTP request.
 
 That's almost all you need to know to build a simple form with formstate-x. Next, we will show how to build complex input with formstate-x.
 
@@ -45,7 +45,16 @@ With demo of a "Full Name input", we will see how to build complex inputs with f
 
 <code src="./full-name-input/index.tsx"></code>
 
-In this demo we created a custom component called `FullNameInput` in file `FullNameInput.ts`. It is used to collect the user's full name (including first name and last name). Unlike basic input components with API of prop `value` & prop `onChange`, it requries prop `state`:
+In this demo we created a custom component called `FullNameInput` in file `FullNameInput.ts`. It is used to collect the user's full name (including first name and last name). As we can see, state of `FullNameInput` consists of two child states:
+
+```ts
+new FormState({
+  first: new FieldState('').withValidator(required),
+  last: new FieldState('').withValidator(required)
+})
+```
+
+With `FormState`, the two child states (`first` & `last`) are composed together and behaves as one state. If we check the API of `FullNameInput`, unlike basic input components with props `value` & `onChange`, `FullNameInput` requries prop `state`:
 
 ```ts
 interface Props {
@@ -53,14 +62,16 @@ interface Props {
 }
 ```
 
-In addition of component `FullNameInput`, the module exported functionn `createState` as well, which is used to create form state for component `FullNameInput`. It is simple to embed the `FullNameInput` in a form, we can find it in file `index.ts`, which consists of two parts:
+In addition of component `FullNameInput`, the module exported function `createState` as well, which is used to create the state for component `FullNameInput`.
+
+It is easy to embed the `FullNameInput` in a form, we can find it in file `index.ts`, which consists of two parts:
 
 ##### 1. Create state for `FullNameInput`, as part of state for form when creating state
 
 ```ts
 const form = new FormState({
   name: createFullNameState(),
-  email: new FieldState('').validators(validateEmail)
+  email: new FieldState('').withValidator(validateEmail)
 })
 ```
 
@@ -70,12 +81,12 @@ const form = new FormState({
 <FullNameInput state={form.$.name} />
 ```
 
-The best part is that no matter how complex component `FullNameInput` (or its state) is, its API follows the pattern: function `createState` & component `Input`. The parent component does not need to know details about `FullNameInput`, and `FullNameInput` does not to known anything about its parent comoponent (or the form), which makes composition easy and structure fractal.
+The best part is that no matter how complex component `FullNameInput` (or its state) is, its API follows the pattern: function `createState` & component `Input`. The parent component does not need to know details about `FullNameInput`, and `FullNameInput` does not need to know anything about its parent comoponent (or the form), which makes composition easy and the whole structure fractal.
 
 ### Input List
 
-Sometimes we need to collect list of input from user and the size of list is uncertain - user can add or remove input item dynamically. Here we will show how to deal with such cases with formstate-x.
+Sometimes we need to collect list of input from user and the size of list is uncertain—user can add or remove input item dynamically. Here we will show how to deal with such cases with formstate-x.
 
 <code src="./input-list.tsx"></code>
 
-The above demo shows a form in which user can submit more than one phone number. We can validate each phone number on the field state, also validate the number list on the array form state. Note that the array form state can also be child state of another form state - it's totally composible.
+The above demo shows how to make a form in which user can submit more than one phone number with `ArrayFormState`. We can validate each phone number on the field state, also validate the number list on the array form state. Note that the array form state can also be child state of another form state—it's totally composable.

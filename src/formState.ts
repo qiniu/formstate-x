@@ -11,7 +11,7 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
   protected abstract fieldList: IState[]
 
   @override override get validateStatus() {
-    if (this.validationDisabled) {
+    if (this.disabled) {
       return ValidateStatus.WontValidate
     }
     const fieldList = this.fieldList.filter(
@@ -34,7 +34,7 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
 
   /** The error info of form validation. */
   @computed get ownError(): Error {
-    if (this.validationDisabled) {
+    if (this.disabled) {
       return undefined
     }
     return this._error
@@ -47,7 +47,7 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
 
   /** The error info of validation (including fields' error info). */
   @override override get error() {
-    if (this.validationDisabled) {
+    if (this.disabled) {
       return undefined
     }
     if (this._error) {

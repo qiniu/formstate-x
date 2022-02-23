@@ -52,5 +52,15 @@ export function bindCheckbox(state: FieldState<boolean>) {
   }
 }
 
+// `bindTextField` bind field state to Materail-UI `RadioGroup`
+export function bindRadioGroup<T extends string>(state: FieldState<T>) {
+  return {
+    value: state.value,
+    onChange(e: ChangeEvent<HTMLInputElement>) {
+      state.onChange(e.target.value as T)
+    }
+  }
+}
+
 // `bindTextField` bind field state to Materail-UI `Switch`
 export const bindSwitch = bindCheckbox

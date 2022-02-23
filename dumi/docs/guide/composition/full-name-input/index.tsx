@@ -8,7 +8,7 @@ import FullNameInput, { createState as createFullNameState } from './FullNameInp
 
 const form = new FormState({
   name: createFullNameState(),
-  email: new FieldState('').validators(validateEmail)
+  email: new FieldState('').withValidator(validateEmail)
 })
 
 export default observer(function Demo() {
@@ -20,7 +20,7 @@ export default observer(function Demo() {
     // if error, do nothing (or maybe show a toast?)
     if (result.hasError) return
     // if no error, wo do next things, such as sending HTTP request
-    console.log('Submit with:', result.value)
+    alert(`Submit with: ${JSON.stringify(result.value, null, 2)}`)
   }
 
   return (

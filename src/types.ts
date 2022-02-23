@@ -35,14 +35,23 @@ export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValu
 export interface IState<V = any> {
   /** Value in the state. */
   value: V
-  /** If value has been touched */
+  /** If value has been touched. */
   dirty: boolean
-  /** The error info of validation */
+  /** The error info of validation. */
   error: Error
+  /** If the state contains error. */
+  hasError: boolean
   /** If activated (with auto-validation). */
   activated: boolean
   /** Current validate status. */
   validateStatus: ValidateStatus
+  /** If the state is doing a validation. */
+  validating: boolean
+  /**
+   * If the validation has been done.
+   * It does not mean validation passed.
+   */
+  validated: boolean
   /** Fire a validation behavior. */
   validate(): Promise<ValidateResult<V>>
   /** Set `value` on change event. */
@@ -51,10 +60,16 @@ export interface IState<V = any> {
   set(value: V): void
   /** Reset to initial status. */
   reset(): void
-  /** Add validator function. */
-  validators(...validators: Array<Validator<V>>): this
-  /** Configure when to disable validation. */
-  disableValidationWhen(predict: () => boolean): this
+  /** Append validator(s). */
+  withValidator(...validators: Array<Validator<V>>): this
+  /**
+   * Configure when state will be disabled, which means:
+   * - corresponding UI is invisible or disabled
+   * - state value do not need to (and will not) be validated
+   * - state `onChange` will not be called
+   * - no error info will be provided
+   */
+  disableWhen(predictFn: () => boolean): this
   /** Do dispose */
   dispose(): void
 }
