@@ -15,8 +15,7 @@
     "noUnusedParameters": true,
     "lib": ["ESNext", "DOM"],
     "paths": {
-      "formstate-x": ["../src"],
-      "formstate-x/bindings/*": ["../src/bindings/*"]
+      "formstate-x": ["../src"]
     },
     "jsx": "react"
   }

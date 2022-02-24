@@ -2,7 +2,7 @@ import React from 'react'
 import { observable } from 'mobx'
 import { observer } from 'mobx-react'
 import { FieldState } from 'formstate-x'
-import { bindInputWithChangeEvent } from '../../react-bindings'
+import { bindInput } from '../../react-bindings'
 
 const someObservableStore = observable({
   strict: true,
@@ -34,7 +34,7 @@ export default observer(function Demo() {
       <p>
         <label>
           Name:
-          <input type="text" {...bindInputWithChangeEvent(state)} />
+          <input type="text" {...bindInput(state)} />
         </label>
         {state.hasError && <span style={errorTipStyle}>{state.error}</span>}
       </p>

@@ -11,3 +11,13 @@ export async function delayValue<T>(value: T, millisecond: number = defaultDelay
 }
 
 export function assertType<T>(_v: T) {}
+
+// https://stackoverflow.com/questions/68961864/how-does-the-equals-work-in-typescript/68963796#68963796
+export type Equal<X, Y> = (
+  (<T>() => T extends X ? 1 : 2) extends
+  (<T>() => T extends Y ? 1 : 2)
+  ? true
+  : false
+)
+
+export function assertTypeEqual<T, S>(..._args: Equal<T, S> extends true ? [] : [never]) {}

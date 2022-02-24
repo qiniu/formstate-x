@@ -511,7 +511,7 @@ describe('toV2', () => {
     it('should work well', () => {
       const stateV3 = new v3.FieldState('')
       const state = toV2(stateV3)
-      expect(state.value).toBe('')
+      expect<string>(state.value).toBe('')
       expect(state.dirty).toBe(false)
       expect<typeof stateV3>(state.$).toBe(stateV3)
     })
@@ -523,7 +523,7 @@ describe('toV2', () => {
       await delay()
       state.reset()
 
-      expect(stateV3.value).toBe('')
+      expect<string>(stateV3.value).toBe('')
       expect(stateV3.dirty).toBe(false)
       expect(state.value).toBe('')
       expect(state.dirty).toBe(false)

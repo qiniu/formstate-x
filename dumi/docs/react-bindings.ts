@@ -5,7 +5,7 @@ export interface WithValue<T> {
   value: T
 }
 
-export function bindInputWithChangeEvent<T>(state: FieldState<T>) {
+export function bindInput<T>(state: FieldState<T>) {
   return {
     value: state.value,
     onChange(e: ChangeEvent<WithValue<T>>) {

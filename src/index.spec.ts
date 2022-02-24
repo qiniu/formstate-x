@@ -1,4 +1,4 @@
-import { FieldState, FormState, ArrayFormState, TransformedState, DebouncedState, DebouncedFieldState, bindInput } from '.'
+import { FieldState, FormState, ArrayFormState, TransformedState, DebouncedState, DebouncedFieldState } from '.'
 import { defaultDelay, delay } from './testUtils'
 
 describe('FieldState', () => {
@@ -19,12 +19,6 @@ describe('ArrayFormState', () => {
   it('should be newable', () => {
     expect(typeof ArrayFormState).toBe('function')
     expect(ArrayFormState.prototype).toBeTruthy()
-  })
-})
-
-describe('bindInput', () => {
-  it('should be callable', () => {
-    expect(typeof bindInput).toBe('function')
   })
 })
 
@@ -107,7 +101,7 @@ describe('Composition', () => {
     const initialValue = '127.0.0.1:80'
     const hostState = createDebouncedHostState(initialValue)
 
-    expect(hostState.value).toBe(initialValue)
+    expect<string>(hostState.value).toBe(initialValue)
     expect(hostState.hasError).toBe(false)
 
     hostState.set('')

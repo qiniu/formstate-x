@@ -29,7 +29,7 @@ yarn add formstate-x
 ### Usage
 
 ```javascript
-import { FieldState, FormState, bindInput } from 'formstate-x'
+import { FieldState, FormState } from 'formstate-x'
 
 const form = new FormState({
   foo: new FieldState(''),
@@ -50,8 +50,8 @@ async function handleSubmit(e) {
 
 // when render (with react)
 <form onSubmit={handleSubmit}>
-  <FooInput {...bindInput(form.$.foo)}>
-  <BarInput {...bindInput(form.$.bar)}>
+  <FooInput value={form.$.foo.value} onChange={v => form.$.foo.onChange(v)}>
+  <BarInput value={form.$.bar.value} onChange={v => form.$.bar.onChange(v)}>
 </form>
 ```
 
@@ -59,7 +59,7 @@ async function handleSubmit(e) {
 
 formstate-x provides similar APIs with [formstate](https://github.com/formstate/formstate) because we like their simplicity. formstate has a very helpful document which we will recommend you to read. But there are some points of formstate that brought inconvenience to our development, and we got disagreement with formstate in related problems. That's why we build formstate-x:
 
-1. formstate uses MobX but not embracing it, which constrained its ability (related issue: [#11](https://github.com/formstate/formstate/issues/11)). formstate-x leverages MobX's power substantially, so we can easily track all dependencies when do validation, including dynamic values or dynamic valdiators. That's also why realizing cross-field validation is extremly easy with formstat-x.
+1. formstate uses MobX but not embracing it, which constrained its ability (related issue: [#11](https://github.com/formstate/formstate/issues/11)). formstate-x leverages MobX's power substantially, so we can easily track all dependencies when do validation, including dynamic values or dynamic valdiators. That's also why realizing cross-state validation is extremly easy with formstat-x.
 2. formstate mixes validated, safe value with readable value (`$`), in some cases it's not suitable to use either `$` or `value`. formstate-x provides `value` as readable value, `$` as validated and safe value and `_value` for UI binding only.
 3. formstate doesn't provide a good way to extract value from `FormState` ( related issues: [#25](https://github.com/formstate/formstate/issues/25) [#28](https://github.com/formstate/formstate/issues/28)). formstate-x provides `value` as `FormState`'s serialized value, with full type info.
 4. formstate dosen't provide a good way to disable part of a `FormState`. `FormStateLazy` is like a hack and very different concept from `FieldState` & `FormState`. formstate-x provides `disableWhen` to let you realize conditional validation with a single method call.

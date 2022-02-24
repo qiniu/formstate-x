@@ -10,8 +10,6 @@ describe('FieldState', () => {
 
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 
   it('should onChange well', async () => {
@@ -35,8 +33,6 @@ describe('FieldState', () => {
     const invalidValue = '123456'
     state.onChange(invalidValue)
     expect(state.value).toBe(invalidValue)
-
-    state.dispose()
   })
 
   it('should set well', async () => {
@@ -61,8 +57,6 @@ describe('FieldState', () => {
     await delay()
     expect(state.value).toBe(value)
     expect(state.dirty).toBe(true)
-
-    state.dispose()
   })
 
   it('should reset well', async () => {
@@ -81,8 +75,6 @@ describe('FieldState', () => {
 
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 })
 
@@ -94,8 +86,6 @@ describe('FieldState validation', () => {
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with onChange()', async () => {
@@ -112,8 +102,6 @@ describe('FieldState validation', () => {
 
     await delay()
     expect(state.error).toBe('empty')
-
-    state.dispose()
   })
 
   it('should work well with onChange of same value', async () => {
@@ -157,8 +145,6 @@ describe('FieldState validation', () => {
     const validateResult2 = await validateRet2
     expect(validateResult2.hasError).toBe(false)
     expect((validateResult2 as ValidateResultWithValue<string>).value).toBe('sth')
-
-    state.dispose()
   })
 
   it('should work well with reset()', async () => {
@@ -173,8 +159,6 @@ describe('FieldState validation', () => {
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with multiple validators', async () => {
@@ -205,8 +189,6 @@ describe('FieldState validation', () => {
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with async validator', async () => {
@@ -224,8 +206,6 @@ describe('FieldState validation', () => {
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
-
-    state.dispose()
   })
 
   it('should work well with mixed sync and async validator', async () => {
@@ -250,8 +230,6 @@ describe('FieldState validation', () => {
     await delay()
     expect(state.error).toBeUndefined()
     expect(state.hasError).toBe(false)
-
-    state.dispose()
   })
 
   it('should work well with dynamic validator', async () => {
@@ -279,8 +257,6 @@ describe('FieldState validation', () => {
     await delay()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well when add validator dynamically', async () => {
@@ -297,8 +273,6 @@ describe('FieldState validation', () => {
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too long')
-
-    state.dispose()
   })
 
   it('should work well with disableWhen()', async () => {
@@ -338,8 +312,6 @@ describe('FieldState validation', () => {
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
-
-    state.dispose()
   })
 
   it('should work well with race condition caused by validate()', async () => {

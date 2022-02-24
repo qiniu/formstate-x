@@ -4,11 +4,11 @@
  */
 
 import { ChangeEvent } from 'react'
-import { FieldState, IState, isFormState } from 'formstate-x'
+import { ArrayFormState, FieldState, FormState, IState } from 'formstate-x'
 
 // `bindFormHelperText` bind state validate status to Materail-UI `FormHelperText`
 export function bindFormHelperText(state: IState) {
-  if (isFormState(state)) {
+  if (state instanceof FormState || state instanceof ArrayFormState) {
     return {
       error: state.hasOwnError,
       children: state.ownError

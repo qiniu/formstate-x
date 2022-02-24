@@ -63,7 +63,7 @@ As we learnt from section [Reactive Validation](/guide/validation#reactive-valid
 
 ### Transformed State
 
-When we create input components based on UI inputs, these input components always provide their own business semantics which differs from the semantics of the original UI inputs. Which means, sometimes there's a gap between the business-value and the view-value for one component.
+When we create input components based on UI inputs, these input components always provide their own business semantics which differ from the semantics of the original UI inputs. Which means, sometimes there's a gap between the business-value and the view-value for one component.
 
 Let's take a component named `NumberInput` as example.
 
@@ -77,7 +77,7 @@ A typical number input is made with a normal text input to collect user input. S
 const state = new FieldState('')
 ```
 
-However, as implementation details, the `string`-type value, is not the value we would like the consumer of `NumberInput` to access. The component should behave as its name (`NumberInput`) suggests, collecting `number`-type value from user.
+However, as implementation details, the `string`-type value, is not the value we would like the consumer of `NumberInput` to access. The component should behave as its name (`NumberInput`) suggests, to collect `number`-type value from user.
 
 We need to transform the `string`-type value to number before we export it out. That's when `TransformedState` rescues:
 
@@ -101,7 +101,7 @@ In section [Conditional Validation](/guide/validation#conditional-validation), w
 
 However, sometimes we may add more than one validators for one state. It will not be convenient to add the `if` logic in each validator.
 
-Sometimes we face complex states, which composed with many child states. It's not possible to change child states' validators' logic for the parent state. `formstate-x` provides a method `disableWhen` to help with such cases.
+Sometimes we face complex states, which are composed with child states. It's not proper to change validators' logic of child states when writing logic of parent states. `formstate-x` provides a method `disableWhen` to help with such cases.
 
 Here is a demo:
 
