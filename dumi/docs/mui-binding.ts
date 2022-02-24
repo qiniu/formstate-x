@@ -4,19 +4,13 @@
  */
 
 import { ChangeEvent } from 'react'
-import { ArrayFormState, FieldState, FormState, IState } from 'formstate-x'
+import { FieldState, IState } from 'formstate-x'
 
 // `bindFormHelperText` bind state validate status to Materail-UI `FormHelperText`
 export function bindFormHelperText(state: IState) {
-  if (state instanceof FormState || state instanceof ArrayFormState) {
-    return {
-      error: state.hasOwnError,
-      children: state.ownError
-    }
-  }
   return {
-    error: !!state.error, // TODO
-    children: state.error
+    error: state.hasOwnError,
+    children: state.ownError
   }
 }
 
@@ -37,8 +31,8 @@ export function bindTextField(state: FieldState<string>) {
     onChange(e: ChangeEvent<HTMLInputElement>) {
       state.onChange(e.target.value)
     },
-    error: state.hasError,
-    helperText: state.error
+    error: state.hasOwnError,
+    helperText: state.ownError
   }
 }
 

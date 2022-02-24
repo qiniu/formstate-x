@@ -100,6 +100,7 @@ describe('fromV2', () => {
 
       expect(state.validateStatus).toBe(v3.ValidateStatus.NotValidated)
       expect(state.error).toBe(undefined)
+      expect(state.ownError).toBe(undefined)
     })
     it('should work well with onChange', async () => {
       const stateV2 = new v2.FieldState('', defaultDelay)
@@ -109,11 +110,13 @@ describe('fromV2', () => {
       await delay()
       expect(state.validateStatus).toBe(v3.ValidateStatus.Validated)
       expect(state.error).toBe(undefined)
+      expect(state.ownError).toBe(undefined)
 
       state.onChange('')
       await delay()
       expect(state.validateStatus).toBe(v3.ValidateStatus.Validated)
       expect(state.error).toBe('empty')
+      expect(state.ownError).toBe('empty')
     })
     it('should work well with v2-state onChange', async () => {
       const stateV2 = new v2.FieldState('', defaultDelay)
@@ -182,6 +185,7 @@ describe('fromV2', () => {
       expect(state.dirty).toBe(false)
       expect(state.validateStatus).toBe(v3.ValidateStatus.NotValidated)
       expect(state.error).toBe(undefined)
+      expect(state.ownError).toBe(undefined)
 
       state.dispose()
     })
@@ -202,6 +206,7 @@ describe('fromV2', () => {
       await validated
       expect(state.validateStatus).toBe(v3.ValidateStatus.WontValidate)
       expect(state.error).toBe(undefined)
+      expect(state.ownError).toBe(undefined)
 
       state.onChange('123')
       await delay()
@@ -211,11 +216,13 @@ describe('fromV2', () => {
       await delay()
       expect(state.validateStatus).toBe(v3.ValidateStatus.WontValidate)
       expect(state.error).toBe(undefined)
+      expect(state.ownError).toBe(undefined)
 
       runInAction(() => options.disabled = false)
       await delay()
       expect(state.validateStatus).toBe(v3.ValidateStatus.Validated)
       expect(state.error).toBe('empty')
+      expect(state.ownError).toBe('empty')
 
       state.dispose()
     })
@@ -330,6 +337,7 @@ describe('fromV2', () => {
 
       expect(state.validateStatus).toBe(v3.ValidateStatus.NotValidated)
       expect(state.error).toBe(undefined)
+      expect(state.ownError).toBe(undefined)
     })
     it('should work well with onChange', async () => {
       const stateV2 = createV2FormState('')
@@ -339,11 +347,13 @@ describe('fromV2', () => {
       await delay()
       expect(state.validateStatus).toBe(v3.ValidateStatus.Validated)
       expect(state.error).toBe(undefined)
+      expect(state.ownError).toBe(undefined)
 
       state.onChange({ foo: '' })
       await delay()
       expect(state.validateStatus).toBe(v3.ValidateStatus.Validated)
       expect(state.error).toBe('empty')
+      expect(state.ownError).toBe('empty')
     })
     it('should work well with v2-state onChange', async () => {
       const stateV2 = createV2FormState('')
@@ -353,11 +363,13 @@ describe('fromV2', () => {
       await delay()
       expect(state.validateStatus).toBe(v3.ValidateStatus.Validated)
       expect(state.error).toBe(undefined)
+      expect(state.ownError).toBe(undefined)
 
       stateV2.$.foo.onChange('')
       await delay()
       expect(state.validateStatus).toBe(v3.ValidateStatus.Validated)
       expect(state.error).toBe('empty')
+      expect(state.ownError).toBe('empty')
     })
     it('should work well with validate()', async () => {
       const stateV2 = createV2FormState('')
@@ -369,6 +381,7 @@ describe('fromV2', () => {
       expect(stateV2.error).toBe('empty')
       expect(state.validateStatus).toBe(v3.ValidateStatus.Validated)
       expect(state.error).toBe('empty')
+      expect(state.ownError).toBe('empty')
 
       const validateResult1 = await validateRet1
       expect(validateResult1.hasError).toBe(true)
@@ -381,6 +394,7 @@ describe('fromV2', () => {
       expect(stateV2.error).toBe(undefined)
       expect(state.validateStatus).toBe(v3.ValidateStatus.Validated)
       expect(state.error).toBe(undefined)
+      expect(state.ownError).toBe(undefined)
 
       const validateResult2 = await validateRet2
       expect(validateResult2.hasError).toBe(false)
@@ -403,6 +417,7 @@ describe('fromV2', () => {
       expect(state.dirty).toBe(false)
       expect(state.validateStatus).toBe(v3.ValidateStatus.NotValidated)
       expect(state.error).toBe(undefined)
+      expect(state.ownError).toBe(undefined)
 
       state.dispose()
     })
@@ -424,6 +439,7 @@ describe('fromV2', () => {
       await validated
       expect(state.validateStatus).toBe(v3.ValidateStatus.WontValidate)
       expect(state.error).toBe(undefined)
+      expect(state.ownError).toBe(undefined)
 
       stateV2.$.foo.onChange('123')
       await delay()
@@ -433,11 +449,13 @@ describe('fromV2', () => {
       await delay()
       expect(state.validateStatus).toBe(v3.ValidateStatus.WontValidate)
       expect(state.error).toBe(undefined)
+      expect(state.ownError).toBe(undefined)
 
       runInAction(() => options.disabled = false)
       await delay()
       expect(state.validateStatus).toBe(v3.ValidateStatus.Validated)
       expect(state.error).toBe('empty')
+      expect(state.ownError).toBe('empty')
 
       state.dispose()
     })
@@ -680,6 +698,7 @@ describe('toV2', () => {
       }
       value: V
       dirty = false
+      ownError = undefined
       error = undefined
       activated = false
       validateStatus = v3.ValidateStatus.NotValidated

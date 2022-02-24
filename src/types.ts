@@ -39,6 +39,10 @@ export interface IState<V = unknown> {
   error: Error
   /** If the state contains error. */
   hasError: boolean
+  /** The state's own error info, regardless of child states. */
+  ownError: Error
+  /** If the state contains its own error info. */
+  hasOwnError: boolean
   /** If activated (with auto-validation). */
   activated: boolean
   /** Current validate status. */
