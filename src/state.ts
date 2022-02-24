@@ -1,5 +1,5 @@
-import { action, autorun, computed, makeObservable, observable, reaction, when } from 'mobx'
-import { Error, IState, Validated, ValidateResult, ValidateStatus, ValidationResponse, Validator } from './types'
+import { action, autorun, computed, makeObservable, observable, when } from 'mobx'
+import { Error, IState, Validation, ValidateResult, ValidateStatus, ValidationResponse, Validator } from './types'
 import Disposable from './disposable'
 import { applyValidators, isPromiseLike } from './utils'
 
@@ -73,50 +73,29 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   }
 
   /** Current validation info. */
-  @observable.ref protected validation?: Validated<V>
+  protected validation?: Validation<V>
 
-  /** Do validation. */
-  protected doValidation() {
-    const value = this.value
-
-    action('set-validateStatus-when-doValidation', () => {
+  /** Do validation: run validators & apply result. */
+  protected async doValidation() {
+    action('start-validation', () => {
       this._validateStatus = ValidateStatus.Validating
     })()
 
+    // create validation by running validators
+    const value = this.value
     const response = applyValidators(value, this.validatorList)
+    const validation = this.validation = { value, response }
 
-    action('set-validation-when-doValidation', () => {
-      this.validation = { value, response }
-    })()
-  }
+    // read validation result (there may be async validators)
+    const error = isPromiseLike(response) ? await response : response
 
-  /**
-   * Apply validation.
-   */
-  protected async applyValidation() {
-    const validation = this.validation
-    if (!validation) {
-      return
-    }
+    // if validation outdated, just drop it
+    if (this.validation !== validation) return
 
-    const error = (
-      isPromiseLike(validation.response)
-      ? await validation.response
-      : validation.response
-    )
-
-    // 如果 validation 已过期，则不生效
-    if (validation !== this.validation) {
-      return
-    }
-
-    action('endValidation', () => {
+    action('end-validation', () => {
       this.validation = undefined
       this._validateStatus = ValidateStatus.Validated
-
-      if (error !== this.error) {
-        this.setError(error)
-      }
+      this.setError(error)
     })()
   }
 
@@ -176,13 +155,6 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
         this.doValidation()
       },
       { name: 'autorun-check-&-doValidation' }
-    ))
-
-    // auto apply validate result: this.validation -> this.error
-    this.addDisposer(reaction(
-      () => this.validation,
-      () => this.applyValidation(),
-      { name: 'applyValidation-when-validation-change' }
     ))
   }
 

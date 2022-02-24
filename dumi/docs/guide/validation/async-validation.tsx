@@ -1,7 +1,7 @@
 import React from 'react'
 import { observer } from 'mobx-react'
 import { FieldState } from 'formstate-x'
-import { bindInputWithChangeEvent } from '../../react-bindings'
+import { bindInput } from '../../react-bindings'
 
 function validateName(v: string) {
   return new Promise<string | false>(resolve => {
@@ -19,7 +19,7 @@ export default observer(function Demo() {
     <>
       <label>
         Name:
-        <input type="text" {...bindInputWithChangeEvent(state)} />
+        <input type="text" {...bindInput(state)} />
       </label>
       {state.validating && <span style={tipStyle}>validating...</span>}
       {state.validated && state.hasError && <span style={errorTipStyle}>{state.error}</span>}

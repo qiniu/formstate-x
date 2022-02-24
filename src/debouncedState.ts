@@ -10,7 +10,7 @@ const defaultDelay = 200 // ms
  * The state for debounce purpose.
  * Changes from the original state (`$`) will be debounced.
  */
-export class DebouncedState<S extends IState> extends ValidatableState<ValueOf<S>> implements IState<ValueOf<S>> {
+export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends ValidatableState<V> implements IState<V> {
 
   /**
    * The original state.
@@ -18,7 +18,7 @@ export class DebouncedState<S extends IState> extends ValidatableState<ValueOf<S
    */
   public $: S
 
-  @observable.ref private syncedValue!: ValueOf<S>
+  @observable.ref private syncedValue!: V
   @observable.ref private syncedDirty!: boolean
   @observable.ref private syncedActivated!: boolean
 
@@ -74,11 +74,11 @@ export class DebouncedState<S extends IState> extends ValidatableState<ValueOf<S
     return this.validateResult
   }
 
-  onChange(value: ValueOf<S>) {
+  onChange(value: V) {
     this.$.onChange(value)
   }
 
-  set(value: ValueOf<S>) {
+  set(value: V) {
     this.$.set(value)
     this.sync()
   }
@@ -126,7 +126,7 @@ export class DebouncedState<S extends IState> extends ValidatableState<ValueOf<S
  * The field state with debounce.
  * Value changes from `onChange` will be debounced.
  */
-export class DebouncedFieldState<V> extends DebouncedState<FieldState<V>> {
+export class DebouncedFieldState<V> extends DebouncedState<FieldState<V>, V> {
   constructor(initialValue: V, delay = defaultDelay) {
     super(new FieldState(initialValue), delay)
   }

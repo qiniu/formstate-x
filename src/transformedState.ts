@@ -2,15 +2,15 @@ import { computed } from 'mobx'
 import { BaseState } from './state'
 import { IState, Validator, ValueOf } from './types'
 
-export class TransformedState<S extends IState, V> extends BaseState implements IState<V> {
+export class TransformedState<S extends IState<$V>, V, $V = ValueOf<S>> extends BaseState implements IState<V> {
 
   /** The original state, whose value will be transformed. */
   public $: S
 
   constructor(
     originalState: S,
-    private parseTargetValue: (v: ValueOf<S>) => V,
-    private getTargetValue: (v: V) => ValueOf<S>
+    private parseOriginalValue: (v: $V) => V,
+    private getOriginalValue: (v: V) => $V
   ) {
     super()
     this.$ = originalState
@@ -20,7 +20,7 @@ export class TransformedState<S extends IState, V> extends BaseState implements 
   }
 
   @computed get value() {
-    return this.parseTargetValue(this.$.value)
+    return this.parseOriginalValue(this.$.value)
   }
 
   @computed get error() {
@@ -46,11 +46,11 @@ export class TransformedState<S extends IState, V> extends BaseState implements 
   }
 
   set(value: V) {
-    this.$.set(this.getTargetValue(value))
+    this.$.set(this.getOriginalValue(value))
   }
 
   onChange(value: V) {
-    this.$.onChange(this.getTargetValue(value))
+    this.$.onChange(this.getOriginalValue(value))
   }
 
   reset() {
@@ -59,7 +59,7 @@ export class TransformedState<S extends IState, V> extends BaseState implements 
 
   withValidator(...validators: Array<Validator<V>>) {
     const rawValidators = validators.map(validator => (
-      (rawValue: ValueOf<S>) => validator(this.parseTargetValue(rawValue))
+      (rawValue: $V) => validator(this.parseOriginalValue(rawValue))
     ))
     this.$.withValidator(...rawValidators)
     return this

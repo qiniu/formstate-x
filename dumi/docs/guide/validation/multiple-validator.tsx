@@ -1,7 +1,7 @@
 import React from 'react'
 import { observer } from 'mobx-react'
 import { FieldState } from 'formstate-x'
-import { bindInputWithChangeEvent } from '../../react-bindings'
+import { bindInput } from '../../react-bindings'
 
 const validateNotEmpty = (v: string) => v.trim() === '' && 'Empty'
 const validateLength = (v: string) => v.length > 5 && 'Too long'
@@ -16,7 +16,7 @@ export default observer(function Demo() {
     <>
       <label>
         Name:
-        <input type="text" {...bindInputWithChangeEvent(state)} />
+        <input type="text" {...bindInput(state)} />
       </label>
       {state.hasError && <span style={errorTipStyle}>{state.error}</span>}
     </>

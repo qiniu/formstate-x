@@ -1,5 +1,3 @@
-import { FieldState } from './fieldState'
-
 /** A truthy string or falsy values. */
 export type ValidationResponse =
   string
@@ -12,7 +10,7 @@ export type ValidatorResponse =
   ValidationResponse
   | Promise<ValidationResponse>
 
-export type Validated<TValue> = {
+export type Validation<TValue> = {
   value: TValue // value for the response
   response: ValidatorResponse // response for the value
 }
@@ -32,7 +30,7 @@ export type ValidateResultWithValue<T> = { hasError: false, value: T }
 export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
 
 /** interface for State */
-export interface IState<V = any> {
+export interface IState<V = unknown> {
   /** Value in the state. */
   value: V
   /** If value has been touched. */
@@ -79,29 +77,22 @@ export interface Disposer {
   (): void
 }
 
-/** Value of `FieldState`. */
-export type ValueOfFieldState<State> = (
-  State extends FieldState<infer TValue>
-  ? TValue
-  : never
-)
-
-/** Value of object-fields. */
-export type ValueOfObjectFields<Fields> = {
-  [FieldKey in keyof Fields]: ValueOf<Fields[FieldKey]>
+/** Value of states object. */
+export type ValueOfStatesObject<StatesObject> = {
+  [K in keyof StatesObject]: ValueOf<StatesObject[K]>
 }
 
-/** Value of state (`FormState` or `FieldState`) */
+/** Value of `IState` */
 export type ValueOf<S> = S extends IState<infer V> ? V : never
 
 /** Validate status. */
 export enum ValidateStatus {
   /** (need validation but) not validated */
-  NotValidated, // 尚未校验
+  NotValidated,
   /** current validation ongoing */
-  Validating, // 校验中
+  Validating,
   /** current validation finished */
-  Validated, // 校验完成
+  Validated,
   /** do not need to validate */
-  WontValidate // 无须校验
+  WontValidate
 }

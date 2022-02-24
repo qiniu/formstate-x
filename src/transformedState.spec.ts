@@ -68,8 +68,6 @@ describe('TransformedState (for FieldState)', () => {
 
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 
   it('should onChange well', async () => {
@@ -95,8 +93,6 @@ describe('TransformedState (for FieldState)', () => {
     state.onChange(invalidValue)
     await delay()
     expect(state.value).toBe(invalidValue)
-
-    state.dispose()
   })
 
   it('should set well', async () => {
@@ -121,8 +117,6 @@ describe('TransformedState (for FieldState)', () => {
     await delay()
     expect(state.value).toBe(value)
     expect(state.dirty).toBe(true)
-
-    state.dispose()
   })
 
   it('should reset well', async () => {
@@ -141,8 +135,6 @@ describe('TransformedState (for FieldState)', () => {
 
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 })
 
@@ -161,8 +153,6 @@ describe('TransformedState (for FieldState) validation', () => {
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with onChange()', async () => {
@@ -179,8 +169,6 @@ describe('TransformedState (for FieldState) validation', () => {
 
     await delay()
     expect(state.error).toBe('non positive')
-
-    state.dispose()
   })
 
   it('should work well with onChange of same value', async () => {
@@ -222,8 +210,6 @@ describe('TransformedState (for FieldState) validation', () => {
     const validateResult2 = await validateRet2
     expect(validateResult2.hasError).toBe(false)
     expect((validateResult2 as ValidateResultWithValue<number>).value).toBe(1)
-
-    state.dispose()
   })
 
   it('should work well with reset()', async () => {
@@ -238,8 +224,6 @@ describe('TransformedState (for FieldState) validation', () => {
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with multiple validators', async () => {
@@ -270,8 +254,6 @@ describe('TransformedState (for FieldState) validation', () => {
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with async validator', async () => {
@@ -289,8 +271,6 @@ describe('TransformedState (for FieldState) validation', () => {
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('non positive')
-
-    state.dispose()
   })
 
   it('should work well with mixed sync and async validator', async () => {
@@ -315,8 +295,6 @@ describe('TransformedState (for FieldState) validation', () => {
     await delay()
     expect(state.error).toBeUndefined()
     expect(state.hasError).toBe(false)
-
-    state.dispose()
   })
 
   it('should work well with dynamic validator', async () => {
@@ -344,8 +322,6 @@ describe('TransformedState (for FieldState) validation', () => {
     await delay()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well when add validator dynamically', async () => {
@@ -362,8 +338,6 @@ describe('TransformedState (for FieldState) validation', () => {
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('too big')
-
-    state.dispose()
   })
 
   it('should work well with disableWhen', async () => {
@@ -401,8 +375,6 @@ describe('TransformedState (for FieldState) validation', () => {
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('non positive')
-
-    state.dispose()
   })
 
 })
@@ -461,8 +433,6 @@ describe('TransformedState (for FormState)', () => {
 
     expect(state.value).toBe(initialValue)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 
   it('should set well', async () => {
@@ -480,8 +450,6 @@ describe('TransformedState (for FormState)', () => {
     expect(state.$.$.hostname.value).toBe('127.0.0.1')
     expect(state.$.$.port.value).toBe(80)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 
   it('should onChange well', async () => {
@@ -502,8 +470,6 @@ describe('TransformedState (for FormState)', () => {
     expect(state.$.$.hostname.value).toBe('127.0.0.1')
     expect(state.$.$.port.value).toBe(80)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 
   it('should reset well', async () => {
@@ -527,8 +493,6 @@ describe('TransformedState (for FormState)', () => {
     expect(state.$.$.hostname.value).toBe('127.0.0.1')
     expect(state.$.$.port.value).toBe(80)
     expect(state.dirty).toBe(false)
-
-    state.dispose()
   })
 })
 
@@ -542,8 +506,6 @@ describe('TransformedState (for FormState) validation', () => {
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   describe('should work well with onChange()', () => {
@@ -587,8 +549,6 @@ describe('TransformedState (for FormState) validation', () => {
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
-
-    state.dispose()
   })
 
   it('should work well with validate()', async () => {
@@ -620,8 +580,6 @@ describe('TransformedState (for FormState) validation', () => {
     const validateResult2 = await validateRet2
     expect(validateResult2.hasError).toBe(false)
     expect((validateResult2 as ValidateResultWithValue<string>).value).toEqual('qiniu.com')
-
-    state.dispose()
   })
 
   it('should work well with reset()', async () => {
@@ -637,8 +595,6 @@ describe('TransformedState (for FormState) validation', () => {
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 
   it('should work well with disableWhen', async () => {
@@ -681,7 +637,5 @@ describe('TransformedState (for FormState) validation', () => {
     await state.validate()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
-
-    state.dispose()
   })
 })

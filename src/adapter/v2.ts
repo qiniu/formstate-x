@@ -106,7 +106,7 @@ class Downgrader<T extends v3.IState<V>, V> extends BaseState implements IV2Stat
 }
 
 /** Convets formstate-x@v3.x state to formstate-x@v2.x state */
-export function toV2<T extends v3.IState<unknown>>(state: T): IV2StateFromV3<T, T['value']> {
+export function toV2<T extends v3.IState>(state: T): IV2StateFromV3<T, T['value']> {
   return new Downgrader(state)
 }
 
