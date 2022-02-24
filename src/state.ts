@@ -93,6 +93,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
     if (this.validation !== validation) return
 
     action('end-validation', () => {
+      this.validation = undefined
       this._validateStatus = ValidateStatus.Validated
       this.setError(error)
     })()
