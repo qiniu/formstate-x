@@ -36,20 +36,20 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
     return this.syncedDirty
   }
 
+  @override override get ownError() {
+    if (this.disabled) return undefined
+    if (this._error) return this._error
+    return this.$.ownError
+  }
+
   @override override get error() {
-    if (this.disabled) {
-      return undefined
-    }
-    if (this._error) {
-      return this._error
-    }
+    if (this.disabled) return undefined
+    if (this.ownError) return this.ownError
     return this.$.error
   }
 
   @override override get validateStatus() {
-    if (this.disabled) {
-      return ValidateStatus.WontValidate
-    }
+    if (this.disabled) return ValidateStatus.WontValidate
     if (
       this._validateStatus === ValidateStatus.Validating
       || this.$.validateStatus === ValidateStatus.Validating
@@ -83,12 +83,8 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
     this.sync()
   }
 
-  @action reset() {
-    this.activated = false
-    this._validateStatus = ValidateStatus.NotValidated
-    this._error = undefined
-    this.validation = undefined
-
+  @override override reset() {
+    super.reset()
     this.$.reset()
     this.sync()
   }

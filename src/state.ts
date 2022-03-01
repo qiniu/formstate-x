@@ -5,13 +5,19 @@ import { applyValidators, isPromiseLike } from './utils'
 
 /** Extraction for some basic features of State */
 export abstract class BaseState extends Disposable implements Pick<
-  IState, 'error' | 'hasError' | 'validateStatus' | 'validating' | 'validated'
+  IState, 'ownError' | 'hasOwnError' | 'error' | 'hasError' | 'validateStatus' | 'validating' | 'validated'
 > {
 
   abstract error: Error
 
   @computed get hasError() {
     return !!this.error
+  }
+
+  abstract ownError: Error
+
+  @computed get hasOwnError() {
+    return !!this.ownError
   }
 
   abstract validateStatus: ValidateStatus
@@ -37,7 +43,6 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   abstract dirty: boolean
   abstract onChange(value: V): void
   abstract set(value: V): void
-  abstract reset(): void
 
   /** The original validate status (regardless of `validationDisabled`) */
   @observable protected _validateStatus: ValidateStatus = ValidateStatus.NotValidated
@@ -53,8 +58,12 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
    */
   @observable protected _error: Error
 
-  @computed get error() {
+  @computed get ownError() {
     return this.disabled ? undefined : this._error
+  }
+
+  @computed get error() {
+    return this.ownError
   }
 
   /**
@@ -145,6 +154,13 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   @action disableWhen(predictFn: () => boolean) {
     this.shouldDisable = predictFn
     return this
+  }
+
+  @action reset() {
+    this.activated = false
+    this._validateStatus = ValidateStatus.NotValidated
+    this._error = undefined
+    this.validation = undefined
   }
 
   protected init() {
