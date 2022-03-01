@@ -2,6 +2,7 @@ import { action, computed, makeObservable } from 'mobx'
 import * as v2 from 'formstate-x-v2'
 import { BaseState } from '../state'
 import * as v3 from '..'
+import Disposable from '../disposable'
 
 interface IV3StateFromV2<T extends v2.ComposibleValidatable<unknown, V>, V> extends v3.IState<V> {
   /** The original (formstate-x@v2.x) state */
@@ -23,6 +24,9 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
 
   @computed get value() { return this.stateV2.value }
   @computed get dirty() { return this.stateV2.dirty }
+  @computed get ownError() {
+    return getV3OwnError(this.stateV2)
+  }
   @computed get error() { return this.stateV2.error }
   @computed get activated() { return this.stateV2._activated }
   @computed get validateStatus() {
@@ -70,7 +74,7 @@ interface IV2StateFromV3<T extends v3.IState<V>, V> extends v2.ComposibleValidat
   $: T
 }
 
-class Downgrader<T extends v3.IState<V>, V> extends BaseState implements IV2StateFromV3<T, V> {
+class Downgrader<T extends v3.IState<V>, V> extends Disposable implements IV2StateFromV3<T, V> {
   constructor(private stateV3: T) {
     super()
     makeObservable(this)
@@ -85,6 +89,9 @@ class Downgrader<T extends v3.IState<V>, V> extends BaseState implements IV2Stat
 
   @computed get value() { return this.stateV3.value }
   @computed get error() { return this.stateV3.error }
+  @computed get hasError() {
+    return !!this.error
+  }
 
   @computed get validationDisabled() {
     return this.stateV3.validateStatus === v3.ValidateStatus.WontValidate
@@ -99,15 +106,27 @@ class Downgrader<T extends v3.IState<V>, V> extends BaseState implements IV2Stat
     return getV2ValidateStatus(this.stateV3)
   }
 
-  // for BaseState
-  @computed get validateStatus() {
-    return this.stateV3.validateStatus
+  @computed get validating() {
+    return this.stateV3.validateStatus === v3.ValidateStatus.Validating
+  }
+  @computed get validated() {
+    return this.stateV3.validateStatus === v3.ValidateStatus.Validated
   }
 }
 
 /** Convets formstate-x@v3.x state to formstate-x@v2.x state */
 export function toV2<T extends v3.IState>(state: T): IV2StateFromV3<T, T['value']> {
   return new Downgrader(state)
+}
+
+function getV3OwnError(stateV2: v2.ComposibleValidatable<unknown>) {
+  if (isV2FormState(stateV2)) {
+    return stateV2.ownError
+  }
+  if (isV2FieldState(stateV2)) {
+    return stateV2.error
+  }
+  throwNotSupported()
 }
 
 function getV3ValidateStatus(stateV2: v2.ComposibleValidatable<unknown>): v3.ValidateStatus {

@@ -1,5 +1,5 @@
 import { observable, computed, isObservable, action, reaction, makeObservable, override } from 'mobx'
-import { IState, ValidateStatus, Error, ValidateResult, ValueOfStatesObject } from './types'
+import { IState, ValidateStatus, ValidateResult, ValueOfStatesObject } from './types'
 import { ValidatableState } from './state'
 
 abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IState<V> {
@@ -32,26 +32,13 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
     return ValidateStatus.NotValidated
   }
 
-  /** The state's own error info, regardless of child states. */
-  @computed get ownError(): Error {
-    if (this.disabled) {
-      return undefined
-    }
-    return this._error
-  }
-
-  /** If the state contains own errir error. */
-  @computed get hasOwnError() {
-    return !!this.ownError
-  }
-
   /** The error info of validation (including child states' error info). */
   @override override get error() {
     if (this.disabled) {
       return undefined
     }
-    if (this._error) {
-      return this._error
+    if (this.ownError) {
+      return this.ownError
     }
     for (const state of this.childStates) {
       if (state.error) {
@@ -61,11 +48,11 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
   }
 
   /** If reference of child states has been touched. */
-  @observable protected _dirty = false
+  @observable protected ownDirty = false
 
   @computed get dirty() {
     return (
-      this._dirty
+      this.ownDirty
       || this.childStates.some(state => state.dirty)
     )
   }
@@ -73,13 +60,9 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
   /** Reset child states. */
   protected abstract resetChildStates(): void
 
-  @action reset() {
-    this.activated = false
-    this._validateStatus = ValidateStatus.NotValidated
-    this._error = undefined
-    this.validation = undefined
-    this._dirty = false
-
+  @override override reset() {
+    super.reset()
+    this.ownDirty = false
     this.resetChildStates()
   }
 
@@ -221,13 +204,13 @@ export class ArrayFormState<
     this.childStates.splice(fromIndex, num).forEach(state => {
       state.dispose()
     })
-    this._dirty = true
+    this.ownDirty = true
   }
 
   private _insert(fromIndex: number, ...childValues: V[]) {
     const states = childValues.map(this.createChildState)
     this.childStates.splice(fromIndex, 0, ...states)
-    this._dirty = true
+    this.ownDirty = true
   }
 
   private _set(value: V[], withOnChange = false) {
@@ -298,7 +281,7 @@ export class ArrayFormState<
 
     const [state] = this.childStates.splice(fromIndex, 1)
     this.childStates.splice(toIndex, 0, state)
-    this._dirty = true
+    this.ownDirty = true
     this.activated = true
   }
 

@@ -1,4 +1,4 @@
-import { observable, runInAction, when } from 'mobx'
+import { action, observable, runInAction, when } from 'mobx'
 import { ValidateResultWithError, ValidateResultWithValue } from './types'
 import { TransformedState } from './transformedState'
 import { FieldState } from './fieldState'
@@ -153,6 +153,8 @@ describe('TransformedState (for FieldState) validation', () => {
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
   })
 
   it('should work well with onChange()', async () => {
@@ -162,6 +164,7 @@ describe('TransformedState (for FieldState) validation', () => {
     await delay()
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
+    expect(state.hasOwnError).toBe(true)
 
     state.onChange(2)
     state.onChange(3)
@@ -169,6 +172,7 @@ describe('TransformedState (for FieldState) validation', () => {
 
     await delay()
     expect(state.error).toBe('non positive')
+    expect(state.ownError).toBe('non positive')
   })
 
   it('should work well with onChange of same value', async () => {
@@ -224,6 +228,8 @@ describe('TransformedState (for FieldState) validation', () => {
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
   })
 
   it('should work well with multiple validators', async () => {
@@ -358,6 +364,8 @@ describe('TransformedState (for FieldState) validation', () => {
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
 
     state.onChange(10)
     await delay()
@@ -370,11 +378,15 @@ describe('TransformedState (for FieldState) validation', () => {
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
 
     runInAction(() => options.disabled = false)
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('non positive')
+    expect(state.hasOwnError).toBe(true)
+    expect(state.ownError).toBe('non positive')
   })
 
 })
@@ -497,6 +509,78 @@ describe('TransformedState (for FormState)', () => {
 })
 
 describe('TransformedState (for FormState) validation', () => {
+  it('should work well', async () => {
+    const ctrl = observable({
+      hasFooError: false,
+      hasFormError: false,
+      hasTransformedFormError: false
+    })
+    const fooState = new FieldState('').withValidator(() => ctrl.hasFooError && 'foo error')
+    const formState = new FormState({ foo: fooState }).withValidator(() => ctrl.hasFormError && 'form error')
+    const state = new TransformedState(formState, v => v, v => v).withValidator(
+      () => ctrl.hasTransformedFormError && 'form error'
+    )
+    await state.validate()
+    expect(state.ownError).toBe(undefined)
+    expect(state.error).toBe(undefined)
+
+    action(() => {
+      ctrl.hasFooError = true
+      ctrl.hasFormError = false
+      ctrl.hasTransformedFormError = false
+    })()
+    expect(state.ownError).toBe(undefined)
+    expect(state.error).toBe('foo error')
+
+    action(() => {
+      ctrl.hasFooError = false
+      ctrl.hasFormError = true
+      ctrl.hasTransformedFormError = false
+    })()
+    expect(state.ownError).toBe('form error')
+    expect(state.error).toBe('form error')
+
+    action(() => {
+      ctrl.hasFooError = false
+      ctrl.hasFormError = false
+      ctrl.hasTransformedFormError = true
+    })()
+    expect(state.ownError).toBe('form error')
+    expect(state.error).toBe('form error')
+
+    action(() => {
+      ctrl.hasFooError = true
+      ctrl.hasFormError = true
+      ctrl.hasTransformedFormError = false
+    })()
+    expect(state.ownError).toBe('form error')
+    expect(state.error).toBe('form error')
+
+    action(() => {
+      ctrl.hasFooError = true
+      ctrl.hasFormError = false
+      ctrl.hasTransformedFormError = true
+    })()
+    expect(state.ownError).toBe('form error')
+    expect(state.error).toBe('form error')
+
+    action(() => {
+      ctrl.hasFooError = false
+      ctrl.hasFormError = true
+      ctrl.hasTransformedFormError = true
+    })()
+    expect(state.ownError).toBe('form error')
+    expect(state.error).toBe('form error')
+
+    action(() => {
+      ctrl.hasFooError = true
+      ctrl.hasFormError = true
+      ctrl.hasTransformedFormError = true
+    })()
+    expect(state.ownError).toBe('form error')
+    expect(state.error).toBe('form error')
+  })
+
   it('should work well when initialized', async () => {
     const state = createHostState('127.0.0.1:80').withValidator(
       v => !v && 'empty'
@@ -506,6 +590,8 @@ describe('TransformedState (for FormState) validation', () => {
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
   })
 
   describe('should work well with onChange()', () => {
@@ -520,11 +606,13 @@ describe('TransformedState (for FormState) validation', () => {
       expect(state.validating).toBe(false)
       expect(state.hasError).toBe(true)
       expect(state.error).toBe('empty')
+      expect(state.hasOwnError).toBe(true)
+      expect(state.ownError).toBe('empty')
 
       state.dispose()
     })
 
-    it('and field validator', async () => {
+    it('and child state validator', async () => {
       const state = createHostState('127.0.0.1:80')
       state.$.$.hostname.withValidator(v => !v && 'empty')
 
@@ -533,12 +621,14 @@ describe('TransformedState (for FormState) validation', () => {
       expect(state.validating).toBe(false)
       expect(state.hasError).toBe(true)
       expect(state.error).toBe('empty')
+      expect(state.hasOwnError).toBe(false)
+      expect(state.ownError).toBe(undefined)
 
       state.dispose()
     })
   })
 
-  it('should work well with fields onChange()', async () => {
+  it('should work well with child states onChange()', async () => {
     const state = createHostState('127.0.0.1').withValidator(
       v => !v && 'empty'
     )
@@ -549,6 +639,8 @@ describe('TransformedState (for FormState) validation', () => {
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
+    expect(state.hasOwnError).toBe(true)
+    expect(state.ownError).toBe('empty')
   })
 
   it('should work well with validate()', async () => {
@@ -621,21 +713,29 @@ describe('TransformedState (for FormState) validation', () => {
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
 
     state.$.$.hostname.onChange('')
     await state.validate()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
 
     options.updateDisabled(false)
 
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
+    expect(state.hasOwnError).toBe(true)
+    expect(state.ownError).toBe('empty')
 
     state.$.$.hostname.onChange('qiniu.com')
     await state.validate()
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
   })
 })

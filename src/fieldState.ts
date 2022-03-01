@@ -1,5 +1,5 @@
-import { observable, computed, action, makeObservable } from 'mobx'
-import { IState, ValidateStatus } from './types'
+import { observable, computed, action, makeObservable, override } from 'mobx'
+import { IState } from './types'
 import { is } from './utils'
 import { ValidatableState } from './state'
 
@@ -19,12 +19,9 @@ export class FieldState<V> extends ValidatableState<V> implements IState<V> {
     this.value = value
   }
 
-  @action reset() {
+  @override override reset() {
+    super.reset()
     this.value = this.initialValue
-    this.activated = false
-    this._validateStatus = ValidateStatus.NotValidated
-    this._error = undefined
-    this.validation = undefined
   }
 
   @computed get dirty() {

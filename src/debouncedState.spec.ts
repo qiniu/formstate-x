@@ -1,4 +1,4 @@
-import { when, observable, runInAction } from 'mobx'
+import { when, observable, runInAction, action } from 'mobx'
 import { DebouncedState, DebouncedFieldState } from './debouncedState'
 import { ValidateResultWithError, ValidateResultWithValue, ValidateStatus } from './types'
 import { defaultDelay, delay, delayValue } from './testUtils'
@@ -76,6 +76,80 @@ describe('DebouncedState', () => {
 
   it('should dispose well', () => {
     new DebouncedState(new FieldState('')).dispose()
+  })
+})
+
+describe('DebouncedState validation', () => {
+  it('should work well with FormState', async () => {
+    const ctrl = observable({
+      hasFooError: false,
+      hasFormError: false,
+      hasDebouncedFormError: false
+    })
+    const fooState = new FieldState('').withValidator(() => ctrl.hasFooError && 'foo error')
+    const formState = new FormState({ foo: fooState }).withValidator(() => ctrl.hasFormError && 'form error')
+    const state = new DebouncedState(formState, defaultDelay).withValidator(
+      () => ctrl.hasDebouncedFormError && 'form error'
+    )
+    await state.validate()
+    expect(state.ownError).toBe(undefined)
+    expect(state.error).toBe(undefined)
+
+    action(() => {
+      ctrl.hasFooError = true
+      ctrl.hasFormError = false
+      ctrl.hasDebouncedFormError = false
+    })()
+    expect(state.ownError).toBe(undefined)
+    expect(state.error).toBe('foo error')
+
+    action(() => {
+      ctrl.hasFooError = false
+      ctrl.hasFormError = true
+      ctrl.hasDebouncedFormError = false
+    })()
+    expect(state.ownError).toBe('form error')
+    expect(state.error).toBe('form error')
+
+    action(() => {
+      ctrl.hasFooError = false
+      ctrl.hasFormError = false
+      ctrl.hasDebouncedFormError = true
+    })()
+    expect(state.ownError).toBe('form error')
+    expect(state.error).toBe('form error')
+
+    action(() => {
+      ctrl.hasFooError = true
+      ctrl.hasFormError = true
+      ctrl.hasDebouncedFormError = false
+    })()
+    expect(state.ownError).toBe('form error')
+    expect(state.error).toBe('form error')
+
+    action(() => {
+      ctrl.hasFooError = true
+      ctrl.hasFormError = false
+      ctrl.hasDebouncedFormError = true
+    })()
+    expect(state.ownError).toBe('form error')
+    expect(state.error).toBe('form error')
+
+    action(() => {
+      ctrl.hasFooError = false
+      ctrl.hasFormError = true
+      ctrl.hasDebouncedFormError = true
+    })()
+    expect(state.ownError).toBe('form error')
+    expect(state.error).toBe('form error')
+
+    action(() => {
+      ctrl.hasFooError = true
+      ctrl.hasFormError = true
+      ctrl.hasDebouncedFormError = true
+    })()
+    expect(state.ownError).toBe('form error')
+    expect(state.error).toBe('form error')
   })
 })
 
@@ -242,6 +316,8 @@ describe('DebouncedFieldState validation', () => {
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
   })
 
   it('should work well with onChange()', async () => {
@@ -261,6 +337,7 @@ describe('DebouncedFieldState validation', () => {
 
     await delay()
     expect(state.error).toBe('empty')
+    expect(state.ownError).toBe('empty')
   })
 
   it('should work well with onChange of same value', async () => {
@@ -419,6 +496,8 @@ describe('DebouncedFieldState validation', () => {
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
 
     state.$.onChange('123')
     await delay()
@@ -431,11 +510,15 @@ describe('DebouncedFieldState validation', () => {
     expect(state.validated).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
+    expect(state.hasOwnError).toBe(false)
+    expect(state.ownError).toBeUndefined()
 
     runInAction(() => options.disabled = false)
     await delay()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
+    expect(state.hasOwnError).toBe(true)
+    expect(state.ownError).toBe('empty')
   })
 
   it('should work well with race condition caused by validate()', async () => {
