@@ -123,7 +123,10 @@ function getV3OwnError(stateV2: v2.ComposibleValidatable<unknown>) {
   if (isV2FormState(stateV2)) {
     return stateV2.ownError
   }
-  return stateV2.error
+  if (isV2FieldState(stateV2)) {
+    return stateV2.error
+  }
+  throwNotSupported()
 }
 
 function getV3ValidateStatus(stateV2: v2.ComposibleValidatable<unknown>): v3.ValidateStatus {

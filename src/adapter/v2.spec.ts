@@ -515,6 +515,11 @@ describe('fromV2', () => {
       expect(() => state.withValidator(() => 'boom')).toThrowError('Operation not supported.')
       expect(() => state.disableWhen(() => true)).toThrowError('Operation not supported.')
     })
+    it('should throw with unknown state\'s ownError', () => {
+      const stateV2 = new V2DumbState('')
+      const state = fromV2(stateV2)
+      expect(() => state.ownError).toThrowError('Operation not supported.')
+    })
     it('should throw with unknown validate status', () => {
       const stateV2 = new V2DumbState('')
       stateV2._validateStatus = -1
