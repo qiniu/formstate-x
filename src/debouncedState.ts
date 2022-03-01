@@ -83,7 +83,7 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
     this.sync()
   }
 
-  override reset() {
+  @override override reset() {
     super.reset()
     this.$.reset()
     this.sync()

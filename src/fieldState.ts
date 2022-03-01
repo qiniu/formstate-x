@@ -1,4 +1,4 @@
-import { observable, computed, action, makeObservable } from 'mobx'
+import { observable, computed, action, makeObservable, override } from 'mobx'
 import { IState } from './types'
 import { is } from './utils'
 import { ValidatableState } from './state'
@@ -19,7 +19,7 @@ export class FieldState<V> extends ValidatableState<V> implements IState<V> {
     this.value = value
   }
 
-  override reset() {
+  @override override reset() {
     super.reset()
     this.value = this.initialValue
   }

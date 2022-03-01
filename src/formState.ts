@@ -60,7 +60,7 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
   /** Reset child states. */
   protected abstract resetChildStates(): void
 
-  override reset() {
+  @override override reset() {
     super.reset()
     this.ownDirty = false
     this.resetChildStates()
