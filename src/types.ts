@@ -1,26 +1,21 @@
-/** A truthy string or falsy values. */
-export type ValidationResponse =
+/** Result of validation. */
+export type ValidationResult =
   string
   | null
   | undefined
   | false
 
-/** The return value of a validator. */
-export type ValidatorResponse = 
-  ValidationResponse
-  | Promise<ValidationResponse>
+/** Return value of validator. */
+export type ValidatorReturned = 
+  ValidationResult
+  | Promise<ValidationResult>
+
+/** A validator checks if given value is valid. **/
+export type Validator<T> = (value: T) => ValidatorReturned
 
 export type Validation<TValue> = {
-  value: TValue // value for the response
-  response: ValidatorResponse // response for the value
-}
-
-/**
- * A validator simply takes a value and returns a string or Promise<string>
- * If a truthy string is returned it represents a validation error
- **/
-export interface Validator<TValue> {
-  (value: TValue): ValidatorResponse
+  value: TValue // value for the validation
+  returned: ValidatorReturned // result of applying validators
 }
 
 export type Error = string | undefined
@@ -65,7 +60,7 @@ export interface IState<V = unknown> {
   /** Append validator(s). */
   withValidator(...validators: Array<Validator<V>>): this
   /**
-   * Configure when state will be disabled, which means:
+   * Configure when state should be disabled, which means:
    * - corresponding UI is invisible or disabled
    * - state value do not need to (and will not) be validated
    * - state `onChange` will not be called

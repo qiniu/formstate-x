@@ -1,7 +1,7 @@
 import { action, autorun, computed, makeObservable, observable, when } from 'mobx'
-import { Error, IState, Validation, ValidateResult, ValidateStatus, ValidationResponse, Validator } from './types'
+import { Error, IState, Validation, ValidateResult, ValidateStatus, Validator } from './types'
 import Disposable from './disposable'
-import { applyValidators, isPromiseLike } from './utils'
+import { applyValidators, isValid, isPromiseLike } from './utils'
 
 /** Extraction for some basic features of State */
 export abstract class BaseState extends Disposable implements Pick<
@@ -69,8 +69,8 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   /**
    * Set error info.
    */
-  @action setError(error: ValidationResponse) {
-    this._error = error ? error : undefined
+  @action setError(error: Error) {
+    this._error = error
   }
 
   /** List of validator functions. */
@@ -92,11 +92,11 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
 
     // create validation by running validators
     const value = this.value
-    const response = applyValidators(value, this.validatorList)
-    const validation = this.validation = { value, response }
+    const returned = applyValidators(value, this.validatorList)
+    const validation = this.validation = { value, returned }
 
     // read validation result (there may be async validators)
-    const error = isPromiseLike(response) ? await response : response
+    const result = isPromiseLike(returned) ? await returned : returned
 
     // if validation outdated, just drop it
     if (this.validation !== validation) return
@@ -104,7 +104,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
     action('end-validation', () => {
       this.validation = undefined
       this._validateStatus = ValidateStatus.Validated
-      this.setError(error)
+      this.setError(isValid(result) ? undefined : result)
     })()
   }
 
