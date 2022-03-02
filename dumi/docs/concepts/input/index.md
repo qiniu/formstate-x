@@ -18,7 +18,7 @@ A input is a part of an application, which collects info from user interaction. 
 
 We will introduce general inputs' API based on [React.js](https://reactjs.org/). It will not be very different in other UI frameworks like [Vue.js](https://vuejs.org/) or [Angular](https://angular.io/).
 
-In a React.js application, a [(controlled) input component](https://reactjs.org/docs/forms.html#controlled-components) always provides a API like:
+In a React.js application, a [(controlled) input component](https://reactjs.org/docs/forms.html#controlled-components) always provides an API like:
 
 ```ts
 type Props<T> = {

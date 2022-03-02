@@ -33,7 +33,7 @@ export interface IState<V> {
   withValidator(...validators: Array<Validator<V>>): this
   /** Fire a validation behavior imperatively. */
   validate(): Promise<ValidateResult<V>>
-  /** Configure when state should be disabled */
+  /** Configure when state should be disabled. */
   disableWhen(predictFn: () => boolean): this
 }
 ```
