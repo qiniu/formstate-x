@@ -26,9 +26,9 @@ export interface IState<V> {
   /** Current validate status. */
   validateStatus: ValidateStatus
   /** The error info of validation. */
-  error: Error
+  error: ValidationError
   /** The state's own error info, regardless of child states. */
-  ownError: Error
+  ownError: ValidationError
   /** Append validator(s). */
   withValidator(...validators: Array<Validator<V>>): this
   /** Fire a validation behavior imperatively. */
