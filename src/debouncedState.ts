@@ -6,6 +6,9 @@ import { debounce } from './utils'
 
 const defaultDelay = 200 // ms
 
+/** Infomation synced from original state */
+type OriginalInfo<V> = Pick<IState<V>, 'activated' | 'touched' | 'error' | 'ownError'>
+
 /**
  * The state for debounce purpose.
  * Changes from the original state (`$`) will be debounced.
@@ -18,34 +21,45 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
    */
   public $: S
 
-  @observable.ref private syncedValue!: V
-  @observable.ref private syncedTouched!: boolean
-  @observable.ref private syncedActivated!: boolean
+  /** Debounced version of original value */
+  @observable.ref value!: V
 
-  @action private sync() {
-    this.syncedValue = this.$.value
-    this.syncedTouched = this.$.touched
-    this.syncedActivated = this.$.activated
+  /** Orignal information, same version with current `value` */
+  @observable.ref private synced!: OriginalInfo<V>
+
+  /** Original information for current `value` */
+  @computed private get original(): OriginalInfo<V> {
+    // If current `value` & original value are the same,
+    // the direct information from original state is correct and newest for current value
+    if (Object.is(this.$.value, this.value)) return this.$
+    return this.synced
   }
 
-  @computed get value() {
-    return this.syncedValue
+  /** Sync value and related information from original state */
+  @action private sync() {
+    this.value = this.$.value
+    this.synced = {
+      activated: this.$.activated,
+      touched: this.$.touched,
+      error: this.$.error,
+      ownError: this.$.ownError
+    }
   }
 
   @computed get touched() {
-    return this.syncedTouched
+    return this.original.touched
   }
 
   @override override get ownError() {
     if (this.disabled) return undefined
     if (this._error) return this._error
-    return this.$.ownError
+    return this.original.ownError
   }
 
   @override override get error() {
     if (this.disabled) return undefined
     if (this.ownError) return this.ownError
-    return this.$.error
+    return this.original.error
   }
 
   @override override get validateStatus() {
@@ -106,8 +120,8 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
     ))
 
     this.addDisposer(reaction(
-      () => this.syncedActivated,
-      syncedActivated => syncedActivated && !this.activated && (this.activated = syncedActivated),
+      () => this.original.activated,
+      originalActivated => originalActivated && !this.activated && (this.activated = originalActivated),
       { fireImmediately: true, name: 'activate-when-original-state-activated' }
     ))
 
