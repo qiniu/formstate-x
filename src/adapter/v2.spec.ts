@@ -13,7 +13,7 @@ describe('fromV2', () => {
       const state = fromV2(stateV2)
 
       expect(state.value).toBe('')
-      expect(state.dirty).toBe(false)
+      expect(state.touched).toBe(false)
       expect(state.activated).toBe(false)
       expect<typeof stateV2>(state.$).toBe(stateV2)
     })
@@ -25,7 +25,7 @@ describe('fromV2', () => {
       stateV2.onChange('foo')
 
       await delay()
-      expect(state.dirty).toBe(true)
+      expect(state.touched).toBe(true)
       expect(state.value).toBe('foo')
       expect(state.activated).toBe(true)
 
@@ -35,7 +35,7 @@ describe('fromV2', () => {
       expect(stateV2._value).toBe('bar')
       expect(stateV2.value).toBe('bar')
       expect(stateV2.$).toBe('bar')
-      expect(state.dirty).toBe(true)
+      expect(state.touched).toBe(true)
       expect(state.value).toBe('bar')
     })
 
@@ -44,7 +44,7 @@ describe('fromV2', () => {
       const state = fromV2(stateV2)
 
       stateV2.set('foo')
-      expect(state.dirty).toBe(true)
+      expect(state.touched).toBe(true)
       expect(state.value).toBe('foo')
       expect(state.activated).toBe(false)
 
@@ -52,7 +52,7 @@ describe('fromV2', () => {
       expect(stateV2.dirty).toBe(true)
       expect(stateV2._value).toBe('bar')
       expect(stateV2.value).toBe('bar')
-      expect(state.dirty).toBe(true)
+      expect(state.touched).toBe(true)
       expect(state.value).toBe('bar')
       expect(state.activated).toBe(false)
     })
@@ -69,7 +69,7 @@ describe('fromV2', () => {
       expect(stateV2.value).toBe(initialValue)
       expect(stateV2.dirty).toBe(false)
       expect(state.value).toBe(initialValue)
-      expect(state.dirty).toBe(false)
+      expect(state.touched).toBe(false)
       expect(state.activated).toBe(false)
 
       state.onChange('456')
@@ -78,7 +78,7 @@ describe('fromV2', () => {
       expect(stateV2.value).toBe(initialValue)
       expect(stateV2.dirty).toBe(false)
       expect(state.value).toBe(initialValue)
-      expect(state.dirty).toBe(false)
+      expect(state.touched).toBe(false)
       expect(state.activated).toBe(false)
 
       state.dispose()
@@ -182,7 +182,7 @@ describe('fromV2', () => {
       expect(stateV2._validateStatus).toBe(v2.ValidateStatus.NotValidated)
       expect(stateV2.error).toBe(undefined)
       expect(state.value).toBe(initialValue)
-      expect(state.dirty).toBe(false)
+      expect(state.touched).toBe(false)
       expect(state.validateStatus).toBe(v3.ValidateStatus.NotValidated)
       expect(state.error).toBe(undefined)
       expect(state.ownError).toBe(undefined)
@@ -241,7 +241,7 @@ describe('fromV2', () => {
       const state = fromV2(stateV2)
 
       expect(state.value).toEqual({ foo: '' })
-      expect(state.dirty).toBe(false)
+      expect(state.touched).toBe(false)
       expect(state.activated).toBe(false)
       expect<typeof stateV2>(state.$).toBe(stateV2)
     })
@@ -253,7 +253,7 @@ describe('fromV2', () => {
       state.onChange({ foo: 'foo' })
 
       await delay()
-      expect(state.dirty).toBe(true)
+      expect(state.touched).toBe(true)
       expect(state.value).toEqual({ foo: 'foo' })
       expect(state.activated).toBe(true)
 
@@ -264,7 +264,7 @@ describe('fromV2', () => {
       expect(stateV2.$.foo.value).toBe('bar')
       expect(stateV2.dirty).toBe(true)
       expect(stateV2.value).toEqual({ foo: 'bar' })
-      expect(state.dirty).toBe(true)
+      expect(state.touched).toBe(true)
       expect(state.value).toEqual({ foo: 'bar' })
       expect(state.activated).toBe(true)
     })
@@ -274,7 +274,7 @@ describe('fromV2', () => {
       const state = fromV2(stateV2)
 
       state.set({ foo: 'foo' })
-      expect(state.dirty).toBe(true)
+      expect(state.touched).toBe(true)
       expect(state.value).toEqual({ foo: 'foo' })
       expect(state.activated).toBe(false)
 
@@ -283,7 +283,7 @@ describe('fromV2', () => {
       expect(stateV2.$.foo.value).toBe('bar')
       expect(stateV2.dirty).toBe(true)
       expect(stateV2.value).toEqual({ foo: 'bar' })
-      expect(state.dirty).toBe(true)
+      expect(state.touched).toBe(true)
       expect(state.value).toEqual({ foo: 'bar' })
       expect(state.activated).toBe(false)
     })
@@ -299,7 +299,7 @@ describe('fromV2', () => {
       expect(stateV2.value).toEqual({ foo: '' })
       expect(stateV2.dirty).toBe(false)
       expect(state.value).toEqual({ foo: '' })
-      expect(state.dirty).toBe(false)
+      expect(state.touched).toBe(false)
       expect(state.activated).toBe(false)
 
       state.onChange({ foo: 'bar' })
@@ -308,7 +308,7 @@ describe('fromV2', () => {
       expect(stateV2.value).toEqual({ foo: '' })
       expect(stateV2.dirty).toBe(false)
       expect(state.value).toEqual({ foo: '' })
-      expect(state.dirty).toBe(false)
+      expect(state.touched).toBe(false)
       expect(state.activated).toBe(false)
 
       state.dispose()
@@ -414,7 +414,7 @@ describe('fromV2', () => {
       expect(stateV2._validateStatus).toBe(v2.ValidateStatus.NotValidated)
       expect(stateV2.error).toBe(undefined)
       expect(state.value).toEqual(initialValue)
-      expect(state.dirty).toBe(false)
+      expect(state.touched).toBe(false)
       expect(state.validateStatus).toBe(v3.ValidateStatus.NotValidated)
       expect(state.error).toBe(undefined)
       expect(state.ownError).toBe(undefined)
@@ -547,7 +547,7 @@ describe('toV2', () => {
       state.reset()
 
       expect<string>(stateV3.value).toBe('')
-      expect(stateV3.dirty).toBe(false)
+      expect(stateV3.touched).toBe(false)
       expect(state.value).toBe('')
       expect(state.dirty).toBe(false)
       expect(state._activated).toBe(false)
@@ -556,7 +556,7 @@ describe('toV2', () => {
       state.reset()
 
       expect(stateV3.value).toBe('')
-      expect(stateV3.dirty).toBe(false)
+      expect(stateV3.touched).toBe(false)
       expect(state.value).toBe('')
       expect(state.dirty).toBe(false)
       expect(state._activated).toBe(false)
@@ -702,7 +702,7 @@ describe('toV2', () => {
         this.value = initialValue
       }
       value: V
-      dirty = false
+      touched = false
       ownError = undefined
       error = undefined
       activated = false

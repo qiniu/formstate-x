@@ -19,12 +19,12 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
   public $: S
 
   @observable.ref private syncedValue!: V
-  @observable.ref private syncedDirty!: boolean
+  @observable.ref private syncedTouched!: boolean
   @observable.ref private syncedActivated!: boolean
 
   @action private sync() {
     this.syncedValue = this.$.value
-    this.syncedDirty = this.$.dirty
+    this.syncedTouched = this.$.touched
     this.syncedActivated = this.$.activated
   }
 
@@ -32,8 +32,8 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
     return this.syncedValue
   }
 
-  @computed get dirty() {
-    return this.syncedDirty
+  @computed get touched() {
+    return this.syncedTouched
   }
 
   @override override get ownError() {

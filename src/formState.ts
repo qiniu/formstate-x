@@ -48,12 +48,12 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
   }
 
   /** If reference of child states has been touched. */
-  @observable protected ownDirty = false
+  @observable protected ownTouched = false
 
-  @computed get dirty() {
+  @computed get touched() {
     return (
-      this.ownDirty
-      || this.childStates.some(state => state.dirty)
+      this.ownTouched
+      || this.childStates.some(state => state.touched)
     )
   }
 
@@ -62,7 +62,7 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
 
   @override override reset() {
     super.reset()
-    this.ownDirty = false
+    this.ownTouched = false
     this.resetChildStates()
   }
 
@@ -204,13 +204,13 @@ export class ArrayFormState<
     this.childStates.splice(fromIndex, num).forEach(state => {
       state.dispose()
     })
-    this.ownDirty = true
+    this.ownTouched = true
   }
 
   private _insert(fromIndex: number, ...childValues: V[]) {
     const states = childValues.map(this.createChildState)
     this.childStates.splice(fromIndex, 0, ...states)
-    this.ownDirty = true
+    this.ownTouched = true
   }
 
   private _set(value: V[], withOnChange = false) {
@@ -281,7 +281,7 @@ export class ArrayFormState<
 
     const [state] = this.childStates.splice(fromIndex, 1)
     this.childStates.splice(toIndex, 0, state)
-    this.ownDirty = true
+    this.ownTouched = true
     this.activated = true
   }
 

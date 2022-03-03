@@ -29,7 +29,7 @@ export interface IState<V = unknown> {
   /** Value in the state. */
   value: V
   /** If value has been touched. */
-  dirty: boolean
+  touched: boolean
   /** The error info of validation. */
   error: ValidationError
   /** If the state contains error. */

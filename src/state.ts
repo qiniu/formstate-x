@@ -40,7 +40,7 @@ export abstract class BaseState extends Disposable implements Pick<
 export abstract class ValidatableState<V> extends BaseState implements IState<V> {
 
   abstract value: V
-  abstract dirty: boolean
+  abstract touched: boolean
   abstract onChange(value: V): void
   abstract set(value: V): void
 

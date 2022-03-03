@@ -16,7 +16,7 @@ describe('FormState (mode: object)', () => {
     expect(isObservable(state.$)).toBe(true)
     expect(state.$.foo).toBeInstanceOf(FieldState)
     expect(state.$.bar).toBeInstanceOf(FieldState)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
   })
 
   it('should initialize well with observable fields', () => {
@@ -44,7 +44,7 @@ describe('FormState (mode: object)', () => {
     await delay()
 
     expect(state.value).toEqual(value)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
   })
 
   it('should set well', async () => {
@@ -59,7 +59,7 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(value1)
     expect(state.$.foo.value).toBe(value1.foo)
     expect(state.$.bar.value).toBe(value1.bar)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     state.reset()
 
@@ -68,7 +68,7 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(value2)
     expect(state.$.foo.value).toBe(value2.foo)
     expect(state.$.bar.value).toBe(value2.bar)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     state.reset()
 
@@ -77,7 +77,7 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(value3)
     expect(state.$.foo.value).toBe(value3.foo)
     expect(state.$.bar.value).toBe(value3.bar)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     state.reset()
 
@@ -85,7 +85,7 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(initialValue)
     expect(state.$.foo.value).toBe(initialValue.foo)
     expect(state.$.bar.value).toBe(initialValue.bar)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(true)
   })
 
   it('should onChange well', async () => {
@@ -101,7 +101,7 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(value1)
     expect(state.$.foo.value).toBe(value1.foo)
     expect(state.$.bar.value).toBe(value1.bar)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     state.reset()
 
@@ -111,7 +111,7 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(value2)
     expect(state.$.foo.value).toBe(value2.foo)
     expect(state.$.bar.value).toBe(value2.bar)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     state.reset()
 
@@ -121,7 +121,7 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(value3)
     expect(state.$.foo.value).toBe(value3.foo)
     expect(state.$.bar.value).toBe(value3.bar)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     state.reset()
 
@@ -130,7 +130,7 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(initialValue)
     expect(state.$.foo.value).toBe(initialValue.foo)
     expect(state.$.bar.value).toBe(initialValue.bar)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(true)
   })
 
   it('should reset well', async () => {
@@ -146,7 +146,7 @@ describe('FormState (mode: object)', () => {
     state.reset()
 
     expect(state.value).toEqual(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
   })
 })
 
@@ -275,7 +275,7 @@ describe('FormState (mode: object) validation', () => {
 
     state.reset()
     expect(state.value).toEqual(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
     expect(state.validating).toBe(false)
     expect(state.hasOwnError).toBe(false)
     expect(state.ownError).toBeUndefined()
@@ -607,7 +607,7 @@ describe('FormState (mode: array)', () => {
     state.$.forEach(field => {
       expect(field).toBeInstanceOf(FieldState)
     })
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
   })
 
   it('should initialize well with correct typing', () => {
@@ -633,7 +633,7 @@ describe('FormState (mode: array)', () => {
     await delay()
 
     expect(state.value).toEqual(value)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
   })
 
   it('should set well', async () => {
@@ -649,7 +649,7 @@ describe('FormState (mode: array)', () => {
     state.$.forEach((field, i) => {
       expect(field.value).toBe(value1[i])
     })
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
     expect(state.hasError).toBe(false)
 
     state.reset()
@@ -661,7 +661,7 @@ describe('FormState (mode: array)', () => {
     state.$.forEach((field, i) => {
       expect(field.value).toBe(value2[i])
     })
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
     expect(state.hasError).toBe(false)
 
     state.reset()
@@ -674,7 +674,7 @@ describe('FormState (mode: array)', () => {
     state.$.forEach((field, i) => {
       expect(field.value).toBe(value3[i])
     })
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
     expect(state.hasError).toBe(false)
     expect(field2Dispose).toBeCalled()
 
@@ -685,7 +685,7 @@ describe('FormState (mode: array)', () => {
     state.set(value4)
     expect(state.value).toEqual(value4)
     expect(state.$).toHaveLength(value4.length)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
     expect(state.hasError).toBe(false)
     expect(field1Dispose).toBeCalled()
   })
@@ -704,7 +704,7 @@ describe('FormState (mode: array)', () => {
     state.$.forEach((field, i) => {
       expect(field.value).toBe(value1[i])
     })
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
     expect(state.hasError).toBe(true)
 
     state.reset()
@@ -717,7 +717,7 @@ describe('FormState (mode: array)', () => {
     state.$.forEach((field, i) => {
       expect(field.value).toBe(value2[i])
     })
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
     expect(state.hasError).toBe(true)
 
     state.reset()
@@ -731,7 +731,7 @@ describe('FormState (mode: array)', () => {
     state.$.forEach((field, i) => {
       expect(field.value).toBe(value3[i])
     })
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
     expect(field2Dispose).toBeCalled()
     expect(state.hasError).toBe(false)
 
@@ -743,7 +743,7 @@ describe('FormState (mode: array)', () => {
     await delay()
     expect(state.value).toEqual(value4)
     expect(state.$).toHaveLength(value4.length)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
     expect(field1Dispose).toBeCalled()
   })
 
@@ -947,7 +947,7 @@ describe('FormState (mode: array)', () => {
     state.reset()
 
     expect(state.value).toEqual(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
   })
 
   it('should reset well with fields changed', async () => {
@@ -956,42 +956,42 @@ describe('FormState (mode: array)', () => {
     let disposeFn: () => void
 
     state.remove(-1)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     disposeFn = state.$[0].dispose = jest.fn(state.$[0].dispose)
     state.reset()
 
     expect(state.value).toEqual(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
     expect(disposeFn).toBeCalled()
 
     state.append('789')
     const field = state.$[state.$.length - 1]
     disposeFn = field.dispose = jest.fn(field.dispose)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     state.reset()
 
     expect(state.value).toEqual(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
     expect(disposeFn).toBeCalled()
 
     state.set([])
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     state.reset()
 
     expect(state.value).toEqual(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
 
     state.set(['456', '789', '012'])
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     disposeFn = state.$[0].dispose = jest.fn(state.$[2].dispose)
     state.reset()
 
     expect(state.value).toEqual(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
     expect(disposeFn).toBeCalled()
   })
 
@@ -1085,7 +1085,7 @@ describe('FormState (mode: array) validation', () => {
 
     state.reset()
     expect(state.value).toEqual(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
     expect(state.validating).toBe(false)
     expect(state.hasOwnError).toBe(false)
     expect(state.ownError).toBeUndefined()
@@ -1506,7 +1506,7 @@ describe('nested FormState', () => {
     it('with initial status', () => {
       const sourceConfigState = createSourceConfigState(initialValue)
       expect(sourceConfigState.value).toEqual(initialValue)
-      expect(sourceConfigState.dirty).toBe(false)
+      expect(sourceConfigState.touched).toBe(false)
       sourceConfigState.dispose()
     })
 
@@ -1515,11 +1515,11 @@ describe('nested FormState', () => {
       const value1 = { type: 'bar', addrs: [addr1, addr2] }
       sourceConfigState.set(value1)
       expect(sourceConfigState.value).toEqual(value1)
-      expect(sourceConfigState.dirty).toBe(true)
+      expect(sourceConfigState.touched).toBe(true)
 
       sourceConfigState.reset()
       expect(sourceConfigState.value).toEqual(initialValue)
-      expect(sourceConfigState.dirty).toBe(false)
+      expect(sourceConfigState.touched).toBe(false)
       sourceConfigState.dispose()
     })
 
@@ -1527,11 +1527,11 @@ describe('nested FormState', () => {
       const sourceConfigState = createSourceConfigState(initialValue)
       sourceConfigState.$.addrs.set([])
       expect(sourceConfigState.value).toEqual({ ...initialValue, addrs: [] })
-      expect(sourceConfigState.dirty).toBe(true)
+      expect(sourceConfigState.touched).toBe(true)
 
       sourceConfigState.reset()
       expect(sourceConfigState.value).toEqual(initialValue)
-      expect(sourceConfigState.dirty).toBe(false)
+      expect(sourceConfigState.touched).toBe(false)
       sourceConfigState.dispose()
     })
 
@@ -1539,11 +1539,11 @@ describe('nested FormState', () => {
       const sourceConfigState = createSourceConfigState(initialValue)
       sourceConfigState.$.addrs.set([addr1, addr2, addr3])
       expect(sourceConfigState.value).toEqual({ ...initialValue, addrs: [addr1, addr2, addr3] })
-      expect(sourceConfigState.dirty).toBe(true)
+      expect(sourceConfigState.touched).toBe(true)
 
       sourceConfigState.reset()
       expect(sourceConfigState.value).toEqual(initialValue)
-      expect(sourceConfigState.dirty).toBe(false)
+      expect(sourceConfigState.touched).toBe(false)
       sourceConfigState.dispose()
     })
 
@@ -1554,11 +1554,11 @@ describe('nested FormState', () => {
         ...initialValue,
         addrs: [{ ...addr1, protocols: ['https'] }]
       })
-      expect(sourceConfigState.dirty).toBe(true)
+      expect(sourceConfigState.touched).toBe(true)
 
       sourceConfigState.reset()
       expect(sourceConfigState.value).toEqual(initialValue)
-      expect(sourceConfigState.dirty).toBe(false)
+      expect(sourceConfigState.touched).toBe(false)
       sourceConfigState.dispose()
     })
 
@@ -1569,11 +1569,11 @@ describe('nested FormState', () => {
         ...initialValue,
         addrs: [...initialValue.addrs, addr3]
       })
-      expect(sourceConfigState.dirty).toBe(true)
+      expect(sourceConfigState.touched).toBe(true)
 
       sourceConfigState.reset()
       expect(sourceConfigState.value).toEqual(initialValue)
-      expect(sourceConfigState.dirty).toBe(false)
+      expect(sourceConfigState.touched).toBe(false)
       sourceConfigState.dispose()
     })
 
@@ -1584,11 +1584,11 @@ describe('nested FormState', () => {
         ...initialValue,
         addrs: [{ ...addr1, protocols: ['http', 'https'] }]
       })
-      expect(sourceConfigState.dirty).toBe(true)
+      expect(sourceConfigState.touched).toBe(true)
 
       sourceConfigState.reset()
       expect(sourceConfigState.value).toEqual(initialValue)
-      expect(sourceConfigState.dirty).toBe(false)
+      expect(sourceConfigState.touched).toBe(false)
       sourceConfigState.dispose()
     })
 
@@ -1596,7 +1596,7 @@ describe('nested FormState', () => {
       const sourceConfigState = createSourceConfigState(initialValue)
       sourceConfigState.set(initialValue)
       expect(sourceConfigState.value).toEqual(initialValue)
-      expect(sourceConfigState.dirty).toBe(false)
+      expect(sourceConfigState.touched).toBe(true)
       sourceConfigState.dispose()
     })
   })

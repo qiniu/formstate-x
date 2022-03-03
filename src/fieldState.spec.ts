@@ -9,7 +9,7 @@ describe('FieldState', () => {
     const state = new FieldState(initialValue)
 
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
   })
 
   it('should onChange well', async () => {
@@ -22,13 +22,13 @@ describe('FieldState', () => {
     state.onChange(value)
 
     expect(state.value).toBe(value)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     const newValue = '789'
     state.onChange('456')
     state.onChange(newValue)
     expect(state.value).toBe(newValue)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     const invalidValue = '123456'
     state.onChange(invalidValue)
@@ -42,7 +42,7 @@ describe('FieldState', () => {
     const value = '123'
     state.set(value)
     expect(state.value).toBe(value)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     // set 不应该使 field 激活
     expect(state.validating).toBe(false)
@@ -56,7 +56,7 @@ describe('FieldState', () => {
     state.validate()
     await delay()
     expect(state.value).toBe(value)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
   })
 
   it('should reset well', async () => {
@@ -68,13 +68,13 @@ describe('FieldState', () => {
     state.reset()
 
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
 
     state.onChange('456')
     state.reset()
 
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
   })
 })
 
@@ -155,7 +155,7 @@ describe('FieldState validation', () => {
 
     state.reset()
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()

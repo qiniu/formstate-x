@@ -31,8 +31,8 @@ export class TransformedState<S extends IState<$V>, V, $V = ValueOf<S>> extends 
     return this.$.error
   }
 
-  @computed get dirty() {
-    return this.$.dirty
+  @computed get touched() {
+    return this.$.touched
   }
 
   @computed get activated() {
