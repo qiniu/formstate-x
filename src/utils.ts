@@ -71,8 +71,3 @@ export function debounce(fn: () => void, delay: number) {
 export function isArrayLike(value: unknown): value is unknown[] | IObservableArray {
   return Array.isArray(value) || isObservableArray(value)
 }
-
-export function is(value1: any, value2: any) {
-  // TODO: Browser compatibity?
-  return Object.is(value1, value2)
-}

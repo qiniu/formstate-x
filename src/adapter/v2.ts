@@ -23,7 +23,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
   @computed get $() { return this.stateV2 }
 
   @computed get value() { return this.stateV2.value }
-  @computed get dirty() { return this.stateV2.dirty }
+  @computed get touched() { return this.stateV2.dirty }
   @computed get ownError() {
     return getV3OwnError(this.stateV2)
   }
@@ -100,7 +100,7 @@ class Downgrader<T extends v3.IState<V>, V> extends Disposable implements IV2Sta
   validate() { return this.stateV3.validate() }
   reset() { this.stateV3.reset() }
 
-  @computed get dirty() { return this.stateV3.dirty }
+  @computed get dirty() { return this.stateV3.touched }
   @computed get _activated() { return this.stateV3.activated }
   @computed get _validateStatus() {
     return getV2ValidateStatus(this.stateV3)

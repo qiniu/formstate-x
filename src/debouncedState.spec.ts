@@ -17,15 +17,21 @@ describe('DebouncedState', () => {
 
     expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
+    expect(state.touched).toBe(false)
+    expect(state.activated).toBe(false)
 
     const newValue = ''
     state.onChange(newValue)
-    expect(state.value).toBe(initialValue)
     expect(state.$.value).toBe(newValue)
+    expect(state.value).toBe(initialValue)
+    expect(state.touched).toBe(false)
+    expect(state.activated).toBe(false)
 
     await delay()
     expect(state.value).toBe(newValue)
     expect(state.$.value).toBe(newValue)
+    expect(state.touched).toBe(true)
+    expect(state.activated).toBe(true)
   })
 
   it('should initialize well with FormState', async () => {
@@ -151,6 +157,24 @@ describe('DebouncedState validation', () => {
     expect(state.ownError).toBe('form error')
     expect(state.error).toBe('form error')
   })
+  it('should sync original validation result with delay', async () => {
+    const originalState = new FieldState('foo').withValidator(v => !v && 'empty')
+    const state = new DebouncedState(originalState, defaultDelay)
+
+    await originalState.validate()
+    expect(state.error).toBe(undefined)
+    expect(state.ownError).toBe(undefined)
+
+    await state.onChange('')
+    expect(state.value).toBe('foo')
+    expect(state.error).toBe(undefined)
+    expect(state.ownError).toBe(undefined)
+
+    await delay()
+    expect(state.value).toBe('')
+    expect(state.error).toBe('empty')
+    expect(state.ownError).toBe('empty')
+  })
 })
 
 function createFieldState<T>(initialValue: T, delay = defaultDelay) {
@@ -164,7 +188,7 @@ describe('DebouncedFieldState', () => {
 
     expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
   })
 
   it('should initialize well with default delay as 200ms', async () => {
@@ -173,7 +197,7 @@ describe('DebouncedFieldState', () => {
 
     expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
 
     const newValue = 'abc'
     state.onChange(newValue)
@@ -181,13 +205,13 @@ describe('DebouncedFieldState', () => {
 
     expect(state.$.value).toBe(newValue)
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
 
     await delay(100)
 
     expect(state.$.value).toBe(newValue)
     expect(state.value).toBe(newValue)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
   })
 
   it('should onChange well', async () => {
@@ -202,14 +226,14 @@ describe('DebouncedFieldState', () => {
     expect(state.value).toBe(initialValue)
     expect(state.activated).toBe(false)
     expect(state.validateStatus).toBe(ValidateStatus.NotValidated)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
 
     await delay()
     expect(state.$.value).toBe(value)
     expect(state.value).toBe(value)
     expect(state.activated).toBe(true)
     expect(state.validateStatus).toBe(ValidateStatus.Validated)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     const newValue = '789'
     state.$.onChange('456')
@@ -220,7 +244,7 @@ describe('DebouncedFieldState', () => {
     await delay()
     expect(state.$.value).toBe(newValue)
     expect(state.value).toBe(newValue)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     const invalidValue = '123456'
     state.$.onChange(invalidValue)
@@ -240,7 +264,7 @@ describe('DebouncedFieldState', () => {
     state.set(value)
     expect(state.$.value).toBe(value)
     expect(state.value).toBe(value)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     // set 不应该使 field 激活
     expect(state.validating).toBe(false)
@@ -255,7 +279,7 @@ describe('DebouncedFieldState', () => {
     await delay()
     expect(state.$.value).toBe(value)
     expect(state.value).toBe(value)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
   })
 
   it('should reset well', async () => {
@@ -268,14 +292,14 @@ describe('DebouncedFieldState', () => {
 
     expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
 
     state.$.onChange('456')
     state.reset()
 
     expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
   })
 
   it('should work well with delay', async () => {
@@ -397,7 +421,7 @@ describe('DebouncedFieldState validation', () => {
     state.reset()
     expect(state.$.value).toBe(initialValue)
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
@@ -523,11 +547,13 @@ describe('DebouncedFieldState validation', () => {
 
   it('should work well with race condition caused by validate()', async () => {
     const validator = jest.fn()
-    validator.mockReturnValueOnce(delayValue('foo', 200))
-    validator.mockReturnValueOnce(delayValue('bar', 100))
     const field = createFieldState(1).withValidator(validator)
+
+    validator.mockReturnValue(delayValue('foo', 200))
     field.validate()
+
     await delay(50)
+    validator.mockReturnValue(delayValue('bar', 100))
     await field.validate()
 
     expect(field.error).toBe('bar')

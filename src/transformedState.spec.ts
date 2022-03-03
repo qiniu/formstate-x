@@ -67,7 +67,7 @@ describe('TransformedState (for FieldState)', () => {
     const state = createNumState(initialValue)
 
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
   })
 
   it('should onChange well', async () => {
@@ -80,14 +80,14 @@ describe('TransformedState (for FieldState)', () => {
     state.onChange(value)
     await delay()
     expect(state.value).toBe(value)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     const newValue = 100
     state.onChange(50)
     state.onChange(newValue)
     await delay()
     expect(state.value).toBe(newValue)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     const invalidValue = 200
     state.onChange(invalidValue)
@@ -102,7 +102,7 @@ describe('TransformedState (for FieldState)', () => {
     const value = 123
     state.set(value)
     expect(state.value).toBe(value)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     // set 不应该使 field 激活
     expect(state.validating).toBe(false)
@@ -116,7 +116,7 @@ describe('TransformedState (for FieldState)', () => {
     state.validate()
     await delay()
     expect(state.value).toBe(value)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
   })
 
   it('should reset well', async () => {
@@ -128,13 +128,13 @@ describe('TransformedState (for FieldState)', () => {
     state.reset()
 
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
 
     state.onChange(456)
     state.reset()
 
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
   })
 })
 
@@ -224,7 +224,7 @@ describe('TransformedState (for FieldState) validation', () => {
 
     state.reset()
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
@@ -444,7 +444,7 @@ describe('TransformedState (for FormState)', () => {
     const state = createNumState(initialValue)
 
     expect(state.value).toBe(initialValue)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
   })
 
   it('should set well', async () => {
@@ -455,13 +455,13 @@ describe('TransformedState (for FormState)', () => {
     expect(state.value).toEqual('qiniu.com:443')
     expect(state.$.$.hostname.value).toBe('qiniu.com')
     expect(state.$.$.port.value).toBe(443)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     state.set('127.0.0.1:80')
     expect(state.value).toEqual('127.0.0.1:80')
     expect(state.$.$.hostname.value).toBe('127.0.0.1')
     expect(state.$.$.port.value).toBe(80)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(true)
   })
 
   it('should onChange well', async () => {
@@ -472,7 +472,7 @@ describe('TransformedState (for FormState)', () => {
     expect(state.value).toEqual('qiniu.com:443')
     expect(state.$.$.hostname.value).toBe('qiniu.com')
     expect(state.$.$.port.value).toBe(443)
-    expect(state.dirty).toBe(true)
+    expect(state.touched).toBe(true)
 
     state.reset()
 
@@ -481,7 +481,7 @@ describe('TransformedState (for FormState)', () => {
     expect(state.value).toEqual('127.0.0.1:80')
     expect(state.$.$.hostname.value).toBe('127.0.0.1')
     expect(state.$.$.port.value).toBe(80)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(true)
   })
 
   it('should reset well', async () => {
@@ -495,7 +495,7 @@ describe('TransformedState (for FormState)', () => {
     expect(state.value).toEqual('127.0.0.1:80')
     expect(state.$.$.hostname.value).toBe('127.0.0.1')
     expect(state.$.$.port.value).toBe(80)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
 
     state.onChange('qiniu.com:443')
     await delay()
@@ -504,7 +504,7 @@ describe('TransformedState (for FormState)', () => {
     expect(state.value).toEqual('127.0.0.1:80')
     expect(state.$.$.hostname.value).toBe('127.0.0.1')
     expect(state.$.$.port.value).toBe(80)
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
   })
 })
 
@@ -683,7 +683,7 @@ describe('TransformedState (for FormState) validation', () => {
 
     state.reset()
     expect(state.value).toEqual('')
-    expect(state.dirty).toBe(false)
+    expect(state.touched).toBe(false)
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
