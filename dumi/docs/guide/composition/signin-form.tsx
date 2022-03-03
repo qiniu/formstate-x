@@ -58,10 +58,5 @@ function validateUsername(v: string) {
 function validatePassword(v: string) {
   if (!v) return 'Please input your password!'
   if (v.length < 8) return 'Too short for password!'
-  return new Promise<string | null>(resolve => {
-    setTimeout(() => {
-      const tooSimple = /^[a-zA-Z\d]+$/.test(v)
-      resolve(tooSimple ? 'Too simple for password!' : null)
-    }, 500)
-  })
+  if (/^[a-zA-Z\d]+$/.test(v)) return 'Too simple for password!'
 }
