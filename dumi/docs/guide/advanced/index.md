@@ -101,7 +101,7 @@ In section [Conditional Validation](/guide/validation#conditional-validation), w
 
 However, sometimes we may add more than one validators for one state. It will not be convenient to add the `if` logic in each validator.
 
-Sometimes we face complex states, which are composed with child states. It's not proper to change validators' logic of child states when writing logic of parent states. `formstate-x` provides a method `disableWhen` to help with such cases.
+Sometimes we face complex states, which are composed of more than one child states. It's not proper to change validators' logic of child states when writing logic of parent states. `formstate-x` provides a method `disableWhen` to help with such cases.
 
 Here is a demo:
 

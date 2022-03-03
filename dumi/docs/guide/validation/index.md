@@ -22,19 +22,13 @@ All we need to do next is consuming the validation result by access `state.hasEr
 
 ### Validator
 
-Validator is another essential concept in formstate-x. A validator is a function, which takes the input value as argument and returns error info.
-
-The returned value (error info) can be a `string` value, which means the input value is invalid and the invalid message (such as `"Too long"` in the example above) is returned. Error info can also be a falsy value (such as `null` / `undefined` / `false` / `''`), which means the input value is valid and no message need to be returned.
-
-If the validation process is async, a validator—we call it "async validator"—can return a `Promise`. You can check details in [Async Validator](#async-validator)
-
-Defining validate logic as multiple standalone functions has benefits: they are easy to reuse and easy to test.
+Validator is another essential concept in formstate-x. A validator is a function, which takes the input value as argument and returns the validation result. Check details for validators in section [`Validator`](/concepts/validator).
 
 ### Async Validator
 
 <code src="./async-validation.tsx"></code>
 
-If one validator returns a `Promise`, we call it async validator. We expect the promise to resolve with an error info, just the same as the return value of normal validators. And the value will be treated the same way as the return value of normal validators: non-empty `string` value means invalid and falsy value means valid.
+If one validator returns a `Promise`, we call it async validator. We expect the promise to resolve with a validation result, just the same as the return value of normal validators. And the value will be treated the same way as the return value of normal validators: non-empty `string` value means invalid and falsy value means valid.
 
 If the promise rejects, the rejected value will be thrown during validation. This validation will not be considered either valid or invalid. So if you do some HTTP API calling in an async validator, it is recommended to deal with the potential exception. For example:
 
@@ -89,4 +83,4 @@ In this example, we use two validators to ensure the name input
 
 Only values which satisfy both requirements will be considered valid. You can also mix async validators with normal validators, nothing special.
 
-You may notice that the begining value is empty (`""`), while there's no error message. After user typed in something and then cleared them, error message "Empty" is shown. In formstate-x, state only do auto-validation when it is **activated**, and state will not be activated until user operates (`onChange` is called). You can check details about **activated** [here](#TODO). If you want to trigger validation by hand, you can call `state.validate()`, which imperatively triggers validation and also activates the state.
+You may notice that the begining value is empty (`""`), while there's no error message. After user typed in something and then cleared them, error message "Empty" is shown. In formstate-x, state is auto validated only when it is **activated**, and state will not be activated until user ineracts. You can check details about activated [here](/concepts/state#activated).

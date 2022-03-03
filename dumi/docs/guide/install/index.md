@@ -6,7 +6,7 @@ toc: menu
 
 ### Install MobX
 
-formstate-x is realized based on MobX. Before you use formstate-x, you need to ensure MobX installed. If you haven't tried MobX, you can check it [here](https://mobx.js.org).
+formstate-x is realized based on MobX. Before you use formstate-x, you need to ensure MobX installed. If you haven't tried MobX, you can check its documentation [here](https://mobx.js.org).
 
 If you are using MobX & React, `mobx-react` is also required, you can check details [here](https://mobx.js.org/react-integration.html).
 

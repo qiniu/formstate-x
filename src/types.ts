@@ -1,31 +1,26 @@
-/** A truthy string or falsy values. */
-export type ValidationResponse =
+/** Result of validation. */
+export type ValidationResult =
   string
   | null
   | undefined
   | false
 
-/** The return value of a validator. */
-export type ValidatorResponse = 
-  ValidationResponse
-  | Promise<ValidationResponse>
+/** Return value of validator. */
+export type ValidatorReturned = 
+  ValidationResult
+  | Promise<ValidationResult>
+
+/** A validator checks if given value is valid. **/
+export type Validator<T> = (value: T) => ValidatorReturned
 
 export type Validation<TValue> = {
-  value: TValue // value for the response
-  response: ValidatorResponse // response for the value
+  value: TValue // value for the validation
+  returned: ValidatorReturned // result of applying validators
 }
 
-/**
- * A validator simply takes a value and returns a string or Promise<string>
- * If a truthy string is returned it represents a validation error
- **/
-export interface Validator<TValue> {
-  (value: TValue): ValidatorResponse
-}
+export type ValidationError = string | undefined
 
-export type Error = string | undefined
-
-export type ValidateResultWithError = { hasError: true, error: NonNullable<Error> }
+export type ValidateResultWithError = { hasError: true, error: NonNullable<ValidationError> }
 export type ValidateResultWithValue<T> = { hasError: false, value: T }
 export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
 
@@ -36,11 +31,11 @@ export interface IState<V = unknown> {
   /** If value has been touched. */
   dirty: boolean
   /** The error info of validation. */
-  error: Error
+  error: ValidationError
   /** If the state contains error. */
   hasError: boolean
   /** The state's own error info, regardless of child states. */
-  ownError: Error
+  ownError: ValidationError
   /** If the state contains its own error info. */
   hasOwnError: boolean
   /** If activated (with auto-validation). */
@@ -65,7 +60,7 @@ export interface IState<V = unknown> {
   /** Append validator(s). */
   withValidator(...validators: Array<Validator<V>>): this
   /**
-   * Configure when state will be disabled, which means:
+   * Configure when state should be disabled, which means:
    * - corresponding UI is invisible or disabled
    * - state value do not need to (and will not) be validated
    * - state `onChange` will not be called
