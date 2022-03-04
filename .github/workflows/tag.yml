@@ -3,6 +3,7 @@ name: Tag
 on:
   push:
     branches:
+      - v2.x
       - master
 
 jobs:
