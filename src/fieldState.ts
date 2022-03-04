@@ -71,7 +71,7 @@ export default class FieldState<TValue> extends Disposable implements Composible
 
   /**
    * The most recent validation result.
-   * If state is disabled, the result of the last validation is obtained.
+   * If state is disabled and later enabled, the result of the last validation is obtained.
    * If you need to clear the validation result, please use the reset function.
    */
   @computed private get validateResult(): ValidateResult<TValue> {
