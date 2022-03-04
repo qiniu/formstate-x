@@ -1,28 +1,29 @@
 import { isObservableArray, IObservableArray } from 'mobx'
-import { Validator, ValidationResponse, ValidatorResponse } from './types'
+import { Validator, ValidationResult, ValidatorReturned } from './types'
 
 export function isPromiseLike(arg: any): arg is Promise<any> {
   return arg != null && typeof arg === 'object' && typeof arg.then === 'function'
 }
 
-export function isEmpty(response: ValidationResponse): boolean {
-  return !response
+/** If validation result is valid */
+export function isValid(result: ValidationResult): result is '' | null | undefined | false {
+  return !result
 }
 
-export function asyncResponsesAnd(asyncResponses: Array<Promise<ValidationResponse>>): ValidatorResponse {
-  if (asyncResponses.length === 0) {
+export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>): ValidatorReturned {
+  if (asyncResults.length === 0) {
     return null
   }
   return new Promise(resolve => {
     // 任一不通过，则不通过
-    asyncResponses.forEach(asyncResponse => asyncResponse.then(Response => {
-      if (!isEmpty(Response)) {
-        resolve(Response)
+    asyncResults.forEach(asyncResult => asyncResult.then(result => {
+      if (!isValid(result)) {
+        resolve(result)
       }
     }))
     // 所有都通过，则通过
-    return Promise.all(asyncResponses).then(responses => {
-      if (responses.every(isEmpty)) {
+    return Promise.all(asyncResults).then(results => {
+      if (results.every(isValid)) {
         resolve(null)
       }
     })
@@ -38,23 +39,23 @@ export function applyValidators<TValue>(value: TValue, validators: Validator<TVa
     return validators[0](value)
   }
 
-  const asyncResponses: Array<Promise<ValidationResponse>> = []
+  const asyncResults: Array<Promise<ValidationResult>> = []
 
   for (const validator of validators) {
-    const response = validator(value)
+    const returned = validator(value)
 
-    if (isPromiseLike(response)) {
-      asyncResponses.push(response)
+    if (isPromiseLike(returned)) {
+      asyncResults.push(returned)
       continue
     }
 
     // 任一不通过，则不通过
-    if (!isEmpty(response)) {
-      return response
+    if (!isValid(returned)) {
+      return returned
     }
   }
 
-  return asyncResponsesAnd(asyncResponses)
+  return asyncResultsAnd(asyncResults)
 }
 
 export function debounce(fn: () => void, delay: number) {

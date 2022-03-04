@@ -1,5 +1,6 @@
 node_modules
-lib
-esm
-coverage
-docs
+/lib
+/esm
+/coverage
+.umi
+.vscode

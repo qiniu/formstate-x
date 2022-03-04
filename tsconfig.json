@@ -8,8 +8,11 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "strict": true,
+    "noImplicitOverride": true,
     "experimentalDecorators": true,
     "useDefineForClassFields": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "outDir": "./lib",
     "lib": ["es2015"]
   },

@@ -15,11 +15,13 @@ jobs:
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
-        node-version: 12.x
-    - name: Generate and deploy document
-      uses: JamesIves/github-pages-deploy-action@2.0.3
-      env:
-        BRANCH: gh-pages
-        FOLDER: docs
-        BUILD_SCRIPT: npm ci && npm run build:doc
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        node-version: 16.x
+    - name: Build docs
+      run: |
+        npm ci
+        npm run build:doc
+    - name: Deploy docs
+      uses: JamesIves/github-pages-deploy-action@v4.2.5
+      with:
+        branch: gh-pages
+        folder: dumi/dist/formstate-x
