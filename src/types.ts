@@ -42,7 +42,6 @@ export interface Validatable<T, TValue = T> {
   validated: boolean
   validationDisabled: boolean
   validate(): Promise<ValidateResult<TValue>>
-  validateResult: ValidateResult<TValue>
   // To see if there are requirements: enableAutoValidation, disableAutoValidation
   // enableAutoValidation: () => void
   // disableAutoValidation: () => void

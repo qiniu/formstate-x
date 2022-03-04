@@ -142,7 +142,7 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
    * If state is disabled, the result of the last validation is obtained.
    * If you need to clear the validation result, please use the reset function.
    */
-  @computed get validateResult(): ValidateResult<TValue> {
+  @computed private get validateResult(): ValidateResult<TValue> {
     return this.hasError
       ? { hasError: true, error: this.error } as const
       : { hasError: false, value: this.value } as const
