@@ -117,6 +117,10 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   }
 
   async validate(): Promise<ValidateResult<V>> {
+    if (this.disabled) {
+      return this.validateResult
+    }
+
     const validation = this.validation
 
     action('activate-when-validate', () => {

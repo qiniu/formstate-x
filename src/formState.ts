@@ -67,6 +67,10 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
   }
 
   override async validate(): Promise<ValidateResult<V>> {
+    if (this.disabled) {
+      return this.validateResult
+    }
+
     await Promise.all([
       ...this.childStates.map(
         state => state.validate()
