@@ -559,6 +559,18 @@ describe('FormState (mode: object) validation', () => {
     expect(state.ownError).toBeUndefined()
     expect(state.error).toBeUndefined()
 
+    options.updateDisabled(false)
+
+    await delay()
+    expect(state.validating).toBe(false)
+    expect(state.validated).toBe(false)
+    expect(state.hasError).toBe(false)
+    expect(state.error).toBeUndefined()
+
+    options.updateDisabled(true)
+
+    await delay()
+
     state.$.foo.onChange('')
     await state.validate()
     expect(state.hasOwnError).toBe(false)
