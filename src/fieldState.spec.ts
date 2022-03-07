@@ -367,6 +367,17 @@ describe('FieldState validation', () => {
     expect(state.hasError).toBe(false)
     expect(state.error).toBeUndefined()
 
+    runInAction(() => options.disabled = false)
+
+    await delay()
+    expect(state.validating).toBe(false)
+    expect(state.validated).toBe(false)
+    expect(state.hasError).toBe(false)
+    expect(state.error).toBeUndefined()
+
+    runInAction(() => options.disabled = true)
+
+    await delay()
     state.onChange('123')
     await delay()
     state.onChange('')

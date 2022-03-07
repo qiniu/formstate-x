@@ -138,6 +138,17 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
   }
 
   /**
+   * The most recent validation result.
+   * If state is disabled and later enabled, the result of the last validation is obtained.
+   * If you need to clear the validation result, please use the reset function.
+   */
+  @computed private get validateResult(): ValidateResult<TValue> {
+    return this.hasError
+      ? { hasError: true, error: this.error } as const
+      : { hasError: false, value: this.value } as const
+  }
+
+  /**
    * If the validation has been done.
    * It does not means validation passed.
    */
@@ -219,6 +230,10 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
    * Fire a validation behavior.
    */
   async validate(): Promise<ValidateResult<TValue>> {
+    if (this.validationDisabled) {
+      return this.validateResult
+    }
+
     action('activate-when-validate', () => {
       this._activated = true
     })()
@@ -234,11 +249,7 @@ export default class FormState<TFields extends ValidatableFields, TValue = Value
       { name: 'return-validate-when-not-validating' }
     )
 
-    return (
-      this.hasError
-      ? { hasError: true, error: this.error } as const
-      : { hasError: false, value: this.value } as const
-    )
+    return this.validateResult
   }
 
   /**
