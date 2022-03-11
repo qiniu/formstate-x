@@ -17,15 +17,9 @@ export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>):
   return new Promise(resolve => {
     let validResultCount = 0
     asyncResults.forEach(asyncResult => asyncResult.then(result => {
-      // return directly if has resolved
-      if (validResultCount === -1) {
-        return
-      }
-
       // return error if any result is invalid
       if (!isValid(result)) {
         resolve(result)
-        validResultCount = -1
         return
       }
 
