@@ -15,18 +15,18 @@ export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>):
     return null
   }
   return new Promise(resolve => {
+    let count = 0
     // 任一不通过，则不通过
     asyncResults.forEach(asyncResult => asyncResult.then(result => {
       if (!isValid(result)) {
         resolve(result)
       }
-    }))
-    // 所有都通过，则通过
-    return Promise.all(asyncResults).then(results => {
-      if (results.every(isValid)) {
+
+      count++
+      if (count === asyncResults.length) {
         resolve(null)
       }
-    })
+    }))
   })
 }
 
