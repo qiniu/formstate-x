@@ -13,7 +13,7 @@ type OriginalInfo<V> = Pick<IState<V>, 'activated' | 'touched' | 'error' | 'ownE
  * The state for debounce purpose.
  * Changes from the original state (`$`) will be debounced.
  */
-export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends ValidatableState<V> implements IState<V> {
+export class DebouncedState<S extends IState<V>, V = ValueOf<S>, SV extends V = V> extends ValidatableState<V, SV> implements IState<V, SV> {
 
   /**
    * The original state.
@@ -136,7 +136,7 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
  * The field state with debounce.
  * Value changes from `onChange` will be debounced.
  */
-export class DebouncedFieldState<V> extends DebouncedState<FieldState<V>, V> {
+export class DebouncedFieldState<V, SV extends V = V> extends DebouncedState<FieldState<V, SV>, V, SV> {
   constructor(initialValue: V, delay = defaultDelay) {
     super(new FieldState(initialValue), delay)
   }

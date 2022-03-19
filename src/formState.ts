@@ -1,8 +1,8 @@
 import { observable, computed, isObservable, action, reaction, makeObservable, override } from 'mobx'
-import { IState, ValidateStatus, ValidateResult, ValueOfStatesObject } from './types'
+import { IState, ValidateStatus, ValidateResult, ValueOfStatesObject, SafeValueOfStatesObject } from './types'
 import { ValidatableState } from './state'
 
-abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IState<V> {
+abstract class AbstractFormState<T, V, SV extends V = V> extends ValidatableState<V, SV> implements IState<V, SV> {
 
   /** Reference of child states. */
   abstract readonly $: T
@@ -66,7 +66,7 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
     this.resetChildStates()
   }
 
-  override async validate(): Promise<ValidateResult<V>> {
+  override async validate(): Promise<ValidateResult<SV>> {
     if (this.disabled) {
       return this.validateResult
     }
@@ -113,7 +113,7 @@ export type StatesObject = { [key: string]: IState }
 export class FormState<
   TStates extends StatesObject
 > extends AbstractFormState<
-  TStates, ValueOfStatesObject<TStates>
+  TStates, ValueOfStatesObject<TStates>, SafeValueOfStatesObject<TStates>
 > {
 
   @observable.ref readonly $: Readonly<TStates>
@@ -171,9 +171,9 @@ export class FormState<
  * The state for a array form (list of child states).
  */
 export class ArrayFormState<
-  V, T extends IState<V> = IState<V>
+  V, SV extends V = V, T extends IState<V, SV> = IState<V, SV>
 > extends AbstractFormState<
-  readonly T[], V[]
+  readonly T[], V[], SV[]
 > {
 
   @observable.ref protected childStates: T[]
