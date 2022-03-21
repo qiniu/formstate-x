@@ -4,8 +4,8 @@ import { defineConfig } from 'dumi'
 const repo = 'formstate-x'
 
 export default defineConfig({
-  title: repo,
-  favicon: 'https://qiniu.staticfile.org/favicon.ico',
+  title: 'FORMSTATE-X',
+  favicon: `/${repo}/favicon.svg`,
   logo: `/${repo}/logo.svg`,
   outputPath: `dist/${repo}`,
   mode: 'site',
