@@ -5,7 +5,7 @@ import { ValidatableState } from './state'
 /**
  * The state for a field.
  */
-export class FieldState<V> extends ValidatableState<V> implements IState<V> {
+export class FieldState<V, SV extends V = V> extends ValidatableState<V, SV> implements IState<V, SV> {
 
   @observable.ref value!: V
 

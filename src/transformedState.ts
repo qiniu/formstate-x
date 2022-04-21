@@ -2,7 +2,7 @@ import { computed } from 'mobx'
 import { BaseState } from './state'
 import { IState, Validator, ValueOf } from './types'
 
-export class TransformedState<S extends IState<$V>, V, $V = ValueOf<S>> extends BaseState implements IState<V> {
+export class TransformedState<S extends IState<$V>, V, $V = ValueOf<S>, SV extends V = V> extends BaseState implements IState<V, SV> {
 
   /** The original state, whose value will be transformed. */
   public $: S
@@ -21,6 +21,11 @@ export class TransformedState<S extends IState<$V>, V, $V = ValueOf<S>> extends 
 
   @computed get value() {
     return this.parseOriginalValue(this.$.value)
+  }
+
+  @computed get safeValue() {
+    if (!this.validated || this.hasError) throw new Error('TODO')
+    return this.value as SV
   }
 
   @computed get ownError() {
@@ -46,7 +51,7 @@ export class TransformedState<S extends IState<$V>, V, $V = ValueOf<S>> extends 
   async validate() {
     const result = await this.$.validate()
     if (result.hasError) return result
-    return { ...result, value: this.value }
+    return { ...result, value: this.value as SV }
   }
 
   set(value: V) {
@@ -61,12 +66,12 @@ export class TransformedState<S extends IState<$V>, V, $V = ValueOf<S>> extends 
     this.$.reset()
   }
 
-  withValidator(...validators: Array<Validator<V>>) {
+  withValidator<NSV = SV>(...validators: Array<Validator<V>>): (this & { safeValue: NSV }) {
     const rawValidators = validators.map(validator => (
       (rawValue: $V) => validator(this.parseOriginalValue(rawValue))
     ))
     this.$.withValidator(...rawValidators)
-    return this
+    return this as (this & { safeValue: NSV })
   }
 
   disableWhen(predict: () => boolean) {

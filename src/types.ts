@@ -25,9 +25,10 @@ export type ValidateResultWithValue<T> = { hasError: false, value: T }
 export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
 
 /** interface for State */
-export interface IState<V = unknown> {
+export interface IState<Value = unknown, SafeValue extends Value = Value> {
   /** Value in the state. */
-  value: V
+  value: Value
+  safeValue: SafeValue
   /** If value has been touched. */
   touched: boolean
   /** The error info of validation. */
@@ -50,15 +51,15 @@ export interface IState<V = unknown> {
    */
   validated: boolean
   /** Fire a validation behavior. */
-  validate(): Promise<ValidateResult<V>>
+  validate(): Promise<ValidateResult<this['safeValue']>>
   /** Set `value` on change event. */
-  onChange(value: V): void
+  onChange(value: Value): void
   /** Set `value` imperatively. */
-  set(value: V): void
+  set(value: Value): void
   /** Reset to initial status. */
   reset(): void
   /** Append validator(s). */
-  withValidator(...validators: Array<Validator<V>>): this
+  withValidator<NSV = SafeValue>(...validators: Array<Validator<Value>>): (this & { safeValue: NSV })
   /**
    * Configure when state should be disabled, which means:
    * - corresponding UI is invisible or disabled
@@ -71,6 +72,9 @@ export interface IState<V = unknown> {
   dispose(): void
 }
 
+/** Safe Value of `IState` */
+export type SafeValueOf<S> = S extends IState ? S['safeValue'] : never
+
 /** Function to do dispose. */
 export interface Disposer {
   (): void
@@ -79,6 +83,11 @@ export interface Disposer {
 /** Value of states object. */
 export type ValueOfStatesObject<StatesObject> = {
   [K in keyof StatesObject]: ValueOf<StatesObject[K]>
+}
+
+/** Safe Value of states object. */
+export type SafeValueOfStatesObject<StatesObject> = {
+  [K in keyof StatesObject]: SafeValueOf<StatesObject[K]>
 }
 
 /** Value of `IState` */

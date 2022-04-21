@@ -37,12 +37,17 @@ export abstract class BaseState extends Disposable implements Pick<
 }
 
 /** Extraction for State's validating logic */
-export abstract class ValidatableState<V> extends BaseState implements IState<V> {
+export abstract class ValidatableState<V, SV extends V> extends BaseState implements IState<V, SV> {
 
   abstract value: V
   abstract touched: boolean
   abstract onChange(value: V): void
   abstract set(value: V): void
+
+  @computed get safeValue(): SV {
+    if (!this.validated || this.hasError) throw new Error('TODO')
+    return this.value as SV
+  }
 
   /** The original validate status (regardless of `validationDisabled`) */
   @observable protected _validateStatus: ValidateStatus = ValidateStatus.NotValidated
@@ -76,9 +81,9 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   /** List of validator functions. */
   @observable.shallow private validatorList: Validator<V>[] = []
 
-  @action withValidator(...validators: Validator<V>[]) {
+  @action withValidator<NSV = this['safeValue']>(...validators: Validator<V>[]): (this & { safeValue: NSV }) {
     this.validatorList.push(...validators)
-    return this
+    return this as (this & { safeValue: NSV })
   }
 
   /** Current validation info. */
@@ -108,15 +113,15 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
     })()
   }
 
-  @computed protected get validateResult(): ValidateResult<V> {
+  @computed protected get validateResult(): ValidateResult<SV> {
     return (
       this.error
-      ? { hasError: true, error: this.error } as const
-      : { hasError: false, value: this.value } as const
+      ? { hasError: true, error: this.error }
+      : { hasError: false, value: this.value as SV }
     )
   }
 
-  async validate(): Promise<ValidateResult<V>> {
+  async validate(): Promise<ValidateResult<SV>> {
     if (this.disabled) {
       return this.validateResult
     }
