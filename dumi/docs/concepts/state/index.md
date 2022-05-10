@@ -25,10 +25,12 @@ export interface IState<V> {
   activated: boolean
   /** Current validate status. */
   validateStatus: ValidateStatus
-  /** The error info of validation. */
+  /** The error info of validation, ErrorObject type will be filled with ErrorObject.message. */
   error: ValidationError
-  /** The state's own error info, regardless of child states. */
+  /** The state's own error info, regardless of child states, ErrorObject type will be filled with ErrorObject.message. */
   ownError: ValidationError
+  /** Ihe state's own error info, regardless of child states. */
+  rawError: ValidationRawError
   /** Append validator(s). */
   withValidator(...validators: Array<Validator<V>>): this
   /** Fire a validation behavior imperatively. */
@@ -67,11 +69,11 @@ Validation is the process of validating user input values.
 Validation is important for cases like:
 
 * When user inputs, we display error tips if validation not passed, so users see that and correct the input
-* Before form submiiting, we check if all value is valid, so invalid requests to the server can be avoided
+* Before form submitting, we check if all value is valid, so invalid requests to the server can be avoided
 
 That's why validation should provide such features:
 
-* It should run automatically, when users changed the value, or when some other data change influcend the value validity
+* It should run automatically, when users changed the value, or when some other data change influenced the value validity
 * It should produce details such as a meaningful message, so users can get friendly hint
 
 With formstate-x, we define validators and append them to states with `withValidator`. formstate-x will do validation for us. Through `validateStatus` & `error`, we can access the validate status and result.
@@ -96,6 +98,10 @@ States will not be auto-validated until it becomes **activated**. And they will 
 ### Own Error
 
 `ownError` & `hasOwnError` are special fields especially for composed states. You can check details about them in issue [#71](https://github.com/qiniu/formstate-x/issues/71).
+
+### Raw Error
+
+Ihe state's own raw error info, regardless of child states. The difference compared to `ownError` is that it contains the type of `ErrorObject`. You can check details about them in issue [#82](https://github.com/qiniu/formstate-x/issues/82).
 
 ### Disable State
 

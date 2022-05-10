@@ -1,5 +1,9 @@
 import { isObservableArray, IObservableArray } from 'mobx'
-import { Validator, ValidationResult, ValidatorReturned } from './types'
+import { Validator, ValidationResult, ValidatorReturned, ErrorObject } from './types'
+
+export function isErrorObject(err: any): err is ErrorObject {
+  return err != null && typeof err === 'object' && 'message' in err
+}
 
 export function isPromiseLike(arg: any): arg is Promise<any> {
   return arg != null && typeof arg === 'object' && typeof arg.then === 'function'

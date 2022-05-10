@@ -1,5 +1,5 @@
 import { observable } from 'mobx'
-import { asyncResultsAnd, isValid, isArrayLike } from './utils'
+import { asyncResultsAnd, isValid, isArrayLike, isErrorObject } from './utils'
 import { delayValue as delay } from './testUtils'
 
 describe('asyncResultsAnd', () => {
@@ -81,5 +81,23 @@ describe('isArrayLike', () => {
   it('should recognize object with invalid length', () => {
     expect(isArrayLike({ length: -1 })).toBe(false)
     expect(isArrayLike({ length: 2.3 })).toBe(false)
+  })
+})
+
+describe('isErrorObject', () => {
+  it('should work well', () => {
+    expect(isErrorObject('')).toBe(false)
+    expect(isErrorObject(0)).toBe(false)
+    expect(isErrorObject(1)).toBe(false)
+    expect(isErrorObject(false)).toBe(false)
+    expect(isErrorObject(true)).toBe(false)
+    expect(isErrorObject(null)).toBe(false)
+    expect(isErrorObject(undefined)).toBe(false)
+    expect(isErrorObject('foo')).toBe(false)
+    expect(isErrorObject({})).toBe(false)
+    expect(isErrorObject({foo: 'foo'})).toBe(false)
+    expect(isErrorObject({message: 'msg'})).toBe(true)
+    expect(isErrorObject({message: 'msg', extra: 'ext' })).toBe(true)
+    expect(isErrorObject(new Error('error msg'))).toBe(true)
   })
 })

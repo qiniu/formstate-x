@@ -607,6 +607,59 @@ describe('FormState (mode: object) validation', () => {
       assertType<{ foo: string }>(res.value)
     }
   })
+
+  describe('should work well with resolved error object', () => {
+    it('should work well with mixed sync and async resolved error object', async () => {
+      const initialValue = { foo: '123', bar: '123' }
+      const state = new FormState({
+        foo: new FieldState(initialValue.foo),
+        bar: new FieldState(initialValue.bar)
+      }).withValidator(
+        ({ foo, bar }) => delayValue(foo === bar && { message: 'same' }),
+        ({ foo }) => foo === '' && { message: 'empty' }
+      )
+      state.validate()
+
+      await delay()
+      expect(state.hasError).toBe(true)
+      expect(state.error).toBe('same')
+      expect(state.ownError).toBe('same')
+      expect(state.rawError).toEqual({ message: 'same' })
+
+      state.$.foo.onChange('')
+
+      await delay()
+      expect(state.hasError).toBe(true)
+      expect(state.error).toBe('empty')
+      expect(state.ownError).toBe('empty')
+      expect(state.rawError).toEqual({ message: 'empty' })
+
+      state.$.foo.onChange('456')
+
+      await delay()
+      expect(state.hasError).toBe(false)
+      expect(state.error).toBeUndefined()
+      expect(state.rawError).toBeUndefined()
+    })
+
+    it('should work well with child states resolved error object', async () => {
+      const state = new FormState({
+        foo: new FieldState(''),
+        bar: new FieldState('').withValidator(
+          v => v === '' && { message: 'empty' }
+        )
+      })
+      state.validate()
+      await delay()
+      expect(state.hasError).toBe(true)
+      expect(state.error).toBe('empty')
+      expect(state.rawError).toBeUndefined()
+      expect(state.ownError).toBeUndefined()
+      expect(state.$.bar.hasError).toBe(true)
+      expect(state.$.bar.error).toBe('empty')
+      expect(state.$.bar.rawError).toEqual({ message: 'empty' })
+    })
+  })
 })
 
 describe('FormState (mode: array)', () => {

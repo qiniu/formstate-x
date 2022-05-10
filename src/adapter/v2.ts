@@ -9,6 +9,13 @@ interface IV3StateFromV2<T extends v2.ComposibleValidatable<unknown, V>, V> exte
   $: T
 }
 
+type ExcludeErrorObject<V> = V extends v3.ErrorObject ? never : V extends Promise<infer R> ? Promise<ExcludeErrorObject<R>> : V
+
+type Conditional<K> = K extends any ? ExcludeErrorObject<K> : never
+
+// Omit ErrorObject
+type LegacyValidator<T> = (V: T) => Conditional<ReturnType<v3.Validator<T>>>
+
 class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseState implements IV3StateFromV2<T, V> {
   constructor(private stateV2: T) {
     super()
@@ -27,6 +34,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
   @computed get ownError() {
     return getV3OwnError(this.stateV2)
   }
+  @computed get rawError() { return this.ownError }
   @computed get error() { return this.stateV2.error }
   @computed get activated() { return this.stateV2._activated }
   @computed get validateStatus() {
@@ -42,7 +50,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
     setForV2(this.stateV2, value)
   }
   reset() { this.stateV2.reset() }
-  withValidator(...validators: Array<v3.Validator<V>>) {
+  withValidator(...validators: Array<LegacyValidator<V>>) {
     if (
       isV2FieldState(this.stateV2)
       || isV2FormState(this.stateV2)
@@ -64,7 +72,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
   }
 }
 
-/** Convets formstate-x@v2.x state to formstate-x@v3.x state */
+/** Converts formstate-x@v2.x state to formstate-x@v3.x state */
 export function fromV2<T extends v2.ComposibleValidatable<unknown, unknown>>(stateV2: T): IV3StateFromV2<T, T['value']> {
   return new Upgrader(stateV2)
 }

@@ -1,7 +1,7 @@
 import { action, autorun, computed, makeObservable, observable, when } from 'mobx'
-import { ValidationError, IState, Validation, ValidateResult, ValidateStatus, Validator } from './types'
+import { ValidationRawError, ValidationError, IState, Validation, ValidateResult, ValidateStatus, Validator } from './types'
 import Disposable from './disposable'
-import { applyValidators, isValid, isPromiseLike } from './utils'
+import { applyValidators, isValid, isPromiseLike, isErrorObject } from './utils'
 
 /** Extraction for some basic features of State */
 export abstract class BaseState extends Disposable implements Pick<
@@ -56,10 +56,14 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   /**
    * The original error info of validation.
    */
-  @observable protected _error: ValidationError
+  @observable protected _error: ValidationRawError
+
+  @computed get rawError() {
+    return  this.disabled ? undefined : this._error
+  }
 
   @computed get ownError() {
-    return this.disabled ? undefined : this._error
+    return this.rawError ? (isErrorObject(this.rawError) ? this.rawError.message : this.rawError) : undefined
   }
 
   @computed get error() {
@@ -69,7 +73,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   /**
    * Set error info.
    */
-  @action setError(error: ValidationError) {
+  @action setError(error: ValidationRawError) {
     this._error = error
   }
 
@@ -111,7 +115,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   @computed protected get validateResult(): ValidateResult<V> {
     return (
       this.error
-      ? { hasError: true, error: this.error } as const
+      ? { hasError: true, error: this.error, rawError: this.rawError } as const
       : { hasError: false, value: this.value } as const
     )
   }
