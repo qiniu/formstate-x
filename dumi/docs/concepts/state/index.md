@@ -101,7 +101,7 @@ States will not be auto-validated until it becomes **activated**. And they will 
 
 ### Raw Error
 
-Ihe state's own raw error info, regardless of child states. The difference compared to `ownError` is that it contains the type of `ErrorObject`. You can check details about them in issue [#82](https://github.com/qiniu/formstate-x/issues/82).
+The state's own raw error info, regardless of child states. The difference compared to `ownError` is that it contains the type of `ErrorObject`. You can check details about them in issue [#82](https://github.com/qiniu/formstate-x/issues/82).
 
 ### Disable State
 
