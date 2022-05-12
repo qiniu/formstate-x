@@ -1,23 +1,24 @@
 import { observable } from 'mobx'
-import { asyncResultsAnd, isValid, isArrayLike, isErrorObject } from './utils'
+import { asyncResultsAnd, isValidationPassed, isArrayLike, isErrorObject, normalizeRawError, normalizeError } from './utils'
 import { delayValue as delay } from './testUtils'
+import { ValidationErrorObject } from './types'
 
 describe('asyncResultsAnd', () => {
   it('should work well with empty results', async () => {
     const result = await asyncResultsAnd([])
-    expect(isValid(result)).toBe(true)
+    expect(isValidationPassed(result)).toBe(true)
   })
 
   it('should work well with all-passed results', async () => {
     const result = await asyncResultsAnd([delay(null)])
-    expect(isValid(result)).toBe(true)
+    expect(isValidationPassed(result)).toBe(true)
 
     await asyncResultsAnd([
       delay(null, 30),
       delay(undefined, 10),
       delay(false, 20)
     ])
-    expect(isValid(result)).toBe(true)
+    expect(isValidationPassed(result)).toBe(true)
   })
 
   it('should work well with unpassed results', async () => {
@@ -99,5 +100,45 @@ describe('isErrorObject', () => {
     expect(isErrorObject({message: 'msg'})).toBe(true)
     expect(isErrorObject({message: 'msg', extra: 'ext' })).toBe(true)
     expect(isErrorObject(new Error('error msg'))).toBe(true)
+
+    class Foo implements ValidationErrorObject { message = 'mewo' }
+    expect(isErrorObject(new Foo())).toBe(true)
+
+    class Bar extends Foo {}
+    expect(isErrorObject(new Bar())).toBe(true)
+  })
+})
+  
+describe('normalizeValidationResult', () => {
+  it('normalizeRawError should work well', () => {
+    expect(normalizeRawError(false)).toBe(undefined)
+    expect(normalizeRawError(null)).toBe(undefined)
+    expect(normalizeRawError(undefined)).toBe(undefined)
+    expect(normalizeRawError('')).toBe(undefined)
+    expect(normalizeRawError('foo')).toBe('foo')
+    expect(normalizeRawError({ message: 'mewo' })).toEqual({ message: 'mewo' })
+
+    class Foo implements ValidationErrorObject { message = 'mewo' }
+    const foo = new Foo()
+    expect(normalizeRawError(foo)).toBe(foo)
+
+    class Bar extends Foo {}
+    const bar = new Bar()
+    expect(normalizeRawError(bar)).toBe(bar)
+  })
+
+  it('normalizeError should work well', () => {
+    expect(normalizeError(undefined)).toBe(undefined)
+    expect(normalizeError('')).toBe('')
+    expect(normalizeError('foo')).toBe('foo')
+    expect(normalizeError({ message: 'mewo' })).toBe('mewo')
+
+    class Foo implements ValidationErrorObject { message = 'mewo' }
+    const foo = new Foo()
+    expect(normalizeError(foo)).toBe('mewo')
+
+    class Bar extends Foo {}
+    const bar = new Bar()
+    expect(normalizeError(bar)).toBe('mewo')
   })
 })

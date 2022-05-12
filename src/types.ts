@@ -4,7 +4,7 @@ export type ValidationResult =
   | null
   | undefined
   | false
-  | ErrorObject
+  | ValidationErrorObject
 
 /** Return value of validator. */
 export type ValidatorReturned = 
@@ -19,9 +19,9 @@ export type Validation<TValue> = {
   returned: ValidatorReturned // result of applying validators
 }
 
-export type ErrorObject = { message: string }
+export type ValidationErrorObject = { message: string }
 export type ValidationError = string | undefined
-export type ValidationRawError = ErrorObject | ValidationError
+export type ValidationRawError = ValidationErrorObject | ValidationError
 
 export type ValidateResultWithError = { hasError: true, rawError: ValidationRawError, error: NonNullable<ValidationError> }
 export type ValidateResultWithValue<T> = { hasError: false, value: T }

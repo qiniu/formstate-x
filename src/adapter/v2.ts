@@ -3,18 +3,12 @@ import * as v2 from 'formstate-x-v2'
 import { BaseState } from '../state'
 import * as v3 from '..'
 import Disposable from '../disposable'
+import { isPromiseLike, normalizeError, normalizeRawError } from '../utils'
 
 interface IV3StateFromV2<T extends v2.ComposibleValidatable<unknown, V>, V> extends v3.IState<V> {
   /** The original (formstate-x@v2.x) state */
   $: T
 }
-
-type ExcludeErrorObject<V> = V extends v3.ErrorObject ? never : V extends Promise<infer R> ? Promise<ExcludeErrorObject<R>> : V
-
-type Conditional<K> = K extends any ? ExcludeErrorObject<K> : never
-
-// Omit ErrorObject
-type LegacyValidator<T> = (V: T) => Conditional<ReturnType<v3.Validator<T>>>
 
 class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseState implements IV3StateFromV2<T, V> {
   constructor(private stateV2: T) {
@@ -50,12 +44,12 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
     setForV2(this.stateV2, value)
   }
   reset() { this.stateV2.reset() }
-  withValidator(...validators: Array<LegacyValidator<V>>) {
+  withValidator(...validators: Array<v3.Validator<V>>) {
     if (
       isV2FieldState(this.stateV2)
       || isV2FormState(this.stateV2)
     ) {
-      this.stateV2.validators(...validators)
+      this.stateV2.validators(...portV2Validators(...validators))
       return this
     }
     throwNotSupported()
@@ -70,6 +64,22 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
     }
     throwNotSupported()
   }
+}
+
+function portV2Validators<V>(...validators: Array<v3.Validator<V>>): Array<v2.Validator<V>> {
+  const normalizeRet = (v: any) => (
+    normalizeError(normalizeRawError(v))
+  )
+  return validators.map(validator => {
+    return (value: V) => {
+      const returned = validator(value)
+      if (isPromiseLike(returned)) {
+        return returned.then(normalizeRet)
+      } else {
+        return normalizeRet(returned)
+      }
+    }
+  })
 }
 
 /** Converts formstate-x@v2.x state to formstate-x@v3.x state */

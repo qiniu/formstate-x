@@ -1,7 +1,27 @@
 import { isObservableArray, IObservableArray } from 'mobx'
-import { Validator, ValidationResult, ValidatorReturned, ErrorObject } from './types'
+import { Validator, ValidationResult, ValidatorReturned, ValidationError, ValidationErrorObject, ValidationRawError } from './types'
 
-export function isErrorObject(err: any): err is ErrorObject {
+export function normalizeRawError(err: ValidationResult): ValidationRawError {
+  if (isErrorObject(err)) {
+    return err
+  }
+
+  if (err === false || err === '' || err === null) {
+    // TODO: print an alert?
+    return undefined
+  }
+
+  return err
+}
+
+export function normalizeError(rawError: ValidationRawError): ValidationError {
+  if (isErrorObject(rawError)) {
+    return rawError.message
+  }
+  return rawError
+}
+
+export function isErrorObject(err: any): err is ValidationErrorObject {
   return err != null && typeof err === 'object' && 'message' in err
 }
 
@@ -9,9 +29,8 @@ export function isPromiseLike(arg: any): arg is Promise<any> {
   return arg != null && typeof arg === 'object' && typeof arg.then === 'function'
 }
 
-/** If validation result is valid */
-export function isValid(result: ValidationResult): result is '' | null | undefined | false {
-  return !result
+export function isValidationPassed(result: ValidationResult): result is undefined {
+  return normalizeRawError(result) === undefined
 }
 
 export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>): ValidatorReturned {
@@ -22,7 +41,7 @@ export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>):
     let validResultCount = 0
     asyncResults.forEach(asyncResult => asyncResult.then(result => {
       // return error if any result is invalid
-      if (!isValid(result)) {
+      if (!isValidationPassed(result)) {
         resolve(result)
         return
       }
@@ -56,7 +75,7 @@ export function applyValidators<TValue>(value: TValue, validators: Validator<TVa
     }
 
     // 任一不通过，则不通过
-    if (!isValid(returned)) {
+    if (!isValidationPassed(returned)) {
       return returned
     }
   }
