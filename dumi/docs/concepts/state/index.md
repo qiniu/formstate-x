@@ -25,11 +25,11 @@ export interface IState<V> {
   activated: boolean
   /** Current validate status. */
   validateStatus: ValidateStatus
-  /** The error info of validation, ErrorObject type will be filled with ErrorObject.message. */
+  /** The error info of validation. */
   error: ValidationError
-  /** The state's own error info, regardless of child states, ErrorObject type will be filled with ErrorObject.message. */
+  /** The state's own error info, regardless of child states. */
   ownError: ValidationError
-  /** Ihe state's own error info, regardless of child states. */
+  /** The state's own error info, includes ValidationErrorObject error type, regardless of child states. */
   rawError: ValidationRawError
   /** Append validator(s). */
   withValidator(...validators: Array<Validator<V>>): this
@@ -101,7 +101,7 @@ States will not be auto-validated until it becomes **activated**. And they will 
 
 ### Raw Error
 
-The state's own raw error info, regardless of child states. The difference compared to `ownError` is that it contains the type of `ErrorObject`. You can check details about them in issue [#82](https://github.com/qiniu/formstate-x/issues/82).
+The state's own raw error info, regardless of child states. The difference compared to `ownError` is that it contains the type of `ValidationErrorObject`. You can check details about them in issue [#82](https://github.com/qiniu/formstate-x/issues/82).
 
 ### Disable State
 

@@ -32,10 +32,10 @@ export type ValidationResult =
   | null
   | undefined
   | false
-  | ErrorObject
+  | ValidationErrorObject
 
 /** Object type validation result. */
-export type ErrorObject = { message: string }
+export type ValidationErrorObject = { message: string }
 
 /** Return value of validator. */
 export type ValidatorReturned = 
