@@ -386,6 +386,18 @@ describe('FieldState validation', () => {
       expect(state.rawError).toEqual({ message: 'error-object-msg'})
       expect(res).toEqual({ hasError: true, error: 'error-object-msg'})
     })
+
+    it('should work well with sync resolved empty message', async () => {
+      const state = new FieldState('').withValidator(
+        _ => ({ message: ''})
+      )
+  
+      const res = await state.validate()
+      expect(state.hasError).toBe(true)
+      expect(state.error).toBe('')
+      expect(state.rawError).toEqual({ message: ''})
+      expect(res).toEqual({ hasError: true, error: ''})
+    })
   
     it('should work well with async resolved', async () => {
       const state = new FieldState('').withValidator(

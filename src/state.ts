@@ -11,7 +11,7 @@ export abstract class BaseState extends Disposable implements Pick<
   abstract error: ValidationError
 
   @computed get hasError() {
-    return !!this.error
+    return this.error !== undefined
   }
 
   abstract ownError: ValidationError
@@ -114,7 +114,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
 
   @computed protected get validateResult(): ValidateResult<V> {
     return (
-      this.error
+      this.error !== undefined
       ? { hasError: true, error: this.error } as const
       : { hasError: false, value: this.value } as const
     )
