@@ -115,7 +115,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   @computed protected get validateResult(): ValidateResult<V> {
     return (
       this.error
-      ? { hasError: true, error: this.error, rawError: this.rawError } as const
+      ? { hasError: true, error: this.error } as const
       : { hasError: false, value: this.value } as const
     )
   }

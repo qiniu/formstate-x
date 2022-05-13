@@ -384,7 +384,7 @@ describe('FieldState validation', () => {
       expect(state.hasError).toBe(true)
       expect(state.error).toBe('error-object-msg')
       expect(state.rawError).toEqual({ message: 'error-object-msg'})
-      expect(res).toEqual({ hasError: true, error: 'error-object-msg', rawError: { message: 'error-object-msg' }})
+      expect(res).toEqual({ hasError: true, error: 'error-object-msg'})
     })
   
     it('should work well with async resolved', async () => {
@@ -397,7 +397,7 @@ describe('FieldState validation', () => {
       expect(state.hasError).toBe(true)
       expect(state.error).toBe('error-object-msg')
       expect(state.rawError).toEqual({ message: 'error-object-msg'})
-      expect(res).toEqual({ hasError: true, error: 'error-object-msg', rawError: { message: 'error-object-msg' }})
+      expect(res).toEqual({ hasError: true, error: 'error-object-msg'})
     })
   })
 })

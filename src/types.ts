@@ -23,7 +23,7 @@ export type ValidationErrorObject = { message: string }
 export type ValidationError = string | undefined
 export type ValidationRawError = ValidationErrorObject | ValidationError
 
-export type ValidateResultWithError = { hasError: true, rawError: ValidationRawError, error: NonNullable<ValidationError> }
+export type ValidateResultWithError = { hasError: true, error: NonNullable<ValidationError> }
 export type ValidateResultWithValue<T> = { hasError: false, value: T }
 export type ValidateResult<T> = ValidateResultWithError | ValidateResultWithValue<T>
 

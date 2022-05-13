@@ -639,7 +639,7 @@ describe('toV2', () => {
       const validateRet = state.validate()
       expect(state._validateStatus).toBe(v3.ValidateStatus.Validating)
       const validated = await validateRet
-      expect(validated).toEqual({ hasError: true, error: 'empty', rawError: 'empty' })
+      expect(validated).toEqual({ hasError: true, error: 'empty' })
       expect(state._validateStatus).toBe(v3.ValidateStatus.Validated)
     })
 
