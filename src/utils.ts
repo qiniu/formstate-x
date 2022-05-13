@@ -29,7 +29,7 @@ export function isPromiseLike(arg: any): arg is Promise<any> {
   return arg != null && typeof arg === 'object' && typeof arg.then === 'function'
 }
 
-export function isValidationPassed(result: ValidationResult): result is undefined {
+export function isValidationPassed(result: ValidationResult) {
   return normalizeRawError(result) === undefined
 }
 
@@ -40,7 +40,7 @@ export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>):
   return new Promise(resolve => {
     let validResultCount = 0
     asyncResults.forEach(asyncResult => asyncResult.then(result => {
-      // return error if any result is invalid
+      // return error if any validation not passed
       if (!isValidationPassed(result)) {
         resolve(result)
         return
