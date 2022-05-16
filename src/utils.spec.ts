@@ -129,9 +129,10 @@ describe('normalizeValidationResult', () => {
 
   it('normalizeError should work well', () => {
     expect(normalizeError(undefined)).toBe(undefined)
-    expect(normalizeError('')).toBe('')
+    expect(normalizeError('')).toBe(undefined)
     expect(normalizeError('foo')).toBe('foo')
     expect(normalizeError({ message: 'mewo' })).toBe('mewo')
+    expect(normalizeError(Error('mewo2'))).toBe('mewo2')
 
     class Foo implements ValidationErrorObject { message = 'mewo' }
     const foo = new Foo()

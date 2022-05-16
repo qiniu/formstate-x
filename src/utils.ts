@@ -7,7 +7,6 @@ export function normalizeRawError(err: ValidationResult): ValidationRawError {
   }
 
   if (err === false || err === '' || err === null) {
-    // TODO: print an alert?
     return undefined
   }
 
@@ -18,11 +17,27 @@ export function normalizeError(rawError: ValidationRawError): ValidationError {
   if (isErrorObject(rawError)) {
     return rawError.message
   }
-  return rawError
+
+  return convertEmptyStringWithWarning(rawError)
 }
 
 export function isErrorObject(err: any): err is ValidationErrorObject {
-  return err != null && typeof err === 'object' && 'message' in err
+  if (err != null && typeof err === 'object' && 'message' in err) {
+    if (!err.message) {
+      console.log(err)
+      throw new Error('ValidationErrorObject message property cannot be empty')
+    }
+    return true
+  }
+  return false
+}
+
+export function convertEmptyStringWithWarning<T>(err: T) {
+  if (typeof err === 'string' && err === '') {
+    console.warn('An empty string errs should be replaced with undefined.')
+    return undefined
+  }
+  return err
 }
 
 export function isPromiseLike(arg: any): arg is Promise<any> {

@@ -1,7 +1,7 @@
 import { action, autorun, computed, makeObservable, observable, when } from 'mobx'
 import { ValidationRawError, ValidationError, IState, Validation, ValidateResult, ValidateStatus, Validator } from './types'
 import Disposable from './disposable'
-import { applyValidators, isPromiseLike, normalizeRawError, normalizeError } from './utils'
+import { applyValidators, isPromiseLike, normalizeRawError, normalizeError, convertEmptyStringWithWarning } from './utils'
 
 /** Extraction for some basic features of State */
 export abstract class BaseState extends Disposable implements Pick<
@@ -74,7 +74,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
    * Set error info.
    */
   @action setError(error: ValidationRawError) {
-    this._error = error
+    this._error = convertEmptyStringWithWarning(error)
   }
 
   /** List of validator functions. */

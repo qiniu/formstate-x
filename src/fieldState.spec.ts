@@ -76,6 +76,35 @@ describe('FieldState', () => {
     expect(state.value).toBe(initialValue)
     expect(state.touched).toBe(false)
   })
+
+  it('should setError well', async () => {
+    const initialValue = ''
+    const state = new FieldState(initialValue)
+
+    state.setError('')
+    expect(state.hasError).toBe(false)
+    expect(state.error).toBe(undefined)
+    expect(state.ownError).toBe(undefined)
+    expect(state.rawError).toBe(undefined)
+
+    state.setError('123')
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('123')
+    expect(state.ownError).toBe('123')
+    expect(state.rawError).toBe('123')
+
+    state.setError({ message: 'mewo3' })
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('mewo3')
+    expect(state.ownError).toBe('mewo3')
+    expect(state.rawError).toEqual({ message: 'mewo3' })
+
+    state.reset()
+    expect(state.hasError).toBe(false)
+    expect(state.error).toBe(undefined)
+    expect(state.ownError).toBe(undefined)
+    expect(state.rawError).toBe(undefined)
+  })
 })
 
 describe('FieldState validation', () => {
@@ -385,18 +414,6 @@ describe('FieldState validation', () => {
       expect(state.error).toBe('error-object-msg')
       expect(state.rawError).toEqual({ message: 'error-object-msg' })
       expect(res).toEqual({ hasError: true, error: 'error-object-msg' })
-    })
-
-    it('should work well with sync resolved empty message', async () => {
-      const state = new FieldState('').withValidator(
-        _ => ({ message: '' })
-      )
-  
-      const res = await state.validate()
-      expect(state.hasError).toBe(true)
-      expect(state.error).toBe('')
-      expect(state.rawError).toEqual({ message: '' })
-      expect(res).toEqual({ hasError: true, error: '' })
     })
   
     it('should work well with async resolved', async () => {

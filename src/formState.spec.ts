@@ -148,6 +148,45 @@ describe('FormState (mode: object)', () => {
     expect(state.value).toEqual(initialValue)
     expect(state.touched).toBe(false)
   })
+
+  it('should setError well', async () => {
+    const initialValue = { foo: 123 }
+    const state = new FormState({
+      foo: new FieldState(initialValue.foo)
+    })
+
+    state.setError('')
+    expect(state.hasError).toBe(false)
+    expect(state.error).toBe(undefined)
+    expect(state.ownError).toBe(undefined)
+    expect(state.rawError).toBe(undefined)
+
+    state.setError('123')
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('123')
+    expect(state.ownError).toBe('123')
+    expect(state.rawError).toBe('123')
+
+    state.setError({ message: 'mewo3' })
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('mewo3')
+    expect(state.ownError).toBe('mewo3')
+    expect(state.rawError).toEqual({ message: 'mewo3' })
+
+    state.reset()
+
+    state.$.foo.setError({ message: 'mewo4' })
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('mewo4')
+    expect(state.ownError).toBe(undefined)
+    expect(state.rawError).toEqual(undefined)
+
+    state.reset()
+    expect(state.hasError).toBe(false)
+    expect(state.error).toBe(undefined)
+    expect(state.ownError).toBe(undefined)
+    expect(state.rawError).toBe(undefined)
+  })
 })
 
 describe('FormState (mode: object) validation', () => {
@@ -1013,6 +1052,43 @@ describe('FormState (mode: array)', () => {
 
     expect(state.value).toEqual(initialValue)
     expect(state.touched).toBe(false)
+  })
+
+  it('should setError well', async () => {
+    const initialValue = ['123']
+    const state = new ArrayFormState(initialValue, v => new FieldState(v))
+
+    state.setError('')
+    expect(state.hasError).toBe(false)
+    expect(state.error).toBe(undefined)
+    expect(state.ownError).toBe(undefined)
+    expect(state.rawError).toBe(undefined)
+
+    state.setError('123')
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('123')
+    expect(state.ownError).toBe('123')
+    expect(state.rawError).toBe('123')
+
+    state.setError({ message: 'mewo3' })
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('mewo3')
+    expect(state.ownError).toBe('mewo3')
+    expect(state.rawError).toEqual({ message: 'mewo3' })
+
+    state.reset()
+
+    state.$[0].setError({ message: 'mewo4' })
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('mewo4')
+    expect(state.ownError).toBe(undefined)
+    expect(state.rawError).toEqual(undefined)
+
+    state.reset()
+    expect(state.hasError).toBe(false)
+    expect(state.error).toBe(undefined)
+    expect(state.ownError).toBe(undefined)
+    expect(state.rawError).toBe(undefined)
   })
 
   it('should reset well with fields changed', async () => {
