@@ -394,9 +394,7 @@ describe('TransformedState (for FieldState) validation', () => {
       _ => ({ message: 'empty' })
     )
 
-    state.validate()
-
-    await delay()
+    await state.validate()
     expect(state.hasError).toBe(true)
     expect(state.error).toBe('empty')
     expect(state.ownError).toBe('empty')
@@ -754,7 +752,7 @@ describe('TransformedState (for FormState) validation', () => {
 
   it('should work well with resolved error object', async () => {
     const state = createHostState('127.0.0.1').withValidator(
-      _ => ({ message: 'mock msg'})
+      _ => ({ message: 'mock msg' })
     )
 
     state.validate()

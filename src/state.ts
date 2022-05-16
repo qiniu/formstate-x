@@ -59,7 +59,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   @observable protected _error: ValidationRawError
 
   @computed get rawError() {
-    return  this.disabled ? undefined : this._error
+    return this.disabled ? undefined : this._error
   }
 
   @computed get ownError() {

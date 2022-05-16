@@ -96,9 +96,9 @@ describe('isErrorObject', () => {
     expect(isErrorObject(undefined)).toBe(false)
     expect(isErrorObject('foo')).toBe(false)
     expect(isErrorObject({})).toBe(false)
-    expect(isErrorObject({foo: 'foo'})).toBe(false)
-    expect(isErrorObject({message: 'msg'})).toBe(true)
-    expect(isErrorObject({message: 'msg', extra: 'ext' })).toBe(true)
+    expect(isErrorObject({ foo: 'foo' })).toBe(false)
+    expect(isErrorObject({ message: 'msg' })).toBe(true)
+    expect(isErrorObject({ message: 'msg', extra: 'ext' })).toBe(true)
     expect(isErrorObject(new Error('error msg'))).toBe(true)
 
     class Foo implements ValidationErrorObject { message = 'mewo' }
