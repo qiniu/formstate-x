@@ -24,7 +24,6 @@ export function normalizeError(rawError: ValidationRawError): ValidationError {
 export function isErrorObject(err: any): err is ValidationErrorObject {
   if (err != null && typeof err === 'object' && 'message' in err) {
     if (!err.message) {
-      console.log(err)
       throw new Error('ValidationErrorObject message property cannot be empty')
     }
     return true
