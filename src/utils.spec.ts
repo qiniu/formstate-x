@@ -1,5 +1,5 @@
 import { observable } from 'mobx'
-import { asyncResultsAnd, isValidationPassed, isArrayLike, isErrorObject, normalizeRawError, normalizeError } from './utils'
+import { asyncResultsAnd, isValidationPassed, isArrayLike, isErrorObject, normalizeRawError, normalizeError, inValidErrorObjectMsg } from './utils'
 import { delayValue as delay } from './testUtils'
 import { ValidationErrorObject } from './types'
 
@@ -106,6 +106,12 @@ describe('isErrorObject', () => {
 
     class Bar extends Foo {}
     expect(isErrorObject(new Bar())).toBe(true)
+
+    try {
+      isErrorObject({ message: '' })
+    } catch (err) {
+      expect(err.message).toBe(inValidErrorObjectMsg)
+    }
   })
 })
   

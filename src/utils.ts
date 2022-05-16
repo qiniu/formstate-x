@@ -21,6 +21,8 @@ export function normalizeError(rawError: ValidationRawError): ValidationError {
   return convertEmptyStringWithWarning(rawError)
 }
 
+export const inValidErrorObjectMsg = 'ValidationErrorObject message property cannot be empty'
+
 export function isErrorObject(err: any): err is ValidationErrorObject {
   if (err != null && typeof err === 'object' && 'message' in err) {
     if (!err.message) {
