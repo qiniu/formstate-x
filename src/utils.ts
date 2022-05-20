@@ -36,7 +36,7 @@ export function isPassed(result: ValidationResult) {
 
 export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>): ValidatorReturned {
   if (asyncResults.length === 0) {
-    return null
+    return undefined
   }
   return new Promise(resolve => {
     let validResultCount = 0
@@ -50,7 +50,7 @@ export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>):
       validResultCount++
       // pass if all results are valid
       if (validResultCount === asyncResults.length) {
-        resolve(null)
+        resolve(undefined)
       }
     }))
   })
@@ -58,7 +58,7 @@ export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>):
 
 export function applyValidators<TValue>(value: TValue, validators: Validator<TValue>[]) {
   if (validators.length === 0) {
-    return null
+    return undefined
   }
 
   if (validators.length === 1) {

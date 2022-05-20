@@ -159,7 +159,7 @@ describe('FormState (mode: object)', () => {
     expect(state.hasError).toBe(false)
     expect(state.error).toBe(undefined)
     expect(state.ownError).toBe(undefined)
-    expect(state.rawError).toBe(undefined)
+    expect(state.rawError).toBe('')
 
     state.setError('123')
     expect(state.hasError).toBe(true)
@@ -1062,7 +1062,7 @@ describe('FormState (mode: array)', () => {
     expect(state.hasError).toBe(false)
     expect(state.error).toBe(undefined)
     expect(state.ownError).toBe(undefined)
-    expect(state.rawError).toBe(undefined)
+    expect(state.rawError).toBe('')
 
     state.setError('123')
     expect(state.hasError).toBe(true)
@@ -1453,7 +1453,7 @@ describe('FormState (mode: array) validation', () => {
     expect(state.error).toBe('too long')
   })
 
-  it.only('should work well with disableWhen', async () => {
+  it('should work well with disableWhen', async () => {
     const options = observable({
       disabled: false,
       updateDisabled(value: boolean) {
