@@ -106,12 +106,7 @@ describe('isErrorObject', () => {
 
     class Bar extends Foo {}
     expect(isErrorObject(new Bar())).toBe(true)
-
-    try {
-      isErrorObject({ message: '' })
-    } catch (err) {
-      expect(err.message).toBe(inValidErrorObjectMsg)
-    }
+    expect(() => isErrorObject({ message: '' })).toThrow(inValidErrorObjectMsg)
   })
 })
   
