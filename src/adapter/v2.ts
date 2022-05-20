@@ -3,7 +3,7 @@ import * as v2 from 'formstate-x-v2'
 import { BaseState } from '../state'
 import * as v3 from '..'
 import Disposable from '../disposable'
-import { isPromiseLike, normalizeError, normalizeRawError } from '../utils'
+import { isPromiseLike, normalizeError } from '../utils'
 
 interface IV3StateFromV2<T extends v2.ComposibleValidatable<unknown, V>, V> extends v3.IState<V> {
   /** The original (formstate-x@v2.x) state */
@@ -68,7 +68,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
 
 function portV2Validators<V>(...validators: Array<v3.Validator<V>>): Array<v2.Validator<V>> {
   const normalizeRet = (v: any) => (
-    normalizeError(normalizeRawError(v))
+    normalizeError(v)
   )
   return validators.map(validator => {
     return (value: V) => {

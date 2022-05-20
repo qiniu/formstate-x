@@ -85,7 +85,7 @@ describe('FieldState', () => {
     expect(state.hasError).toBe(false)
     expect(state.error).toBe(undefined)
     expect(state.ownError).toBe(undefined)
-    expect(state.rawError).toBe(undefined)
+    expect(state.rawError).toBe('')
 
     state.setError('123')
     expect(state.hasError).toBe(true)

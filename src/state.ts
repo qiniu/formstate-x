@@ -1,17 +1,17 @@
 import { action, autorun, computed, makeObservable, observable, when } from 'mobx'
 import { ValidationRawError, ValidationError, IState, Validation, ValidateResult, ValidateStatus, Validator } from './types'
 import Disposable from './disposable'
-import { applyValidators, isPromiseLike, normalizeRawError, normalizeError, convertEmptyStringWithWarning } from './utils'
+import { applyValidators, isPromiseLike, isValidationPassed, normalizeError } from './utils'
 
 /** Extraction for some basic features of State */
 export abstract class BaseState extends Disposable implements Pick<
-  IState, 'ownError' | 'hasOwnError' | 'error' | 'hasError' | 'validateStatus' | 'validating' | 'validated'
-> {
+  IState, 'rawError' | 'ownError' | 'hasOwnError' | 'hasError' | 'validateStatus' | 'validating' | 'validated'
+  > {
 
-  abstract error: ValidationError
+  abstract rawError: ValidationRawError
 
   @computed get hasError() {
-    return this.error !== undefined
+    return !isValidationPassed(this.rawError)
   }
 
   abstract ownError: ValidationError
@@ -56,7 +56,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   /**
    * The original error info of validation.
    */
-  @observable protected _error: ValidationRawError
+  @observable private _error: ValidationRawError
 
   @computed get rawError() {
     return this.disabled ? undefined : this._error
@@ -74,7 +74,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
    * Set error info.
    */
   @action setError(error: ValidationRawError) {
-    this._error = convertEmptyStringWithWarning(error)
+    this._error = error
   }
 
   /** List of validator functions. */
@@ -108,14 +108,14 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
     action('end-validation', () => {
       this.validation = undefined
       this._validateStatus = ValidateStatus.Validated
-      this.setError(normalizeRawError(result))
+      this.setError(result)
     })()
   }
 
   @computed protected get validateResult(): ValidateResult<V> {
     return (
-      this.error !== undefined
-      ? { hasError: true, error: this.error } as const
+      this.hasError
+      ? { hasError: true, error: this.error! } as const
       : { hasError: false, value: this.value } as const
     )
   }

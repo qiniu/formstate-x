@@ -1,5 +1,5 @@
 import { observable } from 'mobx'
-import { asyncResultsAnd, isValidationPassed, isArrayLike, isErrorObject, normalizeRawError, normalizeError, inValidErrorObjectMsg } from './utils'
+import { asyncResultsAnd, isValidationPassed, isArrayLike, isErrorObject, normalizeError, inValidErrorObjectMsg } from './utils'
 import { delayValue as delay } from './testUtils'
 import { ValidationErrorObject } from './types'
 
@@ -109,25 +109,8 @@ describe('isErrorObject', () => {
     expect(() => isErrorObject({ message: '' })).toThrow(inValidErrorObjectMsg)
   })
 })
-  
+
 describe('normalizeValidationResult', () => {
-  it('normalizeRawError should work well', () => {
-    expect(normalizeRawError(false)).toBe(undefined)
-    expect(normalizeRawError(null)).toBe(undefined)
-    expect(normalizeRawError(undefined)).toBe(undefined)
-    expect(normalizeRawError('')).toBe(undefined)
-    expect(normalizeRawError('foo')).toBe('foo')
-    expect(normalizeRawError({ message: 'mewo' })).toEqual({ message: 'mewo' })
-
-    class Foo implements ValidationErrorObject { message = 'mewo' }
-    const foo = new Foo()
-    expect(normalizeRawError(foo)).toBe(foo)
-
-    class Bar extends Foo {}
-    const bar = new Bar()
-    expect(normalizeRawError(bar)).toBe(bar)
-  })
-
   it('normalizeError should work well', () => {
     expect(normalizeError(undefined)).toBe(undefined)
     expect(normalizeError('')).toBe(undefined)

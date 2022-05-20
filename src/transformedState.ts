@@ -1,4 +1,4 @@
-import { computed } from 'mobx'
+import { computed, override } from 'mobx'
 import { BaseState } from './state'
 import { IState, Validator, ValueOf } from './types'
 
@@ -29,6 +29,10 @@ export class TransformedState<S extends IState<$V>, V, $V = ValueOf<S>> extends 
 
   @computed get rawError() {
     return this.$.rawError
+  }
+
+  @override override get hasError() {
+    return this.$.hasError
   }
 
   @computed get error() {

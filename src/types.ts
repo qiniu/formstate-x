@@ -21,7 +21,7 @@ export type Validation<TValue> = {
 
 export type ValidationErrorObject = { message: string }
 export type ValidationError = string | undefined
-export type ValidationRawError = ValidationErrorObject | ValidationError
+export type ValidationRawError = ValidationResult
 
 export type ValidateResultWithError = { hasError: true, error: NonNullable<ValidationError> }
 export type ValidateResultWithValue<T> = { hasError: false, value: T }

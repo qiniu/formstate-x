@@ -1,6 +1,7 @@
 import { observable, computed, isObservable, action, reaction, makeObservable, override } from 'mobx'
 import { IState, ValidateStatus, ValidateResult, ValueOfStatesObject } from './types'
 import { ValidatableState } from './state'
+import { isValidationPassed } from './utils'
 
 abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IState<V> {
 
@@ -45,6 +46,21 @@ abstract class AbstractFormState<T, V> extends ValidatableState<V> implements IS
         return state.error
       }
     }
+  }
+
+  @override override get hasError() {
+    if (this.disabled) {
+      return false
+    }
+    if (!isValidationPassed(this.rawError)) {
+      return true
+    }
+    for (const state of this.childStates) {
+      if (state.hasError) {
+        return true
+      }
+    }
+    return false
   }
 
   /** If reference of child states has been touched. */

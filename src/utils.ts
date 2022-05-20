@@ -1,24 +1,34 @@
 import { isObservableArray, IObservableArray } from 'mobx'
 import { Validator, ValidationResult, ValidatorReturned, ValidationError, ValidationErrorObject, ValidationRawError } from './types'
 
-export function normalizeRawError(err: ValidationResult): ValidationRawError {
-  if (isErrorObject(err)) {
-    return err
+// export function normalizeRawError(err: ValidationResult): ValidationRawError {
+//   if (isErrorObject(err)) {
+//     return err
+//   }
+
+//   if (err === false || err === '' || err === null) {
+//     return undefined
+//   }
+
+//   return err
+// }
+
+// normalize ValidationResult -> ValidationError
+export function normalizeError(result: ValidationRawError): ValidationError {
+  if (isErrorObject(result)) {
+    return result.message
   }
 
-  if (err === false || err === '' || err === null) {
+  if (result === false || result == null) {
     return undefined
   }
 
-  return err
-}
-
-export function normalizeError(rawError: ValidationRawError): ValidationError {
-  if (isErrorObject(rawError)) {
-    return rawError.message
+  if (result === '') {
+    console.warn('An empty string errs should be replaced with undefined or null.')
+    return undefined
   }
 
-  return convertEmptyStringWithWarning(rawError)
+  return result
 }
 
 export const inValidErrorObjectMsg = 'ValidationErrorObject message property cannot be empty'
@@ -33,20 +43,20 @@ export function isErrorObject(err: any): err is ValidationErrorObject {
   return false
 }
 
-export function convertEmptyStringWithWarning<T>(err: T) {
-  if (typeof err === 'string' && err === '') {
-    console.warn('An empty string errs should be replaced with undefined.')
-    return undefined
-  }
-  return err
-}
+// export function convertEmptyStringWithWarning<T>(err: T) {
+//   if (typeof err === 'string' && err === '') {
+//     console.warn('An empty string errs should be replaced with undefined.')
+//     return undefined
+//   }
+//   return err
+// }
 
 export function isPromiseLike(arg: any): arg is Promise<any> {
   return arg != null && typeof arg === 'object' && typeof arg.then === 'function'
 }
 
 export function isValidationPassed(result: ValidationResult) {
-  return normalizeRawError(result) === undefined
+  return normalizeError(result) === undefined
 }
 
 export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>): ValidatorReturned {

@@ -1453,7 +1453,7 @@ describe('FormState (mode: array) validation', () => {
     expect(state.error).toBe('too long')
   })
 
-  it('should work well with disableWhen', async () => {
+  it.only('should work well with disableWhen', async () => {
     const options = observable({
       disabled: false,
       updateDisabled(value: boolean) {

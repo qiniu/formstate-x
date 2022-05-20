@@ -2,12 +2,12 @@ import { action, computed, makeObservable, observable, override, reaction } from
 import { FieldState } from './fieldState'
 import { ValidatableState } from './state'
 import { IState, ValidateStatus, ValueOf } from './types'
-import { debounce, normalizeError } from './utils'
+import { debounce, isValidationPassed, normalizeError } from './utils'
 
 const defaultDelay = 200 // ms
 
 /** Infomation synced from original state */
-type OriginalInfo<V> = Pick<IState<V>, 'activated' | 'touched' | 'error' | 'ownError'>
+type OriginalInfo<V> = Pick<IState<V>, 'activated' | 'touched' | 'error' | 'ownError' | 'hasError'>
 
 /**
  * The state for debounce purpose.
@@ -42,7 +42,8 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
       activated: this.$.activated,
       touched: this.$.touched,
       error: this.$.error,
-      ownError: this.$.ownError
+      ownError: this.$.ownError,
+      hasError: this.$.hasError
     }
   }
 
@@ -52,7 +53,7 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
 
   @override override get ownError() {
     if (this.disabled) return undefined
-    if (this._error) return normalizeError(this._error)
+    if (this.rawError) return normalizeError(this.rawError)
     return this.original.ownError
   }
 
@@ -60,6 +61,11 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
     if (this.disabled) return undefined
     if (this.ownError) return this.ownError
     return this.original.error
+  }
+
+  @override override get hasError() {
+    if (this.disabled) return false
+    return !isValidationPassed(this.rawError) || this.original.hasError
   }
 
   @override override get validateStatus() {
