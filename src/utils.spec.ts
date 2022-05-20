@@ -1,24 +1,24 @@
 import { observable } from 'mobx'
-import { asyncResultsAnd, isValidationPassed, isArrayLike, isErrorObject, normalizeError, inValidErrorObjectMsg } from './utils'
+import { asyncResultsAnd, isPassed, isArrayLike, isErrorObject, normalizeError, inValidErrorObjectMsg } from './utils'
 import { delayValue as delay } from './testUtils'
 import { ValidationErrorObject } from './types'
 
 describe('asyncResultsAnd', () => {
   it('should work well with empty results', async () => {
     const result = await asyncResultsAnd([])
-    expect(isValidationPassed(result)).toBe(true)
+    expect(isPassed(result)).toBe(true)
   })
 
   it('should work well with all-passed results', async () => {
     const result = await asyncResultsAnd([delay(null)])
-    expect(isValidationPassed(result)).toBe(true)
+    expect(isPassed(result)).toBe(true)
 
     await asyncResultsAnd([
       delay(null, 30),
       delay(undefined, 10),
       delay(false, 20)
     ])
-    expect(isValidationPassed(result)).toBe(true)
+    expect(isPassed(result)).toBe(true)
   })
 
   it('should work well with unpassed results', async () => {

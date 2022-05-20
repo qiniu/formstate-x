@@ -1,30 +1,13 @@
 import { isObservableArray, IObservableArray } from 'mobx'
-import { Validator, ValidationResult, ValidatorReturned, ValidationError, ValidationErrorObject, ValidationRawError } from './types'
+import { Validator, ValidatorReturned, ValidationError, ValidationErrorObject, ValidationResult } from './types'
 
-// export function normalizeRawError(err: ValidationResult): ValidationRawError {
-//   if (isErrorObject(err)) {
-//     return err
-//   }
-
-//   if (err === false || err === '' || err === null) {
-//     return undefined
-//   }
-
-//   return err
-// }
-
-// normalize ValidationResult -> ValidationError
-export function normalizeError(result: ValidationRawError): ValidationError {
+// ValidationResult -> ValidationError
+export function normalizeError(result: ValidationResult): ValidationError {
   if (isErrorObject(result)) {
     return result.message
   }
 
-  if (result === false || result == null) {
-    return undefined
-  }
-
-  if (result === '') {
-    console.warn('An empty string errs should be replaced with undefined or null.')
+  if (result === false || result == null || result == '') {
     return undefined
   }
 
@@ -43,19 +26,11 @@ export function isErrorObject(err: any): err is ValidationErrorObject {
   return false
 }
 
-// export function convertEmptyStringWithWarning<T>(err: T) {
-//   if (typeof err === 'string' && err === '') {
-//     console.warn('An empty string errs should be replaced with undefined.')
-//     return undefined
-//   }
-//   return err
-// }
-
 export function isPromiseLike(arg: any): arg is Promise<any> {
   return arg != null && typeof arg === 'object' && typeof arg.then === 'function'
 }
 
-export function isValidationPassed(result: ValidationResult) {
+export function isPassed(result: ValidationResult) {
   return normalizeError(result) === undefined
 }
 
@@ -67,7 +42,7 @@ export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>):
     let validResultCount = 0
     asyncResults.forEach(asyncResult => asyncResult.then(result => {
       // return error if any validation not passed
-      if (!isValidationPassed(result)) {
+      if (!isPassed(result)) {
         resolve(result)
         return
       }
@@ -101,7 +76,7 @@ export function applyValidators<TValue>(value: TValue, validators: Validator<TVa
     }
 
     // 任一不通过，则不通过
-    if (!isValidationPassed(returned)) {
+    if (!isPassed(returned)) {
       return returned
     }
   }

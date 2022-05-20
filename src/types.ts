@@ -6,6 +6,9 @@ export type ValidationResult =
   | false
   | ValidationErrorObject
 
+/** Object type validation result. */
+export type ValidationErrorObject = { message: string }
+
 /** Return value of validator. */
 export type ValidatorReturned = 
   ValidationResult
@@ -19,9 +22,7 @@ export type Validation<TValue> = {
   returned: ValidatorReturned // result of applying validators
 }
 
-export type ValidationErrorObject = { message: string }
 export type ValidationError = string | undefined
-export type ValidationRawError = ValidationResult
 
 export type ValidateResultWithError = { hasError: true, error: NonNullable<ValidationError> }
 export type ValidateResultWithValue<T> = { hasError: false, value: T }
@@ -39,8 +40,8 @@ export interface IState<V = unknown> {
   hasError: boolean
   /** The state's own error info, regardless of child states. */
   ownError: ValidationError
-  /** Ihe state's own error info, includes ValidationErrorObject error type, regardless of child states. */
-  rawError: ValidationRawError
+  /** The state's validation result, is the same as the return value of the validator, regardless of child states. */
+  rawError: ValidationResult
   /** If the state contains its own error info. */
   hasOwnError: boolean
   /** If activated (with auto-validation). */
