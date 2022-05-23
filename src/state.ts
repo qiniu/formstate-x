@@ -58,10 +58,10 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   /**
    * The original return value of validation.
    */
-  @observable private _error: ValidationResult
+  @observable private validationResult: ValidationResult
 
   @computed get rawError() {
-    return this.disabled ? undefined : this._error
+    return this.disabled ? undefined : this.validationResult
   }
 
   @computed get error() {
@@ -72,7 +72,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
    * Set validation result.
    */
   @action setError(error: ValidationResult) {
-    this._error = error
+    this.validationResult = error
   }
 
   /** List of validator functions. */
@@ -165,7 +165,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   @action reset() {
     this.activated = false
     this._validateStatus = ValidateStatus.NotValidated
-    this._error = undefined
+    this.validationResult = undefined
     this.validation = undefined
   }
 
