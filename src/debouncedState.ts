@@ -2,12 +2,12 @@ import { action, computed, makeObservable, observable, override, reaction } from
 import { FieldState } from './fieldState'
 import { ValidatableState } from './state'
 import { IState, ValidateStatus, ValueOf } from './types'
-import { debounce } from './utils'
+import { debounce, isPassed } from './utils'
 
 const defaultDelay = 200 // ms
 
 /** Information synced from original state */
-type OriginalInfo<V> = Pick<IState<V>, 'activated' | 'touched' | 'error' | 'ownError' | 'hasError' | 'rawError'>
+type OriginalInfo<V> = Pick<IState<V>, 'activated' | 'touched' | 'error' | 'rawError'>
 
 /**
  * The state for debounce purpose.
@@ -42,8 +42,6 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
       activated: this.$.activated,
       touched: this.$.touched,
       error: this.$.error,
-      ownError: this.$.ownError,
-      hasError: this.$.hasError,
       rawError: this.$.rawError
     }
   }
@@ -54,7 +52,7 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
 
   @override override get rawError() {
     if (this.disabled) return undefined
-    if (this.validationResult) return this.validationResult
+    if (!isPassed(this.validationResult)) return this.validationResult
     return this.original.rawError
   }
 

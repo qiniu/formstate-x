@@ -25,7 +25,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
 
   @computed get value() { return this.stateV2.value }
   @computed get touched() { return this.stateV2.dirty }
-  @computed get rawError() { 
+  @computed get rawError() {
     return getV3OwnError(this.stateV2)
    }
   @computed get error() { return this.stateV2.error }
