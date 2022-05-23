@@ -20,7 +20,7 @@ export function normalizeError(result: ValidationResult): ValidationError {
 }
 
 export function isErrorObject(err: any): err is ValidationErrorObject {
-  if (err != null && typeof err === 'object' && 'message' in err) {
+  if (err != null && typeof err === 'object' && typeof err.message === 'string') {
     return true
   }
   return false

@@ -56,9 +56,9 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   @observable activated = false
 
   /**
-   * The original return value of validation.
+   * The original validation result.
    */
-  @observable private validationResult: ValidationResult
+  @observable protected validationResult: ValidationResult
 
   @computed get rawError() {
     return this.disabled ? undefined : this.validationResult
