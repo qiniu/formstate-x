@@ -1,4 +1,4 @@
-import { action, computed, makeObservable } from 'mobx'
+import { override, action, computed, makeObservable } from 'mobx'
 import * as v2 from 'formstate-x-v2'
 import { BaseState } from '../state'
 import * as v3 from '..'
@@ -25,7 +25,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
 
   @computed get value() { return this.stateV2.value }
   @computed get touched() { return this.stateV2.dirty }
-  @computed get ownError() {
+  @override override get ownError() {
     return getV3OwnError(this.stateV2)
   }
   @computed get rawError() { return this.ownError }

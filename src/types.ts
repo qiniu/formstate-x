@@ -40,7 +40,7 @@ export interface IState<V = unknown> {
   hasError: boolean
   /** The state's own error info, regardless of child states. */
   ownError: ValidationError
-  /** The state's validation result, is the same as the return value of the validator, regardless of child states. */
+  /** The state's validation result, regardless of child states. */
   rawError: ValidationResult
   /** If the state contains its own error info. */
   hasOwnError: boolean

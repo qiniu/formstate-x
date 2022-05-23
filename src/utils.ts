@@ -1,9 +1,14 @@
 import { isObservableArray, IObservableArray } from 'mobx'
 import { Validator, ValidatorReturned, ValidationError, ValidationErrorObject, ValidationResult } from './types'
 
+export const inValidErrorObjectMsg = 'ValidationErrorObject message property cannot be empty'
+
 // ValidationResult -> ValidationError
 export function normalizeError(result: ValidationResult): ValidationError {
   if (isErrorObject(result)) {
+    if (!result.message) {
+      throw new Error(inValidErrorObjectMsg)
+    }
     return result.message
   }
 
@@ -14,13 +19,8 @@ export function normalizeError(result: ValidationResult): ValidationError {
   return result
 }
 
-export const inValidErrorObjectMsg = 'ValidationErrorObject message property cannot be empty'
-
 export function isErrorObject(err: any): err is ValidationErrorObject {
   if (err != null && typeof err === 'object' && 'message' in err) {
-    if (!err.message) {
-      throw new Error('ValidationErrorObject message property cannot be empty')
-    }
     return true
   }
   return false

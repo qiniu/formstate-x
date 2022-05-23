@@ -1,4 +1,4 @@
-import { computed, override } from 'mobx'
+import { override, computed } from 'mobx'
 import { BaseState } from './state'
 import { IState, Validator, ValueOf } from './types'
 
@@ -21,10 +21,6 @@ export class TransformedState<S extends IState<$V>, V, $V = ValueOf<S>> extends 
 
   @computed get value() {
     return this.parseOriginalValue(this.$.value)
-  }
-
-  @computed get ownError() {
-    return this.$.ownError
   }
 
   @computed get rawError() {

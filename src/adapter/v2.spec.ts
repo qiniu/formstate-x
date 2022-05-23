@@ -703,7 +703,6 @@ describe('toV2', () => {
       }
       value: V
       touched = false
-      ownError = undefined
       error = undefined
       rawError = undefined
       activated = false

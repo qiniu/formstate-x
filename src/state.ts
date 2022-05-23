@@ -1,12 +1,12 @@
 import { action, autorun, computed, makeObservable, observable, when } from 'mobx'
-import { ValidationResult, ValidationError, IState, Validation, ValidateResult, ValidateStatus, Validator } from './types'
+import { ValidationResult, IState, Validation, ValidateResult, ValidateStatus, Validator } from './types'
 import Disposable from './disposable'
 import { applyValidators, isPromiseLike, isPassed, normalizeError } from './utils'
 
 /** Extraction for some basic features of State */
 export abstract class BaseState extends Disposable implements Pick<
   IState, 'rawError' | 'ownError' | 'hasOwnError' | 'hasError' | 'validateStatus' | 'validating' | 'validated'
-  > {
+> {
 
   abstract rawError: ValidationResult
 
@@ -14,7 +14,9 @@ export abstract class BaseState extends Disposable implements Pick<
     return !isPassed(this.rawError)
   }
 
-  abstract ownError: ValidationError
+  @computed get ownError() {
+    return normalizeError(this.rawError)
+  }
 
   @computed get hasOwnError() {
     return !!this.ownError
@@ -60,10 +62,6 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
 
   @computed get rawError() {
     return this.disabled ? undefined : this._error
-  }
-
-  @computed get ownError() {
-    return normalizeError(this.rawError)
   }
 
   @computed get error() {

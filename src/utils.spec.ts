@@ -97,6 +97,7 @@ describe('isErrorObject', () => {
     expect(isErrorObject('foo')).toBe(false)
     expect(isErrorObject({})).toBe(false)
     expect(isErrorObject({ foo: 'foo' })).toBe(false)
+    expect(isErrorObject({ message: '' })).toBe(true)
     expect(isErrorObject({ message: 'msg' })).toBe(true)
     expect(isErrorObject({ message: 'msg', extra: 'ext' })).toBe(true)
     expect(isErrorObject(new Error('error msg'))).toBe(true)
@@ -106,7 +107,6 @@ describe('isErrorObject', () => {
 
     class Bar extends Foo {}
     expect(isErrorObject(new Bar())).toBe(true)
-    expect(() => isErrorObject({ message: '' })).toThrow(inValidErrorObjectMsg)
   })
 })
 
@@ -115,6 +115,7 @@ describe('normalizeValidationResult', () => {
     expect(normalizeError(undefined)).toBe(undefined)
     expect(normalizeError('')).toBe(undefined)
     expect(normalizeError('foo')).toBe('foo')
+    expect(() => normalizeError({ message: '' })).toThrow(inValidErrorObjectMsg)
     expect(normalizeError({ message: 'mewo' })).toBe('mewo')
     expect(normalizeError(Error('mewo2'))).toBe('mewo2')
 

@@ -29,7 +29,7 @@ export interface IState<V> {
   error: ValidationError
   /** The state's own error info, regardless of child states. */
   ownError: ValidationError
-  /** The state's validation result, is the same as the return value of the validator, regardless of child states. */
+  /** The state's validation result, regardless of child states. */
   rawError: ValidationResult
   /** Append validator(s). */
   withValidator(...validators: Array<Validator<V>>): this
@@ -101,7 +101,7 @@ States will not be auto-validated until it becomes **activated**. And they will 
 
 ### Raw Error
 
-The state's validation result, is the same as the return value of the `validator`, regardless of child states. The difference compared to `ownError` is that it contains the type of `ValidationErrorObject`. You can check details about them in issue [#82](https://github.com/qiniu/formstate-x/issues/82).
+The state's validation result, regardless of child states. The difference compared to `ownError` is that it contains the type of `ValidationErrorObject`. You can check details about them in issue [#82](https://github.com/qiniu/formstate-x/issues/82).
 
 ### Disable State
 
