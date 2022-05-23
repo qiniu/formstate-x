@@ -1,7 +1,7 @@
 import { action, autorun, computed, makeObservable, observable, when } from 'mobx'
-import { ValidationResult, IState, Validation, ValidateResult, ValidateStatus, Validator } from './types'
+import { ValidationResult, IState, Validation, ValidateResult, ValidationError, ValidateStatus, Validator } from './types'
 import Disposable from './disposable'
-import { applyValidators, isPromiseLike, isPassed, normalizeError } from './utils'
+import { applyValidators, isPromiseLike, normalizeError } from './utils'
 
 /** Extraction for some basic features of State */
 export abstract class BaseState extends Disposable implements Pick<
@@ -10,8 +10,10 @@ export abstract class BaseState extends Disposable implements Pick<
 
   abstract rawError: ValidationResult
 
+  abstract error: ValidationError
+
   @computed get hasError() {
-    return !isPassed(this.rawError)
+    return !!this.error
   }
 
   @computed get ownError() {

@@ -2,7 +2,7 @@ import { action, computed, makeObservable, observable, override, reaction } from
 import { FieldState } from './fieldState'
 import { ValidatableState } from './state'
 import { IState, ValidateStatus, ValueOf } from './types'
-import { debounce, isPassed } from './utils'
+import { debounce } from './utils'
 
 const defaultDelay = 200 // ms
 
@@ -62,11 +62,6 @@ export class DebouncedState<S extends IState<V>, V = ValueOf<S>> extends Validat
     if (this.disabled) return undefined
     if (this.ownError) return this.ownError
     return this.original.error
-  }
-
-  @override override get hasError() {
-    if (this.disabled) return false
-    return !isPassed(this.rawError) || this.original.hasError
   }
 
   @override override get validateStatus() {
