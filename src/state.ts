@@ -5,7 +5,7 @@ import { applyValidators, isPromiseLike, normalizeError } from './utils'
 
 /** Extraction for some basic features of State */
 export abstract class BaseState extends Disposable implements Pick<
-  IState, 'rawError' | 'ownError' | 'hasOwnError' | 'hasError' | 'validateStatus' | 'validating' | 'validated'
+  IState, 'rawError' | 'error' | 'ownError' | 'hasOwnError' | 'hasError' | 'validateStatus' | 'validating' | 'validated'
 > {
 
   abstract rawError: ValidationResult

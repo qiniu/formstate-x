@@ -1,5 +1,5 @@
 import { observable } from 'mobx'
-import { asyncResultsAnd, isPassed, isArrayLike, isErrorObject, normalizeError, inValidErrorObjectMsg } from './utils'
+import { asyncResultsAnd, isPassed, isArrayLike, isErrorObject, normalizeError, invalidErrorObjectMsg } from './utils'
 import { delayValue as delay } from './testUtils'
 import { ValidationErrorObject } from './types'
 
@@ -115,7 +115,7 @@ describe('normalizeValidationResult', () => {
     expect(normalizeError(undefined)).toBe(undefined)
     expect(normalizeError('')).toBe(undefined)
     expect(normalizeError('foo')).toBe('foo')
-    expect(() => normalizeError({ message: '' })).toThrow(inValidErrorObjectMsg)
+    expect(() => normalizeError({ message: '' })).toThrow(invalidErrorObjectMsg)
     expect(normalizeError({ message: 'mewo' })).toBe('mewo')
     expect(normalizeError(Error('mewo2'))).toBe('mewo2')
 
