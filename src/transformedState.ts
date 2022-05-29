@@ -23,8 +23,8 @@ export class TransformedState<S extends IState<$V>, V, $V = ValueOf<S>> extends 
     return this.parseOriginalValue(this.$.value)
   }
 
-  @computed get ownError() {
-    return this.$.ownError
+  @computed get rawError() {
+    return this.$.rawError
   }
 
   @computed get error() {

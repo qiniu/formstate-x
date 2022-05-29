@@ -389,6 +389,17 @@ describe('TransformedState (for FieldState) validation', () => {
     expect(state.ownError).toBe('non positive')
   })
 
+  it('should work well with resolved error object', async () => {
+    const state = createNumState(0).withValidator(
+      _ => ({ message: 'empty' })
+    )
+
+    await state.validate()
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('empty')
+    expect(state.ownError).toBe('empty')
+    expect(state.rawError).toEqual({ message: 'empty' })
+  })
 })
 
 interface Host {
@@ -737,5 +748,19 @@ describe('TransformedState (for FormState) validation', () => {
     expect(state.error).toBeUndefined()
     expect(state.hasOwnError).toBe(false)
     expect(state.ownError).toBeUndefined()
+  })
+
+  it('should work well with resolved error object', async () => {
+    const state = createHostState('127.0.0.1').withValidator(
+      _ => ({ message: 'mock msg' })
+    )
+
+    state.validate()
+
+    await delay()
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('mock msg')
+    expect(state.ownError).toBe('mock msg')
+    expect(state.rawError).toEqual({ message: 'mock msg' })
   })
 })

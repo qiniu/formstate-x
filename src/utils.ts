@@ -1,24 +1,48 @@
 import { isObservableArray, IObservableArray } from 'mobx'
-import { Validator, ValidationResult, ValidatorReturned } from './types'
+import { Validator, ValidatorReturned, ValidationError, ValidationErrorObject, ValidationResult } from './types'
+
+export const invalidErrorObjectMsg = 'ValidationErrorObject message property cannot be empty'
+
+// ValidationResult -> ValidationError
+export function normalizeError(result: ValidationResult): ValidationError {
+  if (isErrorObject(result)) {
+    if (!result.message) {
+      throw new Error(invalidErrorObjectMsg)
+    }
+    return result.message
+  }
+
+  if (result === false || result == null || result === '') {
+    return undefined
+  }
+
+  return result
+}
+
+export function isErrorObject(err: any): err is ValidationErrorObject {
+  if (err != null && typeof err === 'object' && typeof err.message === 'string') {
+    return true
+  }
+  return false
+}
 
 export function isPromiseLike(arg: any): arg is Promise<any> {
   return arg != null && typeof arg === 'object' && typeof arg.then === 'function'
 }
 
-/** If validation result is valid */
-export function isValid(result: ValidationResult): result is '' | null | undefined | false {
-  return !result
+export function isPassed(result: ValidationResult) {
+  return normalizeError(result) === undefined
 }
 
 export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>): ValidatorReturned {
   if (asyncResults.length === 0) {
-    return null
+    return undefined
   }
   return new Promise(resolve => {
     let validResultCount = 0
     asyncResults.forEach(asyncResult => asyncResult.then(result => {
-      // return error if any result is invalid
-      if (!isValid(result)) {
+      // return error if any validation not passed
+      if (!isPassed(result)) {
         resolve(result)
         return
       }
@@ -26,7 +50,7 @@ export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>):
       validResultCount++
       // pass if all results are valid
       if (validResultCount === asyncResults.length) {
-        resolve(null)
+        resolve(undefined)
       }
     }))
   })
@@ -34,7 +58,7 @@ export function asyncResultsAnd(asyncResults: Array<Promise<ValidationResult>>):
 
 export function applyValidators<TValue>(value: TValue, validators: Validator<TValue>[]) {
   if (validators.length === 0) {
-    return null
+    return undefined
   }
 
   if (validators.length === 1) {
@@ -52,7 +76,7 @@ export function applyValidators<TValue>(value: TValue, validators: Validator<TVa
     }
 
     // 任一不通过，则不通过
-    if (!isValid(returned)) {
+    if (!isPassed(returned)) {
       return returned
     }
   }

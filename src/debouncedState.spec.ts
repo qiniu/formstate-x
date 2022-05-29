@@ -175,6 +175,20 @@ describe('DebouncedState validation', () => {
     expect(state.error).toBe('empty')
     expect(state.ownError).toBe('empty')
   })
+
+  it('should work well with resolved error object', async () => {
+    const fooState = new FieldState('')
+    const formState = new FormState({ foo: fooState })
+    const state = new DebouncedState(formState, defaultDelay).withValidator(
+      () => ({ message: 'mock msg' })
+    )
+
+    await state.validate()
+    expect(state.hasError).toBe(true)
+    expect(state.ownError).toBe('mock msg')
+    expect(state.error).toBe('mock msg')
+    expect(state.rawError).toEqual({ message: 'mock msg' })
+  })
 })
 
 function createFieldState<T>(initialValue: T, delay = defaultDelay) {
@@ -606,5 +620,19 @@ describe('DebouncedFieldState validation', () => {
     await delay(500)
     expect(validator).toBeCalled()
     expect(state.validateStatus).toBe(ValidateStatus.Validated)
+  })
+
+  it('should work well with resolved error object', async () => {
+    const state = createFieldState(0).withValidator(
+      _ => ({ message: 'empty' })
+    )
+
+    state.validate()
+
+    await delay()
+    expect(state.hasError).toBe(true)
+    expect(state.error).toBe('empty')
+    expect(state.ownError).toBe('empty')
+    expect(state.rawError).toEqual({ message: 'empty' })
   })
 })

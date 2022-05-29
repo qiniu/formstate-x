@@ -3,6 +3,7 @@ import * as v2 from 'formstate-x-v2'
 import { BaseState } from '../state'
 import * as v3 from '..'
 import Disposable from '../disposable'
+import { isPromiseLike, normalizeError } from '../utils'
 
 interface IV3StateFromV2<T extends v2.ComposibleValidatable<unknown, V>, V> extends v3.IState<V> {
   /** The original (formstate-x@v2.x) state */
@@ -24,7 +25,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
 
   @computed get value() { return this.stateV2.value }
   @computed get touched() { return this.stateV2.dirty }
-  @computed get ownError() {
+  @computed get rawError() {
     return getV3OwnError(this.stateV2)
   }
   @computed get error() { return this.stateV2.error }
@@ -47,7 +48,7 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
       isV2FieldState(this.stateV2)
       || isV2FormState(this.stateV2)
     ) {
-      this.stateV2.validators(...validators)
+      this.stateV2.validators(...portV2Validators(...validators))
       return this
     }
     throwNotSupported()
@@ -64,7 +65,23 @@ class Upgrader<T extends v2.ComposibleValidatable<unknown, V>, V> extends BaseSt
   }
 }
 
-/** Convets formstate-x@v2.x state to formstate-x@v3.x state */
+function portV2Validators<V>(...validators: Array<v3.Validator<V>>): Array<v2.Validator<V>> {
+  const normalizeRet = (v: any) => (
+    normalizeError(v)
+  )
+  return validators.map(validator => {
+    return (value: V) => {
+      const returned = validator(value)
+      if (isPromiseLike(returned)) {
+        return returned.then(normalizeRet)
+      } else {
+        return normalizeRet(returned)
+      }
+    }
+  })
+}
+
+/** Converts formstate-x@v2.x state to formstate-x@v3.x state */
 export function fromV2<T extends v2.ComposibleValidatable<unknown, unknown>>(stateV2: T): IV3StateFromV2<T, T['value']> {
   return new Upgrader(stateV2)
 }

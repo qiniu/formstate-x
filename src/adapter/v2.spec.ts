@@ -703,8 +703,8 @@ describe('toV2', () => {
       }
       value: V
       touched = false
-      ownError = undefined
       error = undefined
+      rawError = undefined
       activated = false
       validateStatus = v3.ValidateStatus.NotValidated
       async validate() {

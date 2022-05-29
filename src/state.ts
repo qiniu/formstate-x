@@ -1,12 +1,14 @@
 import { action, autorun, computed, makeObservable, observable, when } from 'mobx'
-import { ValidationError, IState, Validation, ValidateResult, ValidateStatus, Validator } from './types'
+import { ValidationResult, IState, Validation, ValidateResult, ValidationError, ValidateStatus, Validator } from './types'
 import Disposable from './disposable'
-import { applyValidators, isValid, isPromiseLike } from './utils'
+import { applyValidators, isPromiseLike, normalizeError } from './utils'
 
 /** Extraction for some basic features of State */
 export abstract class BaseState extends Disposable implements Pick<
-  IState, 'ownError' | 'hasOwnError' | 'error' | 'hasError' | 'validateStatus' | 'validating' | 'validated'
+  IState, 'rawError' | 'error' | 'ownError' | 'hasOwnError' | 'hasError' | 'validateStatus' | 'validating' | 'validated'
 > {
+
+  abstract rawError: ValidationResult
 
   abstract error: ValidationError
 
@@ -14,7 +16,9 @@ export abstract class BaseState extends Disposable implements Pick<
     return !!this.error
   }
 
-  abstract ownError: ValidationError
+  @computed get ownError() {
+    return normalizeError(this.rawError)
+  }
 
   @computed get hasOwnError() {
     return !!this.ownError
@@ -54,12 +58,12 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   @observable activated = false
 
   /**
-   * The original error info of validation.
+   * The original validation result.
    */
-  @observable protected _error: ValidationError
+  @observable protected validationResult: ValidationResult
 
-  @computed get ownError() {
-    return this.disabled ? undefined : this._error
+  @computed get rawError() {
+    return this.disabled ? undefined : this.validationResult
   }
 
   @computed get error() {
@@ -67,10 +71,10 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   }
 
   /**
-   * Set error info.
+   * Set validation result.
    */
-  @action setError(error: ValidationError) {
-    this._error = error
+  @action setError(error: ValidationResult) {
+    this.validationResult = error
   }
 
   /** List of validator functions. */
@@ -104,14 +108,14 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
     action('end-validation', () => {
       this.validation = undefined
       this._validateStatus = ValidateStatus.Validated
-      this.setError(isValid(result) ? undefined : result)
+      this.setError(result)
     })()
   }
 
   @computed protected get validateResult(): ValidateResult<V> {
     return (
-      this.error
-      ? { hasError: true, error: this.error } as const
+      this.hasError
+      ? { hasError: true, error: this.error! } as const
       : { hasError: false, value: this.value } as const
     )
   }
@@ -163,7 +167,7 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
   @action reset() {
     this.activated = false
     this._validateStatus = ValidateStatus.NotValidated
-    this._error = undefined
+    this.validationResult = undefined
     this.validation = undefined
   }
 
