@@ -13,7 +13,7 @@ export default class Disposable {
   /**
    * Collect the disposer function.
    */
-  protected addDisposer(disposer: Disposer) {
+  addDisposer(disposer: Disposer) {
     this.disposers.push(disposer)
   }
 
