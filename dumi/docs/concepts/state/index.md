@@ -37,6 +37,10 @@ export interface IState<V> {
   validate(): Promise<ValidateResult<V>>
   /** Configure when state should be disabled. */
   disableWhen(predictFn: () => boolean): this
+  /** Do dispose. */
+  dispose(): void
+  /** Collect the disposer function. */
+  addDisposer(disposer: Disposer): void
 }
 ```
 
@@ -92,7 +96,7 @@ That's why there's a boolean field `activated` for states.
 
 States will not be auto-validated until it becomes **activated**. And they will become (and stay) activated if one of these happens:
 
-1. Value changed by user interactions (method `onChange()` is called). 
+1. Value changed by user interactions (method `onChange()` is called).
 2. State imperatively validated (method `validate()` is called).
 
 ### Own Error
