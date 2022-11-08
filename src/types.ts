@@ -10,7 +10,7 @@ export type ValidationResult =
 export type ValidationErrorObject = { message: string }
 
 /** Return value of validator. */
-export type ValidatorReturned = 
+export type ValidatorReturned =
   ValidationResult
   | Promise<ValidationResult>
 
@@ -75,6 +75,8 @@ export interface IState<V = unknown> {
   disableWhen(predictFn: () => boolean): this
   /** Do dispose */
   dispose(): void
+  /** Collect the disposer function */
+  addDisposer(disposer: Disposer): void
 }
 
 /** Function to do dispose. */
