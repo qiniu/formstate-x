@@ -10,7 +10,7 @@ export type ValidationResult =
 export type ValidationErrorObject = { message: string }
 
 /** Return value of validator. */
-export type ValidatorReturned = 
+export type ValidatorReturned =
   ValidationResult
   | Promise<ValidationResult>
 
