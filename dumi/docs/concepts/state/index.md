@@ -39,8 +39,6 @@ export interface IState<V> {
   disableWhen(predictFn: () => boolean): this
   /** Do dispose. */
   dispose(): void
-  /** Collect the disposer function. */
-  addDisposer(disposer: Disposer): void
 }
 ```
 
