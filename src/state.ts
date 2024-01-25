@@ -125,15 +125,13 @@ export abstract class ValidatableState<V> extends BaseState implements IState<V>
       return this.validateResult
     }
 
-    const validation = this.validation
-
-    action('activate-when-validate', () => {
-      this.activated = true
-    })()
-
-    // 若 `validation` 未发生变更，意味着未发生新的校验行为
-    // 若上边操作未触发自动的校验行为，强制调用之
-    if (this.validation === validation) {
+    if (!this.activated) {
+      // activate 本身会触发自动的校验行为（见 `autorun-check-&-doValidation`）
+      action('activate-when-validate', () => {
+        this.activated = true
+      })()
+    } else {
+      // 若未触发自动校验，这里调用之以确保进行了校验
       this.doValidation()
     }
 
