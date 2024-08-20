@@ -118,12 +118,14 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with onChange()', async () => {
-    const state = new FieldState('xxx').withValidator(val => !val && 'empty')
+    const validator = jest.fn((val: string) => !val && 'empty')
+    const state = new FieldState('xxx').withValidator(validator)
     state.onChange('')
 
     await delay()
     expect(state.validated).toBe(true)
     expect(state.hasError).toBe(true)
+    expect(validator).toBeCalledTimes(1)
 
     state.onChange('123')
     state.onChange('123456')
@@ -134,23 +136,25 @@ describe('FieldState validation', () => {
   })
 
   it('should work well with onChange of same value', async () => {
-    const state = new FieldState(1).withValidator(
-      () => null
-    )
+    const validator = jest.fn(() => null)
+    const state = new FieldState(1).withValidator(validator)
     await state.validate()
     expect(state.validated).toBe(true)
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(false)
+    expect(validator).toBeCalledTimes(1)
 
     state.onChange(1)
     await delay()
     expect(state.validated).toBe(true)
     expect(state.validating).toBe(false)
     expect(state.hasError).toBe(false)
+    expect(validator).toBeCalledTimes(1)
   })
 
   it('should work well with validate()', async () => {
-    const state = new FieldState('').withValidator(val => !val && 'empty')
+    const validator = jest.fn((val: string) => !val && 'empty')
+    const state = new FieldState('').withValidator(validator)
     const validateRet1 = state.validate()
 
     await delay()
@@ -162,6 +166,7 @@ describe('FieldState validation', () => {
     const validateResult1 = await validateRet1
     expect(validateResult1.hasError).toBe(true)
     expect((validateResult1 as ValidateResultWithError).error).toBe('empty')
+    expect(validator).toBeCalledTimes(1)
 
     state.onChange('sth')
     const validateRet2 = state.validate()
