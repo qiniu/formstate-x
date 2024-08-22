@@ -28,7 +28,7 @@ export class FieldState<V> extends ValidatableState<V> implements IState<V> {
     this.touched = false
   }
 
-  constructor(private initialValue: V) {
+  constructor(protected initialValue: V) {
     super()
     makeObservable(this)
     this.reset()
